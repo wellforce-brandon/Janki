@@ -1,0 +1,18 @@
+{
+  "name": "janki",
+  "version": "0.2.0.0",
+  "description": "Personal Japanese learning desktop app with FSRS-6 SRS and WaniKani-style kanji progression",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "tauri": "tauri"
+  }
+}

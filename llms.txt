@@ -1,0 +1,39 @@
+# Janki
+
+> Personal Windows desktop app for learning Japanese with FSRS-6 SRS and WaniKani-style kanji progression.
+
+## Stack
+
+- Tauri 2.x (desktop shell, Rust backend)
+- Svelte 5 + Vite (frontend SPA)
+- shadcn-svelte + Tailwind CSS 4 (UI)
+- SQLite via tauri-plugin-sql (local database)
+- FSRS-6 via ts-fsrs (spaced repetition)
+- anki-reader (Anki .apkg import)
+
+## Key Files
+
+- [CLAUDE.md](CLAUDE.md): Project rules and conventions
+- [README.md](README.md): Architecture, prerequisites, data sources
+- [tasks/plan-repo.md](tasks/plan-repo.md): Full development plan (4 phases)
+- [.claude/references/infrastructure.md](.claude/references/infrastructure.md): Desktop app architecture
+- [.claude/references/design-guardrails.md](.claude/references/design-guardrails.md): UI rules, colors, typography, accessibility
+- [.claude/references/tools.md](.claude/references/tools.md): CLI tools reference
+- [.claude/agent-memory/decisions.md](.claude/agent-memory/decisions.md): Architectural decisions and rationale
+
+## Architecture
+
+```
+Tauri Window
+  └─ Svelte 5 Frontend (WebView2)
+       ├─ Views: Dashboard, Review, KanjiMap, Decks, Stats, Search, Settings
+       ├─ SRS: FSRS-6 (deck cards) + WaniKani fixed-interval (kanji progression)
+       └─ Data: SQLite ($APPDATA/janki/janki.db)
+```
+
+## Development Phases
+
+1. Foundation -- scaffold, layout, theme, SQLite schema
+2. Core -- SRS engine, Anki import, flashcard review, kanji progression
+3. Polish -- TTS, search, statistics, keyboard shortcuts
+4. Ship -- auto-updater, system tray, backup, grammar, reading practice

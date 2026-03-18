@@ -3,6 +3,9 @@ name: architect
 description: Use PROACTIVELY for phase-based planning, tech stack decisions, file structure design, and architectural review. Uses phases (Foundation, Core, Polish, Ship), never timelines.
 model: opus
 permissionMode: plan
+skills:
+  - plan-repo
+  - spec-developer
 tools:
   - Read
   - Glob

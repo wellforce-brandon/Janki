@@ -7,9 +7,10 @@ All custom agents for this project. Each agent is defined in `.claude/agents/` a
 ### architect
 
 - **File:** `.claude/agents/architect.md`
-- **Purpose:** Phase-based planning, tech stack decisions, file structure design, and architectural review. Uses phase-based planning (Foundation → Core → Polish → Ship), never timeline-based.
+- **Purpose:** Phase-based planning, tech stack decisions, file structure design, and architectural review. Uses phase-based planning (Foundation, Core, Polish, Ship), never timeline-based.
 - **When to use:** Starting a new feature, restructuring a codebase, evaluating technology choices, or designing system architecture.
 - **Model:** opus
+- **Skills:** plan-repo, spec-developer
 
 ### reviewer
 
@@ -17,6 +18,7 @@ All custom agents for this project. Each agent is defined in `.claude/agents/` a
 - **Purpose:** Code review focused on correctness, maintainability, naming, DRY violations, and adherence to project standards.
 - **When to use:** Before merging PRs, after completing a feature, or when requesting a second opinion on code quality.
 - **Model:** sonnet
+- **Context:** Reviews against discovered patterns in `.claude/agent-memory/patterns.md` and design guardrails
 
 ### security
 
@@ -24,6 +26,7 @@ All custom agents for this project. Each agent is defined in `.claude/agents/` a
 - **Purpose:** Security-focused analysis covering OWASP Top 10, secrets detection, dependency vulnerabilities, and input validation gaps.
 - **When to use:** Before releases, after adding authentication or authorization logic, or when handling user input or external data.
 - **Model:** opus
+- **Isolation:** worktree (runs in isolated copy of repo)
 
 ### performance
 

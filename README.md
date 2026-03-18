@@ -1,92 +1,119 @@
-# Claude Code Starter Template
+# Janki
 
-A ready-to-use `.claude/` configuration folder for any repository. Ships with skills, agents, and settings aligned to Claude Code best practices (March 2026).
+Personal Windows desktop app for learning Japanese. Replaces Anki with a modern UI, FSRS-6 spaced repetition, and WaniKani-style kanji progression.
 
-## Quick Start
+## Features
 
-### New Project
+- **FSRS-6 SRS Engine** -- 20-30% fewer reviews than Anki's SM-2, with direct retention targeting
+- **Anki Deck Import** -- import .apkg files from AnkiWeb community decks
+- **WaniKani-Style Kanji** -- 60-level progression: radicals -> kanji -> vocab with SRS stages
+- **Stroke Order** -- animated SVG stroke diagrams from KanjiVG
+- **Japanese TTS** -- pronunciation via Web Speech API (Windows neural voices)
+- **Dark/Light Theme** -- toggle with system preference detection
+- **Keyboard-Driven** -- full keyboard shortcuts for reviews and navigation
+- **Local-First** -- all data stored in SQLite, no account or server needed
+
+## Tech Stack
+
+| Layer | Choice |
+|-------|--------|
+| Desktop shell | Tauri 2.x |
+| Frontend | Svelte 5 |
+| UI components | shadcn-svelte |
+| Styling | Tailwind CSS 4 |
+| Database | SQLite (tauri-plugin-sql) |
+| SRS algorithm | FSRS-6 (ts-fsrs) |
+| Anki import | anki-reader |
+| Linter/Formatter | Biome 2.x |
+| Test runner | Vitest |
+| Package manager | pnpm |
+
+## Architecture
+
+```
+┌─────────────────────────────────────┐
+│          Tauri Window               │
+│  ┌───────────────────────────────┐  │
+│  │     Svelte 5 Frontend         │  │
+│  │  ┌─────────┐  ┌───────────┐  │  │
+│  │  │ Views   │  │Components │  │  │
+│  │  │Dashboard│  │ FlashCard │  │  │
+│  │  │ Review  │  │ KanjiCard │  │  │
+│  │  │KanjiMap │  │StrokeOrder│  │  │
+│  │  │ Decks   │  │ DeckList  │  │  │
+│  │  │ Stats   │  │  Charts   │  │  │
+│  │  └────┬────┘  └─────┬─────┘  │  │
+│  │       │              │        │  │
+│  │  ┌────┴──────────────┴─────┐  │  │
+│  │  │     Stores + Logic      │  │  │
+│  │  │  FSRS-6 │ WK-SRS │ TTS │  │  │
+│  │  └────────────┬────────────┘  │  │
+│  └───────────────┼───────────────┘  │
+│                  │ tauri-plugin-sql  │
+│  ┌───────────────┴───────────────┐  │
+│  │    Rust Backend (Tauri)       │  │
+│  │  SQLite │ File System │ TTS  │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+         │
+    $APPDATA/janki/
+    ├── janki.db      (SQLite)
+    ├── backups/      (daily auto-backup)
+    └── logs/
+```
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) 18+
+- [Rust](https://rustup.rs/) (stable toolchain)
+- [pnpm](https://pnpm.io/) (`npm i -g pnpm`)
+- Windows 11 (WebView2 pre-installed)
+
+## Getting Started
 
 ```bash
-git clone https://github.com/your-org/claude-code-bootstrap.git my-project
-cd my-project
-rm -rf .git && git init
+git clone https://github.com/your-user/janki.git
+cd janki
+pnpm install
+pnpm tauri dev
 ```
 
-Then open Claude Code and say: **"plan repo"** to plan your stack, then **"initialize repo"** to configure.
-
-### Existing Project
-
-```bash
-# Copy the .claude/ folder into your repo
-cp -r path/to/claude-code-bootstrap/.claude/ your-repo/.claude/
-cp path/to/claude-code-bootstrap/CLAUDE.md your-repo/CLAUDE.md
-cp path/to/claude-code-bootstrap/agents.md your-repo/agents.md
-```
-
-Then open Claude Code in your repo and say: **"initialize repo"** to merge the template with your existing setup.
-
-## Workflow
+## Project Structure
 
 ```
-plan repo  →  initialize repo  →  (build features)  →  update practices
-    ↑                                    |
-    |              spec developer  ←─────┘
-    |              (plan in one session, execute in another)
-    └──────────────────────────────────────────────────────┘
+janki/
+├── src/                    # Svelte frontend
+│   ├── lib/
+│   │   ├── components/     # UI components (review, kanji, deck, stats)
+│   │   ├── stores/         # Svelte state management
+│   │   ├── db/             # Database layer (queries, migrations)
+│   │   ├── srs/            # FSRS-6 + WaniKani SRS engines
+│   │   ├── import/         # Anki .apkg parser
+│   │   └── tts/            # Text-to-speech
+│   └── views/              # Top-level page components
+├── src-tauri/              # Tauri Rust backend
+├── data/                   # Static Japanese language data (JSON, SVG)
+├── tasks/                  # Development plans
+└── .claude/                # Claude Code configuration
 ```
 
-1. **Plan first:** `plan repo` researches current options and recommends the best stack for your project, then generates README, design guardrails, and tools reference.
-2. **Initialize:** `init-repo` reads the plan and configures `.claude/` with skills, agents, settings, and hierarchical CLAUDE.md files.
-3. **Build features:** Use `spec developer` for big features -- it interviews you, explores the codebase, and generates a detailed plan saved to `/tasks`. Execute in a fresh session.
-4. **Stay current:** `update practices` fetches latest best practices and updates your config. Safe to run anytime.
+## Development Phases
 
-## What's Included
+- **Phase 1 -- Foundation:** Project scaffold, layout, theme, SQLite schema
+- **Phase 2 -- Core:** SRS engine, Anki import, flashcard review, kanji progression
+- **Phase 3 -- Polish:** TTS, search, statistics, keyboard shortcuts, card editor
+- **Phase 4 -- Ship:** Auto-updater, system tray, backup/restore, grammar, reading practice
 
-### Skills
+## Data Sources
 
-| Skill | Trigger | Description |
-|-------|---------|-------------|
-| plan-repo | "plan repo" | Research and recommend best tech stack, generate README, design guardrails, tools reference |
-| init-repo | "initialize repo" | Build or rebuild the .claude/ folder with best practices |
-| update-practices | "update practices" | Fetch latest best practices and update config |
-| spec-developer | "spec developer" | Interview-driven feature spec saved to /tasks |
-| code-review | "code review" | Full codebase review with severity-ranked findings |
-| security-scan | "security scan" | OWASP Top 10, secrets detection, dependency audit |
-| performance-review | "performance review" | Bottleneck analysis with impact-ranked fixes |
-| dependency-audit | "dependency audit" | Outdated, vulnerable, and unused dependency detection |
-| test-scaffold | "scaffold tests" | Generate test files for untested modules |
-| doc-sync | "sync docs" | Align documentation with current code |
-| mermaid-diagram | "mermaid diagram" | Generate data flow / architecture diagrams |
-
-### Agents
-
-See [agents.md](agents.md) for the full agent registry.
-
-| Agent | Purpose |
-|-------|---------|
-| architect | Phase-based planning, tech stack decisions, file structure |
-| reviewer | Code review for correctness and maintainability |
-| security | Vulnerability detection and security analysis |
-| performance | Bottleneck identification and optimization |
-| explorer | Codebase exploration, research, and context gathering |
-
-### Key Concepts
-
-- **Phase-based planning:** Foundation → Core → Polish → Ship. No timelines.
-- **Hierarchical CLAUDE.md:** Root → subfolder, loaded top-down. Only relevant files load.
-- **Subagent-first:** Always offload research, exploration, and log analysis to subagents. Include a "why" in every subagent prompt.
-- **Plan/execute separation:** Plan in one session, execute in another. Save plans to `/tasks`.
-- **Date-aware practices:** Always checks the current date when fetching best practices.
-- **Tools reference:** `.claude/references/tools.md` lists all CLI tools so Claude can detect and install missing ones.
-- **Design guardrails:** `.claude/references/design-guardrails.md` enforces UI/design SLA for frontend projects.
-
-## Keeping Up to Date
-
-Say **"update practices"** in Claude Code. The skill fetches the latest best practices from official and community sources, then updates your config. Safe to run anytime.
-
-## Full Documentation
-
-See [instructions.md](instructions.md) for complete documentation on every skill, agent, and configuration option.
+| Dataset | License | Purpose |
+|---------|---------|---------|
+| [JMdict](https://www.edrdg.org/jmdict/) | CC BY-SA 4.0 | Japanese-English dictionary |
+| [KANJIDIC2](https://www.edrdg.org/kanjidic/) | CC BY-SA 4.0 | Kanji dictionary |
+| [KanjiVG](https://github.com/KanjiVG/kanjivg) | CC BY-SA 3.0 | Stroke order SVGs |
+| [kanji-data](https://github.com/davidluzgouveia/kanji-data) | MIT | WaniKani-style level data |
+| [jmdict-simplified](https://github.com/scriptin/jmdict-simplified) | CC BY-SA 4.0 | JSON-formatted dictionaries |
+| [Tatoeba](https://tatoeba.org/) | CC0/CC-BY | Example sentences |
 
 ## License
 

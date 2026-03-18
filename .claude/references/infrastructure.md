@@ -1,71 +1,82 @@
-# Infrastructure Stack (Fixed)
+# Infrastructure Stack -- Janki (Desktop App)
 
-This is the standard hosting architecture for all projects bootstrapped from this template. The plan-repo skill must use this infrastructure -- it is not negotiable or user-configurable.
+Janki is a **local desktop application**, not a web app. The standard web infrastructure (Cloudflare Pages, Northflank, etc.) does NOT apply to this project.
 
 ## Architecture
 
 ```
-User Browser
-    |
-    +---> Cloudflare Pages (frontend SPA/SSR)
-    |         |
-    |         +---> Northflank API (all backend logic + auth)
-    |         |
-    |         +---> Cloudflare R2 (public file downloads)
-    |
-    +---> Better Auth endpoints (hosted within Northflank API)
-              |
-              +---> /api/auth/sign-in
-              +---> /api/auth/sign-up
-              +---> /api/auth/sign-in/social (Google, Microsoft)
-              +---> /api/auth/magic-link
-              +---> /api/auth/passkey
-              +---> /api/auth/two-factor
-
-Northflank API Service
-    |
-    +---> Northflank Postgres (application data + auth tables)
-    +---> Northflank Redis (caching, sessions, job queues)
-    +---> Cloudflare R2 (signed URLs for private downloads)
-    +---> Email provider (Resend/SES for magic links, OTPs)
-    +---> External APIs (Stripe, webhooks, etc.)
-
-Northflank Cron Jobs
-    |
-    +---> Scheduled tasks (cleanup, reports, sync, email digests)
-    +---> Runs as standalone container on schedule
+┌─────────────────────────────────────┐
+│          Tauri Window               │
+│  ┌───────────────────────────────┐  │
+│  │     Svelte 5 Frontend         │  │
+│  │     (WebView2 on Windows)     │  │
+│  │                               │  │
+│  │  Views: Dashboard, Review,    │  │
+│  │  KanjiMap, Decks, Stats,      │  │
+│  │  Search, Settings             │  │
+│  │                               │  │
+│  │  Libraries: ts-fsrs, anki-    │  │
+│  │  reader, shadcn-svelte        │  │
+│  └───────────────┬───────────────┘  │
+│                  │                  │
+│         tauri-plugin-sql            │
+│         tauri-plugin-fs             │
+│         tauri-plugin-dialog         │
+│                  │                  │
+│  ┌───────────────┴───────────────┐  │
+│  │     Rust Backend (Tauri)      │  │
+│  │                               │  │
+│  │  SQLite (sqlx)                │  │
+│  │  File system access           │  │
+│  │  Native dialogs               │  │
+│  │  System tray (Phase 4)        │  │
+│  │  Auto-updater (Phase 4)       │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+         │
+    $APPDATA/janki/
+    ├── janki.db        (SQLite database)
+    ├── backups/        (daily auto-backup)
+    └── logs/           (app logs)
 ```
 
 ## Infrastructure Decisions (Locked)
 
 | Layer | Choice | Notes |
 |-------|--------|-------|
-| Frontend hosting | Cloudflare Pages | SPA or SSR, deployed via Wrangler or git integration |
-| Backend hosting | Northflank | Container-based, all API logic and auth |
-| Database | Northflank Postgres | Application data + Better Auth tables |
-| Cache/Queue | Northflank Redis | Sessions, caching, job queues |
-| Object storage | Cloudflare R2 | Public downloads (direct) + private downloads (signed URLs) |
-| Auth | Better Auth | Hosted within the Northflank API, not a separate service |
-| Cron jobs | Northflank Cron | Standalone container on schedule |
-| Email | Resend or AWS SES | Magic links, OTPs, transactional email |
-| CDN | Cloudflare (automatic) | Comes with Pages |
+| Desktop shell | Tauri 2.x | Uses Windows 11 WebView2 (pre-installed) |
+| Frontend runtime | Svelte 5 + Vite | SPA rendered in WebView2 |
+| Backend runtime | Rust (Tauri core) | Plugin-based architecture |
+| Database | SQLite | Local file, no server, via tauri-plugin-sql |
+| File storage | Local filesystem | $APPDATA/janki/ |
+| Auth | None | Personal single-user app |
+| Networking | None required | TTS (optional, Edge TTS) and auto-update only |
 
-## Auth Methods (Better Auth)
+## What Does NOT Apply
 
-All projects include these auth methods by default:
-- Email/password sign-in and sign-up
-- Social sign-in (Google, Microsoft)
-- Magic link
-- Passkey (WebAuthn)
-- Two-factor authentication (TOTP)
+This project does NOT use:
+- Cloudflare Pages, Northflank, or any cloud hosting
+- Postgres, Redis, or any remote database
+- Better Auth or any authentication system
+- Docker or containers
+- API servers or backend services
+- Email services (Resend, SES)
+- CDN
 
-## What plan-repo Still Decides
+## Tauri Plugins Used
 
-The infrastructure above is fixed. Plan-repo researches and recommends only:
-- Language and runtime (TypeScript/Bun, TypeScript/Node, Go, Rust, etc.)
-- Frontend framework (Next.js, SvelteKit, Astro, Nuxt, etc.)
-- Backend framework (Hono, Express, Fastify, Elysia, etc.)
-- UI component library (shadcn/ui, Mantine, MUI, etc.)
-- Styling approach (Tailwind, CSS Modules, etc.)
-- ORM/query builder (Drizzle, Prisma, Kysely, etc.)
-- Developer tooling (package manager, linter, formatter, test runner)
+| Plugin | Crate | JS Package | Purpose |
+|--------|-------|------------|---------|
+| SQL | `tauri-plugin-sql` | `@tauri-apps/plugin-sql` | SQLite database |
+| File System | `tauri-plugin-fs` | `@tauri-apps/plugin-fs` | Read/write files |
+| Dialog | `tauri-plugin-dialog` | `@tauri-apps/plugin-dialog` | File picker, confirm dialogs |
+| Updater | `tauri-plugin-updater` | `@tauri-apps/plugin-updater` | Auto-update (Phase 4) |
+
+## Data Storage
+
+All data is local. No cloud sync, no accounts.
+
+- **Database:** `$APPDATA/janki/janki.db` (SQLite)
+- **Backups:** `$APPDATA/janki/backups/` (daily, keep last 7)
+- **Logs:** `$APPDATA/janki/logs/`
+- **Static data:** `data/` folder in app bundle (kanji-data.json, stroke order SVGs)

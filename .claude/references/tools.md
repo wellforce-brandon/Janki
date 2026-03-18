@@ -9,106 +9,109 @@ Claude Code reads this file to know which CLI tools are available and how to use
 - Claude Code should check `<tool> --version` before assuming a tool is available.
 - If a tool is missing and needed, ask the user before installing.
 
-## Important: No Local Infrastructure
+## Important: Local Desktop App
 
-All databases, caches, and backend services run on **Northflank** and **Cloudflare** -- never locally. There is no Docker, no local Postgres, no local Redis. Development connects to remote services via environment variables or Northflank CLI port-forwarding.
+Janki is a local desktop app built with Tauri. There are no remote databases, no cloud services, no Docker. Everything runs locally on Windows 11.
 
-## Universal Tools
+## Core Tools
 
-### Git
+### Node.js
+- **Check:** `node --version`
+- **Install:** https://nodejs.org or `nvm install --lts`
+- **Required version:** 18+
+- **Usage:** Runtime for frontend build tooling
+
+### Rust
+- **Check:** `rustc --version && cargo --version`
+- **Install:** https://rustup.rs (`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`)
+- **Required version:** Stable toolchain
+- **Usage:** Tauri backend compilation
+
+### pnpm
+- **Check:** `pnpm --version`
+- **Install:** `npm i -g pnpm`
+- **Usage:**
+  - `pnpm install` -- install dependencies
+  - `pnpm add <pkg>` -- add dependency
+  - `pnpm add -D <pkg>` -- add dev dependency
+  - `pnpm remove <pkg>` -- remove dependency
+
+## Tauri CLI
+
+### tauri-cli
+- **Check:** `pnpm tauri --version`
+- **Install:** `pnpm add -D @tauri-apps/cli`
+- **Usage:**
+  - `pnpm tauri dev` -- start dev mode (frontend + Tauri window)
+  - `pnpm tauri build` -- build production installer
+  - `pnpm tauri icon <source.png>` -- generate app icons from source image
+  - `pnpm tauri info` -- show system info and Tauri config
+  - `pnpm tauri plugin add <name>` -- add a Tauri plugin
+
+## Build & Dev
+
+### Vite
+- **Check:** `pnpm vite --version`
+- **Install:** `pnpm add -D vite`
+- **Usage:**
+  - Dev server starts automatically via `pnpm tauri dev`
+  - `pnpm vite build` -- build frontend only (rarely needed standalone)
+  - `pnpm vite preview` -- preview production build in browser
+
+### TypeScript
+- **Check:** `pnpm tsc --version`
+- **Install:** `pnpm add -D typescript`
+- **Usage:**
+  - `pnpm tsc --noEmit` -- type-check without emitting
+  - `pnpm svelte-check` -- type-check Svelte files
+
+## Linting & Formatting
+
+### Biome
+- **Check:** `pnpm biome --version`
+- **Install:** `pnpm add -D @biomejs/biome`
+- **Usage:**
+  - `pnpm biome check .` -- lint + format check
+  - `pnpm biome check --write .` -- lint + format fix
+  - `pnpm biome lint .` -- lint only
+  - `pnpm biome format --write .` -- format only
+  - `pnpm biome ci .` -- CI mode (no writes, exit code on issues)
+
+## Testing
+
+### Vitest
+- **Check:** `pnpm vitest --version`
+- **Install:** `pnpm add -D vitest`
+- **Usage:**
+  - `pnpm vitest` -- run tests in watch mode
+  - `pnpm vitest run` -- run tests once
+  - `pnpm vitest run --coverage` -- run with coverage
+  - `pnpm vitest <pattern>` -- run tests matching pattern
+
+## Svelte
+
+### svelte-check
+- **Check:** `pnpm svelte-check --version`
+- **Install:** `pnpm add -D svelte-check`
+- **Usage:**
+  - `pnpm svelte-check` -- type-check all Svelte files
+  - `pnpm svelte-check --threshold warning` -- include warnings
+
+### shadcn-svelte CLI
+- **Check:** `pnpm shadcn-svelte --help`
+- **Install:** (comes with shadcn-svelte init)
+- **Usage:**
+  - `pnpm shadcn-svelte init` -- initialize shadcn-svelte in project
+  - `pnpm shadcn-svelte add button` -- add a component
+  - `pnpm shadcn-svelte add card dialog input` -- add multiple components
+
+## Git
 - **Check:** `git --version`
 - **Usage:** Version control. Always available.
-
-### Node.js / npm (if JS/TS project)
-- **Check:** `node --version && npm --version`
-- **Install:** https://nodejs.org or `nvm install --lts`
-- **Usage:** `npm install`, `npm run <script>`, `npx <command>`
-
-### Bun (alternative JS runtime)
-- **Check:** `bun --version`
-- **Install:** `curl -fsSL https://bun.sh/install | bash`
-- **Usage:** `bun install`, `bun run <script>`, `bunx <command>`
-
-### Python / pip (if Python project)
-- **Check:** `python3 --version && pip3 --version`
-- **Install:** https://python.org or system package manager
-- **Usage:** `pip install -r requirements.txt`, `python3 -m <module>`
-
-## Stack-Specific Tools
-
-This section is populated by plan-repo or init-repo based on the project's stack. Below are common examples.
-
-### Package Managers
-| Tool | Check | Install | Use When |
-|------|-------|---------|----------|
-| pnpm | `pnpm --version` | `npm i -g pnpm` | Monorepos, disk-efficient deps |
-| yarn | `yarn --version` | `npm i -g yarn` | Projects using yarn.lock |
-| uv | `uv --version` | `pip install uv` | Fast Python package management |
-| cargo | `cargo --version` | https://rustup.rs | Rust projects |
-| go | `go version` | https://go.dev/dl | Go projects |
-
-### Linters & Formatters
-| Tool | Check | Install | Use When |
-|------|-------|---------|----------|
-| eslint | `npx eslint --version` | `npm i -D eslint` | JS/TS linting |
-| prettier | `npx prettier --version` | `npm i -D prettier` | JS/TS/CSS/MD formatting |
-| biome | `npx biome --version` | `npm i -D @biomejs/biome` | Fast JS/TS lint + format |
-| ruff | `ruff --version` | `pip install ruff` | Fast Python lint + format |
-| rustfmt | `rustfmt --version` | Included with rustup | Rust formatting |
-
-### Test Runners
-| Tool | Check | Install | Use When |
-|------|-------|---------|----------|
-| vitest | `npx vitest --version` | `npm i -D vitest` | Vite-based JS/TS projects |
-| jest | `npx jest --version` | `npm i -D jest` | JS/TS testing |
-| pytest | `pytest --version` | `pip install pytest` | Python testing |
-| playwright | `npx playwright --version` | `npm i -D @playwright/test` | E2E browser testing |
-
-### Build Tools
-| Tool | Check | Install | Use When |
-|------|-------|---------|----------|
-| vite | `npx vite --version` | `npm i -D vite` | Frontend builds |
-| turbo | `npx turbo --version` | `npm i -D turbo` | Monorepo builds |
-| esbuild | `npx esbuild --version` | `npm i -D esbuild` | Fast JS bundling |
-| tsc | `npx tsc --version` | `npm i -D typescript` | TypeScript compilation |
-
-### Database Tools (Remote Only)
-| Tool | Check | Install | Use When |
-|------|-------|---------|----------|
-| prisma | `npx prisma --version` | `npm i -D prisma` | Prisma ORM (connects to Northflank Postgres) |
-| drizzle-kit | `npx drizzle-kit --version` | `npm i -D drizzle-kit` | Drizzle ORM (connects to Northflank Postgres) |
-
-### Deployment Tools
-| Tool | Check | Install | Use When |
-|------|-------|---------|----------|
-| wrangler | `npx wrangler --version` | `npm i -D wrangler` | Cloudflare Pages & R2 |
-| northflank | `northflank --version` | `npm i -g @northflank/cli` | Northflank backend, Postgres, Redis |
 
 ## Available MCP Servers
 
 Claude Code has access to the following MCP (Model Context Protocol) servers. These provide direct integration with external services without needing CLI tools.
-
-### Cloudflare MCPs
-
-| MCP Server | Purpose |
-|------------|---------|
-| **cloudflare-observability** | Query Worker logs, inspect structured log payloads, list Workers |
-| **cloudflare-workers-builds** | View and debug Workers Builds CI/CD (list builds, get build logs) |
-| **cloudflare-workers-bindings** | Manage KV, R2, D1, Hyperdrive bindings; read Worker code |
-| **cloudflare-containers** | Sandboxed Ubuntu container for running commands, reading/writing files |
-| **cloudflare-radar** | Global internet insights: traffic, attacks, rankings, BGP, URL scanning |
-| **cloudflare-docs** | Search Cloudflare documentation, Pages-to-Workers migration guides |
-| **cloudflare-api** | Execute and search raw Cloudflare API endpoints |
-| **cloudflare-graphql** | Query Cloudflare's GraphQL analytics API, explore schema |
-| **cloudflare-dns-analytics** | DNS analytics reports, zone and account DNS settings |
-| **cloudflare-audit-logs** | Query account audit logs |
-| **cloudflare-logpush** | Manage Logpush jobs by account |
-| **cloudflare-browser** | Fetch URL content as HTML, Markdown, or screenshot |
-| **cloudflare-ai-gateway** | Inspect AI Gateway logs (request/response bodies) |
-| **cloudflare-ai-search** | Search using Cloudflare AI Search / RAG |
-| **cloudflare-casb** | Query CASB integrations, assets, and categories |
-| **cloudflare-dex** | Digital Experience monitoring: fleet status, HTTP/traceroute tests, WARP diagnostics |
-| **cloudflare-agents-sdk-docs** | Search Cloudflare Agents SDK documentation |
 
 ### GitHub MCP
 
@@ -131,26 +134,18 @@ Claude Code has access to the following MCP (Model Context Protocol) servers. Th
 |------------|---------|
 | **notion** | Direct Notion API: search, create/update pages, query databases, manage comments |
 
-### Infrastructure MCPs
-
-| MCP Server | Purpose |
-|------------|---------|
-| **northflank** | Full Northflank management: projects, services, addons (Postgres, Redis), jobs, secrets, volumes, domains, templates, builds, metrics |
-| **railway** | Railway platform: projects, services, deployments, variables, logs, domains |
-| **doppler** | Secrets management: projects, configs, secrets, environments, integrations, service accounts |
-
-### Browser Automation MCP
-
-| MCP Server | Purpose |
-|------------|---------|
-| **claude-in-chrome** | Chrome browser automation: navigate, click, type, read pages, take screenshots, record GIFs, execute JS |
-
 ### IT Management MCPs
 
 | MCP Server | Purpose |
 |------------|---------|
 | **ninjaone** | RMM/endpoint management: devices, organizations, tickets, patches, scripts, alerts |
 | **zendesk** | Help desk: tickets, users, organizations, triggers, automations, macros, views |
+
+### Browser Automation MCP
+
+| MCP Server | Purpose |
+|------------|---------|
+| **claude-in-chrome** | Chrome browser automation: navigate, click, type, read pages, take screenshots, record GIFs, execute JS |
 
 ## Project-Specific Tools
 

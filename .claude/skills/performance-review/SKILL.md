@@ -2,6 +2,8 @@
 name: performance-review
 description: Analyze the codebase for performance bottlenecks, inefficiencies, and optimization opportunities. Use when investigating slowness or preparing for scale.
 user-invocable: true
+model: sonnet
+context: fork
 argument-hint: [optional: file or directory path to scope the review]
 agent: performance
 allowed-tools:

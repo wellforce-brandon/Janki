@@ -2,6 +2,8 @@
 name: dependency-audit
 description: Audit project dependencies for outdated versions, known vulnerabilities, and unused packages. Use periodically or before releases.
 user-invocable: true
+model: sonnet
+context: fork
 argument-hint: (no arguments needed)
 allowed-tools:
   - Read

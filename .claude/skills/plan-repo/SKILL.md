@@ -2,6 +2,7 @@
 name: plan-repo
 description: Analyze project requirements and recommend the best tech stack for the current year. Infrastructure (Cloudflare Pages, Northflank, Better Auth, R2, Postgres, Redis) is fixed. Researches languages, frameworks, UI libraries, and tooling, then generates README, design guardrails, and tools reference. Run this before init-repo.
 user-invocable: true
+model: opus
 argument-hint: [optional: project name or description]
 allowed-tools:
   - Read

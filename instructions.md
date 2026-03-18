@@ -1,403 +1,250 @@
-# Claude Code Starter Template -- Instructions
+# Janki -- Claude Code Configuration Guide
 
-## What This Template Is
+Complete reference for the `.claude/` configuration in this repository.
 
-This repository provides a pre-configured `.claude/` folder that gives Claude Code a set of skills, agents, and settings aligned with current best practices. It works in two modes:
+## Overview
 
-1. **Clone for new projects** -- Start a new repo with Claude Code already configured.
-2. **Copy into existing projects** -- Drop the `.claude/` folder (plus CLAUDE.md and agents.md) into any existing repo to add Claude Code capabilities.
+The `.claude/` folder configures Claude Code for Janki, a personal Windows desktop app for learning Japanese built with Tauri 2.x + Svelte 5. It contains skills (reusable workflows), agents (specialized personas), rules (conditional instructions), settings, and shared agent memory.
+
+## Quick Reference
+
+| Action | Command |
+|--------|---------|
+| Plan a new project | Say "plan repo" |
+| Initialize Claude Code config | Say "initialize repo" |
+| Update to latest practices | Say "update practices" |
+| Plan a feature | Say "spec developer" |
+| Run code review | Say "code review" |
+| Run security audit | Say "security scan" |
+| Check performance | Say "performance review" |
+| Audit dependencies | Say "dependency audit" |
+| Generate tests | Say "scaffold tests" |
+| Sync documentation | Say "sync docs" |
+| Generate diagram | Say "mermaid diagram" |
+| Add LL-G lesson | Say "add lesson" |
 
 ## Folder Structure
 
 ```
 .claude/
-  agents/                  # Custom agent definitions
-    architect.md           # Phase-based planning and system design
-    reviewer.md            # Code review agent
-    security.md            # Security analysis agent
-    performance.md         # Performance analysis agent
-    explorer.md            # Codebase exploration and research agent
-  rules/                   # Conditional instructions (paths: frontmatter)
-  skills/                  # Executable skill definitions
-    plan-repo/SKILL.md     # Pre-init project planning
-    init-repo/SKILL.md     # Repository initialization
-    update-practices/SKILL.md  # Best practice updates
-    spec-developer/SKILL.md   # Interview-driven feature specs
-    code-review/SKILL.md   # Code review
-    security-scan/SKILL.md # Security scanning
-    performance-review/SKILL.md  # Performance analysis
-    dependency-audit/SKILL.md    # Dependency checking
-    test-scaffold/SKILL.md      # Test generation
-    doc-sync/SKILL.md           # Documentation sync
-    mermaid-diagram/SKILL.md    # Diagram generation
+  agents/                    # Custom agent definitions
+    architect.md             # Planning, architecture (opus, skills: plan-repo, spec-developer)
+    reviewer.md              # Code review (sonnet, context: patterns.md + guardrails)
+    security.md              # Security analysis (opus, isolation: worktree)
+    performance.md           # Performance analysis (sonnet)
+    explorer.md              # Research and exploration (sonnet)
+  rules/                     # Conditional instructions (globs frontmatter)
+    commit-changelog.md      # Changelog + version bump on git commit
+    llg-check.md             # LL-G check before code edits (src/**, src-tauri/**)
+    bp-check.md              # BP check before config work (CLAUDE.md, .claude/**)
+    frontend.md              # Svelte 5 component conventions (src/**/*.svelte, *.ts, *.css)
+    database.md              # SQLite + tauri-plugin-sql conventions (src/lib/db/**)
+    tests.md                 # Vitest testing conventions (**/*.test.*, **/*.spec.*)
+  skills/                    # Executable skill definitions
+    plan-repo/SKILL.md       # Stack planning (opus)
+    init-repo/SKILL.md       # Repo initialization (opus)
+    spec-developer/SKILL.md  # Feature spec generation (opus)
+    code-review/SKILL.md     # Code review (sonnet, fork)
+    security-scan/SKILL.md   # Security audit (opus, fork)
+    performance-review/SKILL.md   # Performance analysis (sonnet, fork)
+    dependency-audit/SKILL.md     # Dependency audit (sonnet, fork)
+    test-scaffold/SKILL.md        # Test generation (sonnet)
+    doc-sync/SKILL.md             # Documentation sync (sonnet, fork)
+    mermaid-diagram/SKILL.md      # Diagram generation (sonnet)
+    update-practices/SKILL.md     # Best practice updates (sonnet)
+    add-lesson/SKILL.md           # LL-G contribution (haiku)
   references/
-    source-urls.md         # URL registry for fetching best practices
-    tools.md               # CLI tools reference (auto-populated per stack)
-    design-guardrails.md   # UI/design SLA (generated for frontend projects)
-  settings.json            # Project-level Claude Code settings
-CLAUDE.md                  # Master project rules for Claude Code
-agents.md                  # Agent registry (see agents.md docs below)
-instructions.md            # This file
-README.md                  # GitHub-facing README
-tasks/                     # Saved plans and specs (created on first use)
+    infrastructure.md        # Desktop app architecture (Tauri, SQLite, no cloud)
+    design-guardrails.md     # UI rules, SRS colors, typography, accessibility
+    tools.md                 # CLI tools with install commands and usage
+    source-urls.md           # URL registry for fetching best practices
+  agent-memory/              # Version-controlled shared knowledge
+    README.md                # Agent memory conventions
+    decisions.md             # Architectural decisions and rationale
+    debugging.md             # Known gotchas and failed approaches
+    patterns.md              # Discovered code patterns
+  scripts/
+    check-changelog-staged.sh  # Pre-commit hook script
+  settings.json              # Project-level Claude Code settings
+  settings.local.json.example  # Template for personal overrides
+  bp-audit.md                # BP best practices audit results
+CLAUDE.md                    # Master project rules (180 lines)
+agents.md                    # Agent registry
+instructions.md              # This file
+README.md                    # GitHub-facing README
+llms.txt                     # Machine-readable project index
+tasks/                       # Saved plans and specs
+  plan-repo.md               # Full development plan (4 phases)
 ```
 
----
-
-## Core Workflow
-
-### 1. Plan → Init → Build → Update
-
-```
-plan repo  →  initialize repo  →  build features  →  update practices
-```
-
-- **plan-repo** plans the stack, generates README, creates design guardrails and tools reference.
-- **init-repo** reads the plan and configures everything.
-- **spec-developer** plans individual features.
-- **update-practices** keeps the config current.
-
-### 2. Plan in One Session, Execute in Another
-
-For any non-trivial work: plan in one session, then start a fresh session to execute. This keeps context clean and prevents contamination from planning artifacts.
-
-### 3. Phase-Based Planning (Not Timeline-Based)
-
-All planning uses phases, never dates or time estimates:
-
-| Phase | Focus | Exit Criteria |
-|-------|-------|---------------|
-| Foundation | Project setup, core architecture, tooling | Builds, tests run, deploys |
-| Core | Primary features, data models, integrations | All primary flows work E2E |
-| Polish | Error handling, edge cases, accessibility | 80%+ coverage, no critical bugs |
-| Ship | Deployment, monitoring, documentation | Production-ready |
-
----
-
-## Skills Reference
-
-### plan-repo
-
-- **Trigger:** "plan repo", "plan project", "plan stack", "recommend stack"
-- **What it does:** Interviews you about the project requirements (what it does, target platform, scale, constraints) -- but does NOT ask you to pick a stack. Instead, it spins up parallel research subagents to compare current options (Go vs Rust vs TS, shadcn vs MUI vs Mantine, Drizzle vs Prisma, etc.) as of today's date, then recommends the best stack for your specific project with trade-offs. You approve or override, then it generates README, design guardrails, and tools reference.
-- **When to use:** Before init-repo on new projects, or when evaluating a stack change.
-- **Output:** Stack recommendation with trade-offs, plan file (`tasks/plan-repo.md`), README draft, design guardrails (if UI), tools reference.
-- **Key concept:** It recommends, you decide. Every recommendation is backed by current research, not cached opinions.
-
-### init-repo
-
-- **Trigger:** "initialize repo", "init repo", "set up claude code"
-- **What it does:** Reads the plan (if available), detects the stack, fetches best practices, and builds or updates all configuration files. Generates hierarchical CLAUDE.md files and stack-specific design guardrails. Non-destructive merge with existing config.
-- **When to use:** After plan-repo, after copying `.claude/` into an existing project, or to rebuild from scratch.
-- **Output:** Summary of all files created or modified.
-
-### update-practices
-
-- **Trigger:** "update practices", "refresh best practices", "update claude config"
-- **What it does:** Checks today's date, fetches all sources, compares against current config, implements changes. Prunes CLAUDE.md files of stale advice. Updates tools.md and design guardrails.
-- **When to use:** Periodically or after Claude Code updates.
-- **Safe to repeat:** Running it twice in a row produces no changes the second time.
-
-### spec-developer
-
-- **Trigger:** "spec developer", "plan feature", "spec this feature"
-- **What it does:** Explores the codebase with parallel subagents, then asks 20+ clarifying questions about the feature. Generates a 500-700 line implementation plan covering architecture, data models, test plan, error handling, and rollback strategy. Saves to `/tasks`.
-- **When to use:** For any feature larger than a single file change.
-- **Key concept:** Plan only -- does not implement. Start a fresh session to execute.
-- **Variant:** If retrying after a failed implementation, it documents previous attempts to avoid dead ends.
-
-### code-review
-
-- **Trigger:** "code review", "review code", "full code review"
-- **What it does:** Scans for correctness, naming, DRY violations, error handling, type safety, test coverage, dead code, TODO/FIXME, and consistency. Severity-ranked report.
-- **Scope:** Optionally pass a file or directory path.
-
-### security-scan
-
-- **Trigger:** "security scan", "security audit", "check security"
-- **What it does:** Leaked secrets, OWASP Top 10, dependency CVEs, input validation gaps.
-- **Scope:** Optionally pass a file or directory path.
-
-### performance-review
-
-- **Trigger:** "performance review", "perf review", "check performance"
-- **What it does:** N+1 queries, memory leaks, bundle size, caching, algorithms, build optimization.
-- **Scope:** Optionally pass a file or directory path.
-
-### dependency-audit
-
-- **Trigger:** "dependency audit", "audit dependencies", "check deps"
-- **What it does:** Outdated packages, known vulnerabilities, unused dependencies across all detected package managers.
-
-### test-scaffold
-
-- **Trigger:** "scaffold tests", "generate tests", "add test coverage"
-- **What it does:** Detects test framework, finds untested modules, generates test stubs matching existing patterns.
-- **Scope:** Optionally pass a file or directory.
-
-### doc-sync
-
-- **Trigger:** "sync docs", "update docs", "fix documentation"
-- **What it does:** Cross-references documentation against code. Finds stale references, incorrect examples, missing docs.
-
-### mermaid-diagram
-
-- **Trigger:** "mermaid diagram", "generate diagram", "visualize data flow"
-- **What it does:** Explores the codebase and generates Mermaid diagrams (data flow, architecture, sequence, state machine, ER). Saves to `docs/diagrams/`.
-- **When to use:** For debugging user-reported issues without reading code, for documentation, or for understanding complex systems.
-
----
-
-## Agents Reference
-
-All agents are registered in [agents.md](agents.md) at the repo root. This file serves as the agent registry -- Claude Code reads it to discover available agents.
-
-### architect
-
-- **File:** `.claude/agents/architect.md`
-- **Model:** opus
-- **Mode:** plan
-- **Purpose:** Phase-based planning, tech stack evaluation, file structure design. Always uses phases (Foundation, Core, Polish, Ship), never timelines.
-
-### reviewer
-
-- **File:** `.claude/agents/reviewer.md`
-- **Model:** sonnet
-- **Mode:** plan
-- **Purpose:** Code review for correctness, naming, DRY, error handling, type safety, and standards compliance.
-
-### security
-
-- **File:** `.claude/agents/security.md`
-- **Model:** opus
-- **Mode:** plan
-- **Purpose:** OWASP Top 10, secrets detection, dependency vulnerabilities, input validation.
-
-### performance
-
-- **File:** `.claude/agents/performance.md`
-- **Model:** sonnet
-- **Mode:** plan
-- **Purpose:** Query optimization, memory leaks, I/O, frontend rendering, algorithms, build optimization.
-
-### explorer
-
-- **File:** `.claude/agents/explorer.md`
-- **Model:** sonnet
-- **Mode:** plan
-- **Purpose:** Codebase exploration, online research, doc fetching, context gathering. Always include a "why" when spawning.
-
----
-
-## Hierarchical CLAUDE.md Architecture
-
-CLAUDE.md files are loaded top-down: root user level → project level → subfolder level. Only relevant files load.
-
-### Rules
-
-1. **Root CLAUDE.md** contains project-wide rules, stack info, global conventions.
-2. **Subfolder CLAUDE.md** files only exist where subfolder-specific rules differ from root (e.g., `frontend/CLAUDE.md` for UI conventions).
-3. **`.claude/rules/*.md`** files with `paths:` frontmatter provide conditional instructions that only load when working with matching file paths. Use these instead of subfolder CLAUDE.md files for fine-grained scoping.
-4. A landing page task never loads your backend CLAUDE.md. Context stays narrow.
-5. Keep each file focused and under 200 lines.
-6. Prune after every model update -- remove what the model handles natively.
-7. Do NOT bloat CLAUDE.md with generic advice the model already knows.
-
-### When to Create Subfolder CLAUDE.md
-
-- The subfolder has a different language or framework than the root
-- The subfolder has distinct naming conventions, file structure, or testing patterns
-- The subfolder is a separate deployable (e.g., monorepo package)
-
-### When NOT to Create Subfolder CLAUDE.md
-
-- The subfolder follows the same conventions as root
-- The rules would just repeat or slightly extend root rules
-- The subfolder is a simple utility folder
-
----
-
-## Subagent Best Practices
-
-### Always Offload to Subagents
-
-- Online research and doc fetching
-- Codebase exploration and pattern discovery
-- Log analysis and debugging
-- Context gathering before implementation
-
-### Always Include a "Why"
-
-Every subagent prompt should explain WHY you need the information:
-
-- **Bad:** "How does auth work?"
-- **Good:** "How does auth work, because we're adding rate limiting and need to know where to hook into the auth middleware."
-
-The "why" dramatically reduces noisy and overlapping results from parallel subagents.
-
-### Parallel Exploration
-
-When torn between implementation approaches, spin up parallel Explorer subagents for each approach. Pass all results back to the main session and let it decide.
-
-### Subagents Are Resumable
-
-You can resume a specific subagent to continue its research. Use this to drill deeper without starting over.
-
----
-
-## Skill Frontmatter
-
-Skills support optional fields for model and invocation control:
-
-```yaml
----
-name: my-skill
-description: What this skill does
-user-invocable: true
-disable_model_invocation: true   # Only manual /skillname invocation
-model: haiku                      # Which model runs this skill
-context: fork                     # Run in isolated subagent context
-allowed-tools:
-  - Read
-  - Glob
----
-```
-
-**Model selection guidelines:**
-- `haiku` — Well-defined step-by-step skills (localization, release, formatting)
-- `sonnet` — Analysis and research skills (code review, exploration)
-- `opus` — Orchestration and planning skills (spec developer, architect)
-
-**Additional frontmatter fields (v2.1.69):**
-- `context: fork` — Run skill in an isolated subagent, preventing context contamination
-- `${CLAUDE_SKILL_DIR}` — Reference the skill's own directory for relative file paths
-- Skills in nested `.claude/skills/` subdirectories are auto-discovered
-
----
-
-## Context Management Tips
-
-### Prevent Context Contamination
-
-- **Plan/execute separation:** Plan in one session, execute in another.
-- **Code bias fix:** If Claude is stuck in bad existing patterns, build the feature in isolation in a fresh empty folder, then port it into the main project.
-- **`/rewind`:** Instead of arguing with Claude after a wrong turn, rewind to the last good point and re-guide.
-- **Document failed attempts:** For stubborn bugs, have Claude write a document of all attempted fixes before starting a new session. The new session loads the document and avoids dead ends.
-- **`/handoff`:** Create a handoff document (goal, progress, what worked, what failed, next steps) before ending a session. Load it in the fresh session as sole context.
-- **Modularize aggressively:** Files over 500 lines consume massive context. Regularly break them apart.
-
-### Context Window Management
-
-- Keep CLAUDE.md under 200 lines
-- Use `/compact` proactively around 50% context (disable auto-compact in `/config` for manual control)
-- Start fresh conversations for unrelated topics
-- Break tasks small enough to complete in under 50% context usage
-- System prompt + tools consume ~10% of context. Enable `ENABLE_TOOL_SEARCH: "true"` in settings to lazy-load MCP tools and save tokens.
-
----
-
-## Tools Reference
-
-The file `.claude/references/tools.md` lists all CLI tools the project uses. Claude Code reads this before running commands. If a tool is missing, Claude checks tools.md for the install command and offers to install it.
-
-The file is populated by `plan-repo` and `init-repo` based on the detected stack. You can also add entries manually.
-
----
-
-## Design Guardrails (UI Projects)
-
-For projects with a frontend, `init-repo` generates `.claude/references/design-guardrails.md` with stack-specific UI/design SLA guidelines. These are sourced from current best practices as of the init date and enforced via the CLAUDE.md.
-
-Guardrails cover: component patterns, styling conventions, accessibility requirements, performance budgets, and consistency rules.
-
----
+## Skills
+
+Skills are reusable workflows in `.claude/skills/<name>/SKILL.md`.
+
+| Skill | Model | Context | Trigger |
+|-------|-------|---------|---------|
+| plan-repo | opus | -- | "plan repo" |
+| init-repo | opus | -- | "initialize repo" |
+| spec-developer | opus | -- | "spec developer" |
+| code-review | sonnet | fork | "code review" |
+| security-scan | opus | fork | "security scan" |
+| performance-review | sonnet | fork | "performance review" |
+| dependency-audit | sonnet | fork | "dependency audit" |
+| test-scaffold | sonnet | -- | "scaffold tests" |
+| doc-sync | sonnet | fork | "sync docs" |
+| mermaid-diagram | sonnet | -- | "mermaid diagram" |
+| update-practices | sonnet | -- | "update practices" |
+| add-lesson | haiku | -- | "add lesson" |
+
+### Skill Frontmatter Fields
+
+| Field | Purpose |
+|-------|---------|
+| `model: haiku\|sonnet\|opus` | Which model runs the skill. haiku=step-by-step, sonnet=analysis, opus=planning |
+| `context: fork` | Run in isolated subagent context (prevents context pollution) |
+| `disable_model_invocation: true` | Prevents auto-loading; invoke manually only |
+| `agent: <name>` | Bind skill to a specific agent persona |
+| `allowed-tools` | Restrict which tools the skill can use |
+| `argument-hint` | Describe expected arguments |
+
+## Agents
+
+Agents are spawned automatically or via the Agent tool. Registered in [agents.md](agents.md).
+
+| Agent | Model | Enhancements | Purpose |
+|-------|-------|--------------|---------|
+| architect | opus | skills: plan-repo, spec-developer | Planning, architecture, tech decisions |
+| reviewer | sonnet | context: reviews against patterns.md + guardrails | Code review, quality |
+| security | opus | isolation: worktree | Vulnerability analysis in isolated copy |
+| performance | sonnet | -- | Bottleneck identification |
+| explorer | sonnet | -- | Research, docs, codebase exploration |
+
+### Agent Frontmatter Fields
+
+| Field | Purpose |
+|-------|---------|
+| `model` | Which model runs the agent |
+| `permissionMode: plan` | Agent can read but not write |
+| `background: true` | Run without blocking main session |
+| `isolation: worktree` | Run in isolated git worktree |
+| `context: <text>` | Additional instructions for the agent |
+| `skills: [skill1, skill2]` | Skills the agent can invoke |
+| `maxTurns: N` | Cap agentic iterations (budget) |
+| `effort` | Set model effort level |
+| `disallowedTools` | Block specific tools |
+
+## Path-Scoped Rules
+
+Rules in `.claude/rules/*.md` load conditionally based on file glob patterns.
+
+| Rule File | Triggers On | Purpose |
+|-----------|-------------|---------|
+| `commit-changelog.md` | git commits | Changelog + version bump enforcement |
+| `llg-check.md` | `src/**`, `src-tauri/**`, `data/**` | LL-G check before code edits |
+| `bp-check.md` | `CLAUDE.md`, `.claude/**`, config files | BP check before config work |
+| `frontend.md` | `src/**/*.svelte`, `src/**/*.ts`, `src/**/*.css` | Svelte 5 + shadcn-svelte conventions |
+| `database.md` | `src/lib/db/**`, `src-tauri/**` | SQLite + tauri-plugin-sql conventions |
+| `tests.md` | `**/*.test.*`, `**/*.spec.*`, `**/test/**` | Vitest testing conventions |
 
 ## Hooks
 
-The template includes hooks in `.claude/settings.json`:
+Configured in `.claude/settings.json`.
 
-- **PreToolUse (git commit):** Logs a notification when commits are made.
-- **Stop:** Bell sound when Claude finishes a task (useful with multiple sessions).
-- **Notification:** Bell sound when Claude needs attention.
+| Event | Matcher | Type | Action |
+|-------|---------|------|--------|
+| PreToolUse | `Bash(git commit*)` | command | Check changelog is staged |
+| PreToolUse | `Bash(rm -rf*)` | prompt | LLM safety check on destructive deletes |
+| PostToolUse | `Edit\|Write` | command | Auto-format with Biome on .svelte/.ts/.js/.json |
+| Stop | (all) | command | Bell notification |
+| Notification | (all) | command | Bell notification |
 
-To add custom hooks, edit `.claude/settings.json`. Supported hook events:
+### Hook Types
 
-- `PreToolUse` / `PostToolUse` -- Before/after tool execution
-- `SessionStart` / `SessionEnd` -- Session lifecycle
-- `Stop` / `SubagentStop` -- Task completion
-- `Notification` -- System notifications
-- `PreCompact` -- Before context compaction
-- `UserPromptSubmit` -- Before user prompt processing
-- `InstructionsLoaded` -- When CLAUDE.md or `.claude/rules/*.md` files load
-- `ConfigChange` -- When configuration files change during session
-- `WorktreeCreate` / `WorktreeRemove` -- Git worktree operations
-- `PermissionRequest` -- Process permission requests with custom logic
-- `TeammateIdle` / `TaskCompleted` -- Agent team events
-- `Setup` -- Triggered via `--init`, `--init-only`, or `--maintenance` flags
+| Type | Description |
+|------|-------------|
+| `command` | Shell command. Exit 0 = allow, 2 = block (PreToolUse) |
+| `http` | POST to URL. Requires `allowedHttpHookUrls` in settings |
+| `prompt` | Single-turn LLM yes/no judgment |
+| `agent` | Multi-turn subagent with tool access |
 
-Hooks also support HTTP mode (POST JSON to URLs) in addition to command mode.
+## Settings
 
----
+### settings.json (shared, version-controlled)
 
-## Power User Tips
+- `permissions.allow` -- Auto-approved: Read, Glob, Grep, WebFetch, WebSearch
+- `permissions.deny` -- Blocked: SSH, AWS, Azure, Kube, Docker, npm, git creds, env files, keys
+- `env.ENABLE_TOOL_SEARCH` -- Lazy-load MCP tools (saves ~10% baseline context)
+- `plansDirectory` -- Plans saved to `tasks/`
 
-- **`/add-dir`** — Add a second project directory to copy proven implementations between projects.
-- **Verbose mode** (`/config` → verbose → true) — Shows token count and reasoning trace. Read the trace to learn Claude's terminology, then use it in prompts.
-- **`/statusline`** — Shows model name, context battery, git branch, unstaged changes. Essential with multiple sessions.
-- **`/rewind`** — Return to last good point instead of arguing about a wrong turn.
-- **`/fork`** — Branch current session within conversation. Use `--fork-session` with `--continue` to fork from recent sessions.
-- **`/handoff`** — Create a summary document before ending a session for seamless continuation.
-- **`/release-notes`** — View latest changes in the current Claude Code version.
-- **`--worktree` / `-w`** — Start Claude Code in an isolated git worktree for parallel work.
-- **`--from-pr`** — Resume sessions linked to a GitHub PR.
-- **`claude agents`** — List all configured agents from the CLI.
+### settings.local.json (personal, git-ignored)
 
----
+Create from `.claude/settings.local.json.example` for personal overrides:
 
-## Customizing for Your Project
+```json
+{
+  "disableAllHooks": false,
+  "alwaysThinkingEnabled": true,
+  "language": "en"
+}
+```
 
-### Editing CLAUDE.md
+## Knowledge Base Integration
 
-Update root CLAUDE.md with your project's stack, conventions, and standards. Keep under 200 lines. Create subfolder CLAUDE.md files only where distinct rules apply.
+### LL-G (RULE 1) -- What NOT to Do
 
-### Adding New Skills
+Before writing code, fetch the LL-G index and load relevant HIGH-severity entries. Contribute discoveries back via `/add-lesson`. Technologies relevant to Janki: TypeScript, Tailwind CSS, Svelte, Tauri.
 
-1. Create a folder in `.claude/skills/` with your skill name.
-2. Create `SKILL.md` inside with YAML frontmatter (`name`, `description`, `user-invocable: true`).
-3. Add optional frontmatter: `disable_model_invocation`, `model`, `agent`.
-4. Write step-by-step instructions in the markdown body.
-5. Update the skill table in CLAUDE.md and this instructions.md file.
+### BP (RULE 3) -- What TO Do
 
-### Adding New Agents
+Before config/tooling work, fetch the BP index and load FOUNDATIONAL + RECOMMENDED entries. Use `/add-dir C:\Github\BP` for local access.
 
-1. Create a markdown file in `.claude/agents/` named after the agent.
-2. Add YAML frontmatter: `name`, `description`, `model`, and optionally `tools`, `permissionMode`, `maxTurns`, `skills`, `memory`, `isolation`, `background`, `disallowedTools`.
-3. Write the agent's role, focus areas, and behavior.
-4. Register the agent in [agents.md](agents.md).
-5. Update CLAUDE.md.
+## Hierarchical CLAUDE.md
 
-**New agent fields (v2.1.69):**
-- `skills:` — Preload specific skills into the agent for progressive disclosure
-- `memory:` — Persistent memory scope (`user`, `project`, or `local`)
-- `isolation: worktree` — Run in a temporary git worktree
-- `background: true` — Run asynchronously without blocking
-- `disallowedTools:` — Remove specific tools from inherited tool lists
+| File | Scope | Status |
+|------|-------|--------|
+| Root `CLAUDE.md` | Project-wide rules, stack, RULE 0/1/3 | Exists (180 lines) |
+| `src/CLAUDE.md` | Svelte 5 frontend conventions | Planned (Phase 1) |
+| `src-tauri/CLAUDE.md` | Tauri/Rust backend conventions | Planned (Phase 1) |
 
-### Updating the Source URL Registry
+## Development Workflow
 
-Add URLs to `.claude/references/source-urls.md`. The next `update-practices` run will include them.
+1. **Plan:** `plan-repo` or `spec-developer` to create plans in `tasks/`
+2. **Check:** LL-G (RULE 1) + BP (RULE 3) before writing code
+3. **Build:** Execute plans in a fresh session
+4. **Review:** `code-review`, `security-scan`, `performance-review`
+5. **Learn:** Route gotchas to LL-G via `/add-lesson`, update agent memory
 
-### Personal Settings Overrides
+## Context Management
 
-Create `.claude/settings.local.json` for personal settings (git-ignored). Overrides `.claude/settings.json`.
+- Use `/compact` at ~50% context
+- Start fresh conversations for unrelated topics
+- Plan in one session, execute in another
+- Use `/handoff` before ending complex sessions
+- Break tasks to complete in under 50% context
 
----
+## Adding New Components
+
+### New Skill
+
+1. Create `.claude/skills/<name>/SKILL.md` with YAML frontmatter
+2. Add `model`, `context: fork`, `allowed-tools` as needed
+3. Update CLAUDE.md skill table and this file
+
+### New Agent
+
+1. Create `.claude/agents/<name>.md` with YAML frontmatter
+2. Register in `agents.md`
+3. Update CLAUDE.md agent list
+
+### New Rule
+
+1. Create `.claude/rules/<name>.md` with `globs` frontmatter
+2. Rules auto-load when editing matching files
 
 ## Troubleshooting
 
-- **Skill not triggering:** Check `user-invocable: true` in SKILL.md frontmatter.
-- **Agent not found:** Ensure the agent file is in `.claude/agents/` and registered in [agents.md](agents.md).
-- **Settings not applied:** Hierarchy: CLI flags → settings.local.json → settings.json → global settings.
-- **Hooks not running:** Verify hook event name and matcher in settings.json. Run `/doctor`.
-- **Stale practices:** Run "update practices" -- it checks today's date and fetches current recommendations.
-- **Context overload:** Use `/compact`, break into smaller tasks, or start a fresh session.
+- **Skill not triggering:** Check `user-invocable: true` in SKILL.md frontmatter
+- **Agent not found:** Ensure registered in `agents.md`
+- **Settings not applied:** Hierarchy: CLI flags > settings.local.json > settings.json > global
+- **Hooks not running:** Verify event name and matcher in settings.json
+- **Context overload:** Use `/compact`, break into smaller tasks, or fresh session

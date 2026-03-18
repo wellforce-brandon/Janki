@@ -3,6 +3,7 @@ name: security
 description: Use PROACTIVELY for security-focused analysis covering OWASP Top 10, secrets detection, dependency vulnerabilities, and input validation gaps.
 model: opus
 permissionMode: plan
+isolation: worktree
 tools:
   - Read
   - Glob

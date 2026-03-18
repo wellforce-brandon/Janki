@@ -60,13 +60,13 @@ Beyond basics (name, description, model, permissionMode, tools), agents support:
 - `maxTurns: N` — Cap agentic iterations (budget control).
 - `memory: user|project|local` — Persistent cross-session memory scope.
 
-## Fixed Infrastructure
+## Infrastructure
 
-All projects use this hosting stack (see `.claude/references/infrastructure.md`):
-- **Cloudflare Pages** (frontend) + **Northflank** (backend containers, Postgres, Redis, cron)
-- **Cloudflare R2** (object storage) + **Better Auth** (auth within API) + **Resend/SES** (email)
+Janki is a **local desktop app** (Tauri 2.x + Svelte 5 + SQLite). No cloud services, no servers, no auth. See `.claude/references/infrastructure.md` for details.
 
-Plan-repo only recommends language, frameworks, UI library, ORM, and tooling. Infrastructure is locked.
+## RULE 0 -- Read Before Write (MANDATORY)
+
+Before modifying any file or database table, read its current state first. Before deleting, confirm the target exists and is what you expect. This prevents data loss and silent overwrites in a local-first app where there is no backup server.
 
 ## File Organization
 

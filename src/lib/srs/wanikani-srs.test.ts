@@ -1,9 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { getStageColor, STAGE_CATEGORIES, STAGE_NAMES } from "./wanikani-srs";
 
-// Mock the database module since reviewKanjiItem calls it
+// Mock the database modules since reviewKanjiItem calls them
 vi.mock("../db/queries/kanji", () => ({
 	updateKanjiSrsState: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
+	checkAndUnlockLevel: vi.fn().mockResolvedValue({ ok: true, data: [] }),
+}));
+
+vi.mock("../db/queries/kanji-reviews", () => ({
+	logKanjiReview: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
 }));
 
 describe("WaniKani SRS", () => {
@@ -67,27 +72,28 @@ describe("WaniKani SRS", () => {
 	describe("reviewKanjiItem", () => {
 		it("should advance stage on correct answer", async () => {
 			const { reviewKanjiItem } = await import("./wanikani-srs");
-			const result = await reviewKanjiItem(1, true, 1);
+			const result = await reviewKanjiItem(1, true, 1, 1);
 			expect(result.newStage).toBe(2);
 			expect(result.nextReview).toBeDefined();
+			expect(result.unlockedIds).toEqual([]);
 		});
 
 		it("should drop stage on incorrect answer", async () => {
 			const { reviewKanjiItem } = await import("./wanikani-srs");
-			const result = await reviewKanjiItem(1, false, 3);
+			const result = await reviewKanjiItem(1, false, 3, 1);
 			expect(result.newStage).toBeLessThan(3);
 		});
 
 		it("should burn on correct from enlightened", async () => {
 			const { reviewKanjiItem } = await import("./wanikani-srs");
-			const result = await reviewKanjiItem(1, true, 8);
+			const result = await reviewKanjiItem(1, true, 8, 1);
 			expect(result.newStage).toBe(9);
 			expect(result.nextReview).toBeNull();
 		});
 
 		it("should not exceed stage 9", async () => {
 			const { reviewKanjiItem } = await import("./wanikani-srs");
-			const result = await reviewKanjiItem(1, true, 8);
+			const result = await reviewKanjiItem(1, true, 8, 1);
 			expect(result.newStage).toBeLessThanOrEqual(9);
 		});
 	});

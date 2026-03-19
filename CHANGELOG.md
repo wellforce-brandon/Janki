@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.6.0.0] - 2026-03-19
+
+### Added
+
+- Grouped sidebar navigation: Decks, Kanji, Language, and Tools sections with collapsible headers
+- Kanji Dashboard, Kanji Lessons, and Kanji Review stub views with navigation wiring
+- Section-aware `navigateBack()` helper for sub-view navigation
+- Database migration v3: `kanji_review_log` table for review history tracking
+- `lesson_completed_at`, `user_notes`, `user_synonyms` columns on `kanji_levels` table
+- Backfill migration: existing unlocked items treated as lesson-completed
+- Kanji review log queries: logKanjiReview(), getTodayKanjiReviewCount(), getKanjiReviewStats()
+- User notes and synonyms update queries for kanji items
+- WaniKani-style kanji review session with typed meaning and reading answers
+- Romaji-to-hiragana real-time input converter for reading questions (handles double consonants, n-before-consonant, combination syllables)
+- Green/red feedback bars, progress tracking, and remaining counter in kanji reviews
+- Review completion summary with accuracy, time, and unlock notifications
+- Unlock cascade triggered on kanji review promotions via checkAndUnlockLevel()
+- Review duration tracking per item
+- Toast notifications, empty state, and loading state reusable components
+- Undo system for deck-based FSRS reviews
+- Search with FTS5 support for cards and kanji
+- 16 new tests for romaji-to-hiragana converter (72 total)
+
+### Changed
+
+- Sidebar restructured from flat list to grouped sections (Decks, Kanji, Language, Tools)
+- View type renamed: "review" to "deck-review", "kanji" to "kanji-map"
+- All navigate() call sites updated for new view names
+- reviewKanjiItem() now logs reviews, triggers unlock cascade, accepts level and duration params
+- getDueKanjiReviews() and getDueKanjiCount() now require lesson_completed_at IS NOT NULL
+- KanjiLevelItem interface extended with lesson_completed_at, user_notes, user_synonyms
+- Dashboard, Stats, Settings, and all views updated for new navigation structure
+
 ## [0.5.0.0] - 2026-03-18
 
 ### Added

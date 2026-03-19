@@ -81,6 +81,21 @@ export async function saveSetting<K extends keyof AppSettings>(
 	if (key === "theme") applyTheme(value as string);
 }
 
+export function getDefaults(): AppSettings {
+	return { ...DEFAULTS };
+}
+
+export async function resetAllSettings(): Promise<void> {
+	settings = { ...DEFAULTS };
+	try {
+		const db = await getDb();
+		await db.execute("DELETE FROM settings WHERE key LIKE 'app_%'");
+	} catch {
+		// Silently fail
+	}
+	applyTheme(DEFAULTS.theme);
+}
+
 function applyTheme(theme: string): void {
 	if (
 		theme === "dark" ||

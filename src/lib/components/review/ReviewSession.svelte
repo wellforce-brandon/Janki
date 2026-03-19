@@ -1,12 +1,17 @@
 <script lang="ts">
 import type { CardWithContent } from "$lib/db/queries/cards";
-import { updateCardState } from "$lib/db/queries/cards";
-import { deleteReviewLogEntry } from "$lib/db/queries/reviews";
-import { getTodayStats, restoreDailyStats } from "$lib/db/queries/stats";
 import type { CardState } from "$lib/srs/fsrs";
 import { getNextIntervals, Rating } from "$lib/srs/fsrs";
 import { processReview } from "$lib/srs/scheduler";
+import {
+	performUndo,
+	pushUndo,
+	snapshotCardState,
+	snapshotStats,
+	type UndoEntry,
+} from "$lib/srs/undo";
 import { getSettings } from "$lib/stores/app-settings.svelte";
+import { addToast } from "$lib/stores/toast.svelte";
 import { speakJapanese } from "$lib/tts/speech";
 import FlashCard from "./FlashCard.svelte";
 import RatingButtons from "./RatingButtons.svelte";
@@ -28,24 +33,11 @@ let sessionStartTime = $state(Date.now());
 let isProcessing = $state(false);
 let isDone = $state(false);
 let elapsedSeconds = $state(0);
-
-// Undo stack
-interface UndoEntry {
-	cardIndex: number;
-	card: CardWithContent;
-	previousState: CardState;
-	reviewLogId: number;
-	prevStats: {
-		reviews_count: number;
-		correct_count: number;
-		incorrect_count: number;
-		time_spent_ms: number;
-	} | null;
-	wasCorrect: boolean;
-}
+let paused = $state(false);
 let undoStack = $state<UndoEntry[]>([]);
 
 let currentCard = $derived(currentIndex < cards.length ? cards[currentIndex] : null);
+let progressPercent = $derived(Math.round((currentIndex / cards.length) * 100));
 
 let currentFields = $derived.by(() => {
 	if (!currentCard) return {};
@@ -86,7 +78,7 @@ let settings = $derived(getSettings());
 
 // Timer
 $effect(() => {
-	if (isDone) return;
+	if (isDone || paused) return;
 	const interval = setInterval(() => {
 		elapsedSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
 	}, 1000);
@@ -108,31 +100,8 @@ async function rate(rating: Rating) {
 	const duration = Date.now() - cardStartTime;
 	const wasCorrect = rating >= Rating.Good;
 
-	// Snapshot previous state for undo
-	const previousState: CardState = {
-		stability: currentCard.stability,
-		difficulty: currentCard.difficulty,
-		due: currentCard.due,
-		last_review: currentCard.last_review,
-		reps: currentCard.reps,
-		lapses: currentCard.lapses,
-		state: currentCard.state,
-		scheduled_days: currentCard.scheduled_days,
-		elapsed_days: currentCard.elapsed_days,
-	};
-
-	// Snapshot daily stats
-	const statsResult = await getTodayStats();
-	const prevStats =
-		statsResult.ok && statsResult.data
-			? {
-					reviews_count: statsResult.data.reviews_count,
-					correct_count: statsResult.data.correct_count,
-					incorrect_count: statsResult.data.incorrect_count,
-					time_spent_ms: statsResult.data.time_spent_ms,
-				}
-			: null;
-
+	const previousState: CardState = snapshotCardState(currentCard);
+	const prevStats = await snapshotStats();
 	const result = await processReview(currentCard, rating, duration);
 
 	totalTimeMs += duration;
@@ -140,17 +109,14 @@ async function rate(rating: Rating) {
 	if (wasCorrect) correct++;
 
 	if (result) {
-		undoStack = [
-			...undoStack.slice(-49),
-			{
-				cardIndex: currentIndex,
-				card: currentCard,
-				previousState,
-				reviewLogId: result.reviewLogId,
-				prevStats,
-				wasCorrect,
-			},
-		];
+		undoStack = pushUndo(undoStack, {
+			cardIndex: currentIndex,
+			card: currentCard,
+			previousState,
+			reviewLogId: result.reviewLogId,
+			prevStats,
+			wasCorrect,
+		});
 	}
 
 	currentIndex++;
@@ -170,45 +136,18 @@ async function undo() {
 	const entry = undoStack[undoStack.length - 1];
 	undoStack = undoStack.slice(0, -1);
 
-	// Restore card state
-	await updateCardState(
-		entry.card.id,
-		entry.previousState.state,
-		entry.previousState.stability,
-		entry.previousState.difficulty,
-		entry.previousState.due,
-		entry.previousState.last_review ?? "",
-		entry.previousState.reps,
-		entry.previousState.lapses,
-		entry.previousState.scheduled_days,
-		entry.previousState.elapsed_days,
-	);
+	await performUndo(entry);
 
-	// Delete review log
-	await deleteReviewLogEntry(entry.reviewLogId);
-
-	// Restore daily stats
-	if (entry.prevStats) {
-		const today = new Date().toISOString().split("T")[0];
-		await restoreDailyStats(
-			today,
-			entry.prevStats.reviews_count,
-			entry.prevStats.correct_count,
-			entry.prevStats.incorrect_count,
-			entry.prevStats.time_spent_ms,
-		);
-	}
-
-	// Adjust counters
 	reviewed--;
 	if (entry.wasCorrect) correct--;
 
-	// Go back to that card
 	isDone = false;
 	currentIndex = entry.cardIndex;
 	flipped = false;
 	cardStartTime = Date.now();
 	isProcessing = false;
+
+	addToast("Review undone", "info");
 }
 
 function playTts() {
@@ -223,7 +162,13 @@ function playTts() {
 }
 
 function handleKeydown(e: KeyboardEvent) {
-	if (isDone) return;
+	if (e.key === "Escape") {
+		e.preventDefault();
+		paused = !paused;
+		return;
+	}
+
+	if (isDone || paused) return;
 
 	if (e.key === " " && !flipped) {
 		e.preventDefault();
@@ -261,10 +206,27 @@ function handleKeydown(e: KeyboardEvent) {
 
 <svelte:window onkeydown={handleKeydown} />
 
+{#if paused}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+		<div class="text-center space-y-4">
+			<h2 class="text-2xl font-bold">Paused</h2>
+			<p class="text-muted-foreground">Press <kbd class="rounded border px-1.5 py-0.5 text-xs">Esc</kbd> to resume</p>
+		</div>
+	</div>
+{/if}
+
 {#if isDone}
 	<ReviewSummary {reviewed} {correct} timeMs={totalTimeMs} />
 {:else if currentCard}
 	<div class="mx-auto max-w-2xl space-y-6">
+		<!-- Progress bar -->
+		<div class="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+			<div
+				class="h-full rounded-full bg-primary transition-all duration-300"
+				style="width: {progressPercent}%"
+			></div>
+		</div>
+
 		<div class="flex items-center justify-between text-sm text-muted-foreground">
 			<span>Card {currentIndex + 1} of {cards.length}</span>
 			<div class="flex items-center gap-3">

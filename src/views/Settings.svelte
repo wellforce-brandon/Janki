@@ -1,40 +1,57 @@
 <script lang="ts">
+import { getVersion } from "@tauri-apps/api/app";
 import { exportBackup, importBackup } from "$lib/backup/backup";
 import Button from "$lib/components/ui/button/button.svelte";
-import { getSettings, saveSetting } from "$lib/stores/app-settings.svelte";
+import { getSettings, resetAllSettings, saveSetting } from "$lib/stores/app-settings.svelte";
+import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
 import { checkForUpdates } from "$lib/updater/check-update";
 
 let s = $derived(getSettings());
-let backupStatus = $state("");
-let restoreStatus = $state("");
+let appVersion = $state("...");
+let showResetConfirm = $state(false);
+
+$effect(() => {
+	getVersion().then((v) => {
+		appVersion = v;
+	});
+});
 
 function setTheme(theme: "dark" | "light" | "system") {
 	saveSetting("theme", theme);
+	addToast(`Theme set to ${theme}`, "success");
 }
 
 async function handleExport() {
-	backupStatus = "Exporting...";
 	try {
 		const dest = await exportBackup();
-		backupStatus = dest ? `Saved to ${dest}` : "Cancelled";
+		if (dest) {
+			addToast("Backup exported successfully", "success");
+		} else {
+			addToast("Export cancelled", "info");
+		}
 	} catch (e) {
-		backupStatus = `Error: ${e instanceof Error ? e.message : String(e)}`;
+		addToast(`Export failed: ${e instanceof Error ? e.message : String(e)}`, "error");
 	}
 }
 
 async function handleImport() {
-	restoreStatus = "Importing...";
 	try {
 		const ok = await importBackup();
 		if (ok) {
-			restoreStatus = "Restored. Restart app to apply.";
+			addToast("Backup restored. Restart app to apply.", "success");
 		} else {
-			restoreStatus = "Cancelled";
+			addToast("Import cancelled", "info");
 		}
 	} catch (e) {
-		restoreStatus = `Error: ${e instanceof Error ? e.message : String(e)}`;
+		addToast(`Restore failed: ${e instanceof Error ? e.message : String(e)}`, "error");
 	}
+}
+
+async function handleResetDefaults() {
+	showResetConfirm = false;
+	await resetAllSettings();
+	addToast("All settings restored to defaults", "success");
 }
 </script>
 
@@ -70,7 +87,11 @@ async function handleImport() {
 					max="100"
 					class="w-full rounded-md border bg-background px-3 py-2"
 					value={s.dailyNewLimit}
-					onchange={(e) => saveSetting("dailyNewLimit", Number((e.target as HTMLInputElement).value))}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLInputElement).value);
+						saveSetting("dailyNewLimit", val);
+						addToast("Daily new cards limit saved", "success");
+					}}
 				/>
 			</div>
 			<div class="space-y-1">
@@ -82,7 +103,11 @@ async function handleImport() {
 					max="1000"
 					class="w-full rounded-md border bg-background px-3 py-2"
 					value={s.dailyReviewLimit}
-					onchange={(e) => saveSetting("dailyReviewLimit", Number((e.target as HTMLInputElement).value))}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLInputElement).value);
+						saveSetting("dailyReviewLimit", val);
+						addToast("Daily review limit saved", "success");
+					}}
 				/>
 			</div>
 		</div>
@@ -95,7 +120,11 @@ async function handleImport() {
 			<input
 				type="checkbox"
 				checked={s.ttsEnabled}
-				onchange={(e) => saveSetting("ttsEnabled", (e.target as HTMLInputElement).checked)}
+				onchange={(e) => {
+					const val = (e.target as HTMLInputElement).checked;
+					saveSetting("ttsEnabled", val);
+					addToast(val ? "TTS enabled" : "TTS disabled", "success");
+				}}
 			/>
 			<span class="text-sm">Enable TTS</span>
 		</label>
@@ -140,7 +169,11 @@ async function handleImport() {
 				<input
 					type="checkbox"
 					checked={s.kanjiAutoSpeak}
-					onchange={(e) => saveSetting("kanjiAutoSpeak", (e.target as HTMLInputElement).checked)}
+					onchange={(e) => {
+						const val = (e.target as HTMLInputElement).checked;
+						saveSetting("kanjiAutoSpeak", val);
+						addToast(val ? "Auto-speak enabled" : "Auto-speak disabled", "success");
+					}}
 				/>
 				<span class="text-sm">Auto-play kanji pronunciation on reveal</span>
 			</label>
@@ -154,7 +187,11 @@ async function handleImport() {
 			<input
 				type="checkbox"
 				checked={s.showReviewTimer}
-				onchange={(e) => saveSetting("showReviewTimer", (e.target as HTMLInputElement).checked)}
+				onchange={(e) => {
+					const val = (e.target as HTMLInputElement).checked;
+					saveSetting("showReviewTimer", val);
+					addToast(val ? "Review timer shown" : "Review timer hidden", "success");
+				}}
 			/>
 			<span class="text-sm">Show timer during review</span>
 		</label>
@@ -170,12 +207,6 @@ async function handleImport() {
 			<Button variant="outline" onclick={handleExport}>Export Backup</Button>
 			<Button variant="outline" onclick={handleImport}>Restore from Backup</Button>
 		</div>
-		{#if backupStatus}
-			<p class="text-sm text-muted-foreground">{backupStatus}</p>
-		{/if}
-		{#if restoreStatus}
-			<p class="text-sm text-muted-foreground">{restoreStatus}</p>
-		{/if}
 	</section>
 
 	<!-- Updates -->
@@ -187,10 +218,27 @@ async function handleImport() {
 		<Button variant="outline" onclick={() => checkForUpdates()}>Check for Updates</Button>
 	</section>
 
+	<!-- Reset Defaults -->
+	<section class="space-y-3 rounded-lg border bg-card p-4">
+		<h3 class="font-medium">Reset</h3>
+		<p class="text-sm text-muted-foreground">
+			Restore all settings to their default values. This does not affect your decks or review history.
+		</p>
+		{#if showResetConfirm}
+			<div class="flex items-center gap-3">
+				<span class="text-sm text-destructive">Are you sure?</span>
+				<Button variant="destructive" onclick={handleResetDefaults}>Yes, reset all settings</Button>
+				<Button variant="outline" onclick={() => (showResetConfirm = false)}>Cancel</Button>
+			</div>
+		{:else}
+			<Button variant="outline" onclick={() => (showResetConfirm = true)}>Reset to Defaults</Button>
+		{/if}
+	</section>
+
 	<!-- About -->
 	<section class="space-y-2 rounded-lg border bg-card p-4">
 		<h3 class="font-medium">About</h3>
-		<p class="text-sm text-muted-foreground">Janki v0.5.0</p>
+		<p class="text-sm text-muted-foreground">Janki v{appVersion}</p>
 		<p class="text-sm text-muted-foreground">
 			Kanji data: davidluzgouveia/kanji-data (MIT).
 			SRS engine: ts-fsrs (MIT).

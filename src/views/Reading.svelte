@@ -1,6 +1,10 @@
 <script lang="ts">
+import { Shuffle } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
+import EmptyState from "$lib/components/ui/empty-state.svelte";
+import { Progress } from "$lib/components/ui/progress";
 import { getSettings } from "$lib/stores/app-settings.svelte";
+import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
 import { containsKanji, furiganaToHtml, simpleFurigana } from "$lib/utils/japanese";
 
@@ -10,8 +14,6 @@ interface Sentence {
 	reading: string;
 }
 
-// Built-in example sentences organized by JLPT level
-// These serve as starter content; Tatoeba integration downloads more on demand
 const sampleSentences: Record<string, Sentence[]> = {
 	N5: [
 		{ ja: "私は学生です。", en: "I am a student.", reading: "わたしはがくせいです。" },
@@ -101,9 +103,20 @@ let selectedLevel = $state("N5");
 let showFurigana = $state(true);
 let showTranslation = $state(false);
 let currentIndex = $state(0);
+let shuffled = $state(false);
+let shuffleOrder = $state<number[]>([]);
 
-let sentences = $derived(sampleSentences[selectedLevel] ?? []);
+let baseSentences = $derived(sampleSentences[selectedLevel] ?? []);
+
+let sentences = $derived.by(() => {
+	if (!shuffled || shuffleOrder.length !== baseSentences.length) return baseSentences;
+	return shuffleOrder.map((i) => baseSentences[i]);
+});
+
 let currentSentence = $derived(sentences[currentIndex]);
+let progressPercent = $derived(
+	sentences.length > 0 ? ((currentIndex + 1) / sentences.length) * 100 : 0,
+);
 
 let furiganaHtml = $derived.by(() => {
 	if (!currentSentence) return "";
@@ -129,19 +142,77 @@ function prevSentence() {
 	showTranslation = false;
 }
 
-function speakSentence() {
+async function speakSentence() {
 	if (!currentSentence) return;
 	const s = getSettings();
 	if (!s.ttsEnabled) return;
-	getTts().speak(currentSentence.ja);
+	const tts = getTts();
+	if (!tts.isAvailable()) {
+		addToast("Text-to-speech is not available on this device", "warning");
+		return;
+	}
+	try {
+		await tts.speak(currentSentence.ja);
+	} catch {
+		addToast("TTS playback failed", "error");
+	}
 }
 
 function selectLevel(level: string) {
 	selectedLevel = level;
 	currentIndex = 0;
 	showTranslation = false;
+	shuffled = false;
+	shuffleOrder = [];
+}
+
+function toggleShuffle() {
+	if (shuffled) {
+		shuffled = false;
+		shuffleOrder = [];
+		currentIndex = 0;
+	} else {
+		const order = baseSentences.map((_, i) => i);
+		for (let i = order.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[order[i], order[j]] = [order[j], order[i]];
+		}
+		shuffleOrder = order;
+		shuffled = true;
+		currentIndex = 0;
+	}
+	showTranslation = false;
+}
+
+function handleKeydown(e: KeyboardEvent) {
+	if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+	switch (e.key) {
+		case "ArrowLeft":
+			prevSentence();
+			break;
+		case "ArrowRight":
+			nextSentence();
+			break;
+		case "t":
+		case "T":
+			showTranslation = !showTranslation;
+			break;
+		case "f":
+		case "F":
+			showFurigana = !showFurigana;
+			break;
+		case "s":
+		case "S":
+			speakSentence();
+			break;
+		default:
+			return;
+	}
+	e.preventDefault();
 }
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <div class="mx-auto max-w-3xl space-y-6">
 	<div class="flex items-center justify-between">
@@ -164,11 +235,24 @@ function selectLevel(level: string) {
 			<input type="checkbox" bind:checked={showFurigana} />
 			Show furigana
 		</label>
+		<Button
+			variant={shuffled ? "default" : "outline"}
+			size="sm"
+			onclick={toggleShuffle}
+			aria-label="Toggle shuffle"
+		>
+			<Shuffle class="mr-1.5 h-4 w-4" />
+			Shuffle
+		</Button>
 	</div>
 
-	{#if currentSentence}
-		<div class="space-y-6 rounded-lg border bg-card p-6">
-			<!-- Japanese text with optional furigana -->
+	{#if sentences.length === 0}
+		<EmptyState
+			title="No sentences available"
+			description="There are no sentences for this level yet. More content coming soon."
+		/>
+	{:else if currentSentence}
+		<div class="space-y-6 rounded-lg border bg-card p-6" aria-live="polite">
 			<div class="text-center">
 				{#if showFurigana}
 					<p class="text-3xl leading-relaxed tracking-wide">
@@ -179,12 +263,10 @@ function selectLevel(level: string) {
 				{/if}
 			</div>
 
-			<!-- Reading (always hiragana) -->
 			<div class="text-center">
 				<p class="text-lg text-muted-foreground">{currentSentence.reading}</p>
 			</div>
 
-			<!-- Translation toggle -->
 			<div class="text-center">
 				{#if showTranslation}
 					<p class="text-base text-muted-foreground">{currentSentence.en}</p>
@@ -198,30 +280,29 @@ function selectLevel(level: string) {
 				{/if}
 			</div>
 
-			<!-- Controls -->
 			<div class="flex items-center justify-center gap-3">
-				<Button variant="outline" size="sm" onclick={prevSentence}>Previous</Button>
-				<Button variant="outline" size="sm" onclick={speakSentence}>Speak</Button>
-				<Button size="sm" onclick={nextSentence}>Next</Button>
+				<Button variant="outline" size="sm" onclick={prevSentence} aria-label="Previous sentence">Previous</Button>
+				<Button variant="outline" size="sm" onclick={speakSentence} aria-label="Speak sentence">Speak</Button>
+				<Button size="sm" onclick={nextSentence} aria-label="Next sentence">Next</Button>
 			</div>
 
-			<p class="text-center text-xs text-muted-foreground">
-				{currentIndex + 1} / {sentences.length}
-			</p>
+			<div class="space-y-1">
+				<Progress value={progressPercent} max={100} class="h-2" />
+				<p class="text-center text-xs text-muted-foreground">
+					{currentIndex + 1} / {sentences.length}
+				</p>
+			</div>
 		</div>
-	{:else}
-		<p class="text-muted-foreground">No sentences available for this level.</p>
 	{/if}
 
 	<div class="rounded-lg border bg-muted/30 p-4">
-		<h3 class="mb-2 text-sm font-medium">About Reading Practice</h3>
-		<p class="text-sm text-muted-foreground">
-			Practice reading Japanese sentences with furigana support. Toggle furigana on/off to test
-			your kanji reading ability. Use TTS to hear native pronunciation.
-		</p>
-		<p class="mt-2 text-sm text-muted-foreground">
-			More sentences (via Tatoeba) and dictionary lookup (via JMdict) will be available in a
-			future update.
-		</p>
+		<h3 class="mb-2 text-sm font-medium">Keyboard Shortcuts</h3>
+		<div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
+			<span><kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">←</kbd> Previous</span>
+			<span><kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">→</kbd> Next</span>
+			<span><kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">T</kbd> Translation</span>
+			<span><kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">F</kbd> Furigana</span>
+			<span><kbd class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">S</kbd> Speak</span>
+		</div>
 	</div>
 </div>

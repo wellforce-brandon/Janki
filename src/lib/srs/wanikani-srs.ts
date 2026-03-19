@@ -1,4 +1,5 @@
-import { updateKanjiSrsState } from "../db/queries/kanji";
+import { checkAndUnlockLevel, updateKanjiSrsState } from "../db/queries/kanji";
+import { logKanjiReview } from "../db/queries/kanji-reviews";
 
 // WaniKani-style fixed-interval SRS stages
 // Stage 0: Locked (not yet unlocked)
@@ -69,7 +70,9 @@ export async function reviewKanjiItem(
 	id: number,
 	correct: boolean,
 	currentStage: number,
-): Promise<{ newStage: number; nextReview: string | null }> {
+	level: number,
+	durationMs: number | null = null,
+): Promise<{ newStage: number; nextReview: string | null; unlockedIds: number[] }> {
 	let newStage: number;
 
 	if (correct) {
@@ -82,7 +85,19 @@ export async function reviewKanjiItem(
 
 	await updateKanjiSrsState(id, newStage, nextReview, correct ? 1 : 0, correct ? 0 : 1);
 
-	return { newStage, nextReview };
+	// Log the review to kanji_review_log
+	await logKanjiReview(id, correct, currentStage, newStage, durationMs);
+
+	// Trigger unlock cascade when item is promoted (correct answer)
+	let unlockedIds: number[] = [];
+	if (correct && newStage > currentStage) {
+		const unlockResult = await checkAndUnlockLevel(level);
+		if (unlockResult.ok) {
+			unlockedIds = unlockResult.data;
+		}
+	}
+
+	return { newStage, nextReview, unlockedIds };
 }
 
 export function getStageColor(stage: number): string {

@@ -167,4 +167,34 @@ export const migrations: Migration[] = [
 			DROP TABLE IF EXISTS kanji_fts;
 		`,
 	},
+	{
+		version: 3,
+		description: "Add kanji review log and lesson tracking columns",
+		up: `
+			CREATE TABLE IF NOT EXISTS kanji_review_log (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				kanji_level_id INTEGER NOT NULL REFERENCES kanji_levels(id),
+				correct INTEGER NOT NULL,
+				srs_stage_before INTEGER NOT NULL,
+				srs_stage_after INTEGER NOT NULL,
+				duration_ms INTEGER,
+				reviewed_at TEXT NOT NULL DEFAULT (datetime('now'))
+			);
+
+			CREATE INDEX idx_kanji_review_log_item ON kanji_review_log(kanji_level_id);
+
+			CREATE INDEX idx_kanji_review_log_date ON kanji_review_log(reviewed_at);
+
+			ALTER TABLE kanji_levels ADD COLUMN lesson_completed_at TEXT;
+
+			ALTER TABLE kanji_levels ADD COLUMN user_notes TEXT;
+
+			ALTER TABLE kanji_levels ADD COLUMN user_synonyms TEXT;
+
+			UPDATE kanji_levels SET lesson_completed_at = unlocked_at WHERE srs_stage > 0 AND unlocked_at IS NOT NULL;
+		`,
+		down: `
+			DROP TABLE IF EXISTS kanji_review_log;
+		`,
+	},
 ];

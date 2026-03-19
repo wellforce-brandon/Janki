@@ -3,18 +3,28 @@ import DeckCard from "$lib/components/deck/DeckCard.svelte";
 import DeckEditor from "$lib/components/deck/DeckEditor.svelte";
 import ImportDialog from "$lib/components/deck/ImportDialog.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
+import EmptyState from "$lib/components/ui/empty-state.svelte";
+import LoadingState from "$lib/components/ui/loading-state.svelte";
 import { type DeckWithCounts, getAllDecks } from "$lib/db/queries/decks";
 import { currentView, navigate, viewParams } from "$lib/stores/navigation.svelte";
+import { addToast } from "$lib/stores/toast.svelte";
 import DeckBrowse from "./DeckBrowse.svelte";
 
 let decks = $state<DeckWithCounts[]>([]);
+let loading = $state(true);
 let showCreate = $state(false);
 let showImport = $state(false);
 let editingDeck = $state<DeckWithCounts | null>(null);
 
 async function loadDecks() {
+	loading = true;
 	const result = await getAllDecks();
-	if (result.ok) decks = result.data;
+	if (result.ok) {
+		decks = result.data;
+	} else {
+		addToast("Failed to load decks", "error");
+	}
+	loading = false;
 }
 
 function openDeck(deck: DeckWithCounts) {
@@ -23,12 +33,21 @@ function openDeck(deck: DeckWithCounts) {
 
 function handleSaved() {
 	showCreate = false;
+	const wasEditing = editingDeck !== null;
 	editingDeck = null;
+	addToast(wasEditing ? "Deck updated" : "Deck created", "success");
 	loadDecks();
 }
 
 function handleImported() {
 	showImport = false;
+	addToast("Deck imported successfully", "success");
+	loadDecks();
+}
+
+function handleDeleted() {
+	editingDeck = null;
+	addToast("Deck deleted", "success");
 	loadDecks();
 }
 
@@ -51,7 +70,7 @@ $effect(() => {
 		initialDescription={editingDeck.description ?? ""}
 		onsave={handleSaved}
 		oncancel={() => (editingDeck = null)}
-		ondelete={() => { editingDeck = null; loadDecks(); }}
+		ondelete={handleDeleted}
 	/>
 {:else}
 	<div class="space-y-6">
@@ -63,11 +82,17 @@ $effect(() => {
 			</div>
 		</div>
 
-		{#if decks.length === 0}
-			<div class="py-12 text-center">
-				<p class="text-muted-foreground">No decks yet.</p>
-				<p class="mt-1 text-sm text-muted-foreground">Import an Anki .apkg file or create a new deck.</p>
-			</div>
+		{#if loading}
+			<LoadingState message="Loading decks..." />
+		{:else if decks.length === 0}
+			<EmptyState
+				title="No decks yet"
+				description="Import an Anki .apkg file or create a new deck to get started."
+				actionLabel="Create Deck"
+				onaction={() => (showCreate = true)}
+				secondaryLabel="Import Deck"
+				onsecondary={() => (showImport = true)}
+			/>
 		{:else}
 			<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 				{#each decks as deck}

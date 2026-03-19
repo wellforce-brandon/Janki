@@ -83,19 +83,47 @@ export async function getCardsByDeck(
 	sortBy: "due" | "created_at" | "state" | "stability" = "due",
 	limit = 100,
 	offset = 0,
+	stateFilter?: number,
 ): Promise<QueryResult<CardWithContent[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
+		const params: (number | string)[] = [deckId];
+		let stateClause = "";
+		if (stateFilter !== undefined) {
+			stateClause = " AND c.state = ?";
+			params.push(stateFilter);
+		}
+		params.push(limit, offset);
 		return db.select<CardWithContent[]>(
 			`SELECT c.*, n.fields, n.tags, nt.card_templates, nt.css
 			FROM cards c
 			JOIN notes n ON n.id = c.note_id
 			JOIN note_types nt ON nt.id = n.note_type_id
-			WHERE c.deck_id = ?
+			WHERE c.deck_id = ?${stateClause}
 			ORDER BY c.${sortBy} ASC
 			LIMIT ? OFFSET ?`,
-			[deckId, limit, offset],
+			params,
 		);
+	});
+}
+
+export async function getCardCountByDeck(
+	deckId: number,
+	stateFilter?: number,
+): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const params: number[] = [deckId];
+		let stateClause = "";
+		if (stateFilter !== undefined) {
+			stateClause = " AND state = ?";
+			params.push(stateFilter);
+		}
+		const rows = await db.select<{ count: number }[]>(
+			`SELECT COUNT(*) as count FROM cards WHERE deck_id = ?${stateClause}`,
+			params,
+		);
+		return rows[0].count;
 	});
 }
 
@@ -144,6 +172,35 @@ export async function deleteCard(id: number): Promise<QueryResult<void>> {
 		const db = await getDb();
 		await db.execute("DELETE FROM review_log WHERE card_id = ?", [id]);
 		await db.execute("DELETE FROM cards WHERE id = ?", [id]);
+	});
+}
+
+export interface CardSearchResult {
+	id: number;
+	deck_id: number;
+	fields: string;
+	state: number;
+	due: string;
+	deck_name: string;
+}
+
+export async function searchCards(
+	query: string,
+	limit = 50,
+): Promise<QueryResult<CardSearchResult[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const like = `%${query.trim()}%`;
+		return db.select<CardSearchResult[]>(
+			`SELECT c.id, c.deck_id, n.fields, c.state, c.due, d.name as deck_name
+			FROM cards c
+			JOIN notes n ON n.id = c.note_id
+			JOIN decks d ON d.id = c.deck_id
+			WHERE n.fields LIKE ?
+			ORDER BY c.due ASC
+			LIMIT ?`,
+			[like, limit],
+		);
 	});
 }
 

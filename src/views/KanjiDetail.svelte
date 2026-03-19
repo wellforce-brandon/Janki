@@ -1,8 +1,11 @@
 <script lang="ts">
+import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 import SrsStageIndicator from "$lib/components/kanji/SrsStageIndicator.svelte";
 import StrokeOrder from "$lib/components/kanji/StrokeOrder.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
-import { getKanjiItemById, type KanjiLevelItem } from "$lib/db/queries/kanji";
+import EmptyState from "$lib/components/ui/empty-state.svelte";
+import LoadingState from "$lib/components/ui/loading-state.svelte";
+import { getAdjacentKanji, getKanjiItemById, type KanjiLevelItem } from "$lib/db/queries/kanji";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { speakJapanese } from "$lib/tts/speech";
 
@@ -14,6 +17,8 @@ let { itemId }: Props = $props();
 
 let item = $state<KanjiLevelItem | null>(null);
 let loading = $state(true);
+let prevItem = $state<KanjiLevelItem | null>(null);
+let nextItem = $state<KanjiLevelItem | null>(null);
 
 function parseMeanings(json: string): string[] {
 	try {
@@ -32,24 +37,86 @@ function parseReadings(json: string | null): string[] {
 	}
 }
 
-$effect(() => {
+function navigateToItem(target: KanjiLevelItem) {
+	navigate("kanji-detail", { id: String(target.id), character: target.character });
+}
+
+async function loadItem(id: number) {
 	loading = true;
-	getKanjiItemById(itemId).then((result) => {
-		if (result.ok) item = result.data;
-		loading = false;
-	});
+	prevItem = null;
+	nextItem = null;
+	const result = await getKanjiItemById(id);
+	if (result.ok) {
+		item = result.data;
+		if (item) {
+			const adjResult = await getAdjacentKanji(item.level, item.id);
+			if (adjResult.ok) {
+				prevItem = adjResult.data.prev;
+				nextItem = adjResult.data.next;
+			}
+		}
+	} else {
+		item = null;
+	}
+	loading = false;
+}
+
+function handleKeydown(e: KeyboardEvent) {
+	if (e.key === "ArrowLeft" && prevItem) {
+		navigateToItem(prevItem);
+	} else if (e.key === "ArrowRight" && nextItem) {
+		navigateToItem(nextItem);
+	}
+}
+
+$effect(() => {
+	loadItem(itemId);
+});
+
+$effect(() => {
+	window.addEventListener("keydown", handleKeydown);
+	return () => window.removeEventListener("keydown", handleKeydown);
 });
 </script>
 
 <div class="space-y-6">
-	<Button variant="ghost" onclick={() => navigate("kanji")}>
-		&larr; Back to Kanji Map
-	</Button>
+	<div class="flex items-center gap-2">
+		<Button variant="ghost" onclick={() => navigate("kanji-map")}>
+			&larr; Back to Kanji Map
+		</Button>
+		<div class="ml-auto flex gap-1">
+			{#if prevItem}
+				<button
+					type="button"
+					class="rounded-md border px-2 py-1 text-sm hover:bg-muted"
+					onclick={() => navigateToItem(prevItem!)}
+					aria-label="Previous kanji: {prevItem.character}"
+				>
+					<ChevronLeft class="inline h-4 w-4" /> {prevItem.character}
+				</button>
+			{/if}
+			{#if nextItem}
+				<button
+					type="button"
+					class="rounded-md border px-2 py-1 text-sm hover:bg-muted"
+					onclick={() => navigateToItem(nextItem!)}
+					aria-label="Next kanji: {nextItem.character}"
+				>
+					{nextItem.character} <ChevronRight class="inline h-4 w-4" />
+				</button>
+			{/if}
+		</div>
+	</div>
 
 	{#if loading}
-		<p class="text-muted-foreground">Loading...</p>
+		<LoadingState message="Loading kanji details..." />
 	{:else if !item}
-		<p class="text-muted-foreground">Item not found.</p>
+		<EmptyState
+			title="Kanji not found"
+			description="This item doesn't exist or may have been removed."
+			actionLabel="Back to Kanji Map"
+			onaction={() => navigate("kanji-map")}
+		/>
 	{:else}
 		<div class="mx-auto max-w-2xl space-y-8">
 			<!-- Character display -->

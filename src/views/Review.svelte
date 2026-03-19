@@ -1,40 +1,59 @@
 <script lang="ts">
 import ReviewSession from "$lib/components/review/ReviewSession.svelte";
-import Button from "$lib/components/ui/button/button.svelte";
+import EmptyState from "$lib/components/ui/empty-state.svelte";
+import LoadingState from "$lib/components/ui/loading-state.svelte";
 import { type DeckWithCounts, getAllDecks } from "$lib/db/queries/decks";
+import { getAverageTimePerCard } from "$lib/db/queries/stats";
 import { getReviewQueue, type ReviewQueue } from "$lib/srs/scheduler";
+import { navigate } from "$lib/stores/navigation.svelte";
+import { addToast } from "$lib/stores/toast.svelte";
 
 let decks = $state<DeckWithCounts[]>([]);
 let selectedDeckId = $state<number | null>(null);
 let queue = $state<ReviewQueue | null>(null);
-let loading = $state(false);
-let error = $state<string | null>(null);
+let loadingDecks = $state(true);
+let loadingQueue = $state(false);
+let allCaughtUp = $state(false);
+let avgTimeMs = $state(0);
+
+let selectedDeck = $derived(decks.find((d) => d.id === selectedDeckId) ?? null);
+let estimatedMinutes = $derived.by(() => {
+	if (!selectedDeck || avgTimeMs <= 0) return 0;
+	const totalCards = selectedDeck.due_count + selectedDeck.new_count;
+	return Math.max(1, Math.round((totalCards * avgTimeMs) / 60000));
+});
 
 async function loadDecks() {
-	const result = await getAllDecks();
+	loadingDecks = true;
+	const [result, avgResult] = await Promise.all([getAllDecks(), getAverageTimePerCard()]);
+
 	if (result.ok) {
 		decks = result.data;
-		// Auto-select first deck with due cards
 		const dueDecks = decks.filter((d) => d.due_count > 0 || d.new_count > 0);
 		if (dueDecks.length > 0) selectedDeckId = dueDecks[0].id;
+	} else {
+		addToast("Failed to load decks", "error");
 	}
+
+	if (avgResult.ok) avgTimeMs = avgResult.data;
+	loadingDecks = false;
 }
 
 async function startReview() {
 	if (!selectedDeckId) return;
-	loading = true;
-	error = null;
+	loadingQueue = true;
+	allCaughtUp = false;
 
 	try {
 		queue = await getReviewQueue(selectedDeckId);
 		if (queue.cards.length === 0) {
-			error = "No cards due for review in this deck.";
+			allCaughtUp = true;
 			queue = null;
 		}
 	} catch (e) {
-		error = e instanceof Error ? e.message : "Failed to load review queue";
+		addToast(e instanceof Error ? e.message : "Failed to load review queue", "error");
 	} finally {
-		loading = false;
+		loadingQueue = false;
 	}
 }
 
@@ -49,8 +68,23 @@ $effect(() => {
 	<div class="mx-auto max-w-md space-y-6">
 		<h2 class="text-2xl font-bold">Review</h2>
 
-		{#if decks.length === 0}
-			<p class="text-muted-foreground">No decks yet. Import or create a deck to start reviewing.</p>
+		{#if loadingDecks}
+			<LoadingState message="Loading decks..." />
+		{:else if decks.length === 0}
+			<EmptyState
+				title="No decks yet"
+				description="Import an Anki .apkg file or create a new deck to start reviewing."
+				actionLabel="Create Deck"
+				onaction={() => navigate("decks")}
+				secondaryLabel="Import Deck"
+				onsecondary={() => navigate("decks")}
+			/>
+		{:else if allCaughtUp}
+			<div class="flex flex-col items-center gap-3 rounded-lg border bg-card/50 py-12 text-center">
+				<span class="text-4xl">&#10003;</span>
+				<h3 class="text-lg font-medium">All caught up!</h3>
+				<p class="text-sm text-muted-foreground">No cards due for review in this deck. Check back later.</p>
+			</div>
 		{:else}
 			<div class="space-y-3">
 				<label class="text-sm font-medium" for="deck-select">Select Deck</label>
@@ -67,13 +101,20 @@ $effect(() => {
 				</select>
 			</div>
 
-			{#if error}
-				<p class="text-sm text-destructive">{error}</p>
+			{#if selectedDeck && estimatedMinutes > 0}
+				<p class="text-sm text-muted-foreground">
+					{selectedDeck.due_count + selectedDeck.new_count} cards -- ~{estimatedMinutes} min
+				</p>
 			{/if}
 
-			<Button onclick={startReview} disabled={loading || !selectedDeckId} class="w-full">
-				{loading ? "Loading..." : "Start Review"}
-			</Button>
+			<button
+				type="button"
+				class="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+				onclick={startReview}
+				disabled={loadingQueue || !selectedDeckId}
+			>
+				{loadingQueue ? "Loading..." : "Start Review"}
+			</button>
 		{/if}
 	</div>
 {/if}

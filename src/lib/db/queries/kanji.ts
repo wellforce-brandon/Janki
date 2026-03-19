@@ -17,6 +17,9 @@ export interface KanjiLevelItem {
 	next_review: string | null;
 	correct_count: number;
 	incorrect_count: number;
+	lesson_completed_at: string | null;
+	user_notes: string | null;
+	user_synonyms: string | null;
 }
 
 export interface LevelProgress {
@@ -64,6 +67,7 @@ export async function getDueKanjiReviews(): Promise<QueryResult<KanjiLevelItem[]
 		return db.select<KanjiLevelItem[]>(
 			`SELECT * FROM kanji_levels
 			WHERE srs_stage > 0 AND srs_stage < 9
+			AND lesson_completed_at IS NOT NULL
 			AND next_review IS NOT NULL AND next_review <= datetime('now')
 			ORDER BY next_review ASC`,
 		);
@@ -213,12 +217,62 @@ export async function checkAndUnlockLevel(level: number): Promise<QueryResult<nu
 	});
 }
 
+export async function getAllLevelProgress(): Promise<QueryResult<LevelProgress[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<
+			{ level: number; total: number; guru_plus: number; unlocked: number }[]
+		>(
+			`SELECT level,
+				COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus,
+				COUNT(CASE WHEN srs_stage > 0 THEN 1 END) as unlocked
+			FROM kanji_levels
+			GROUP BY level
+			ORDER BY level`,
+		);
+		return rows.map((r) => ({
+			level: r.level,
+			total: r.total,
+			guru_plus: r.guru_plus,
+			unlocked: r.unlocked,
+			percentage: r.total > 0 ? Math.round((r.guru_plus / r.total) * 100) : 0,
+		}));
+	});
+}
+
+export async function getAdjacentKanji(
+	level: number,
+	currentId: number,
+): Promise<QueryResult<{ prev: KanjiLevelItem | null; next: KanjiLevelItem | null }>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const prevRows = await db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE level = ? AND id < ?
+			ORDER BY id DESC LIMIT 1`,
+			[level, currentId],
+		);
+		const nextRows = await db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE level = ? AND id > ?
+			ORDER BY id ASC LIMIT 1`,
+			[level, currentId],
+		);
+		return {
+			prev: prevRows[0] ?? null,
+			next: nextRows[0] ?? null,
+		};
+	});
+}
+
 export async function getDueKanjiCount(): Promise<QueryResult<number>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ count: number }[]>(
 			`SELECT COUNT(*) as count FROM kanji_levels
 			WHERE srs_stage > 0 AND srs_stage < 9
+			AND lesson_completed_at IS NOT NULL
 			AND next_review IS NOT NULL AND next_review <= datetime('now')`,
 		);
 		return rows[0].count;

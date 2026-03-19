@@ -1,8 +1,17 @@
 <script lang="ts">
 import BarChart from "$lib/components/stats/BarChart.svelte";
 import LineChart from "$lib/components/stats/LineChart.svelte";
-import { getDb } from "$lib/db/database";
-import { type DailyStats, getStatsRange, getStreak } from "$lib/db/queries/stats";
+import EmptyState from "$lib/components/ui/empty-state.svelte";
+import LoadingState from "$lib/components/ui/loading-state.svelte";
+import { type DeckWithCounts, getAllDecks } from "$lib/db/queries/decks";
+import {
+	type DailyStats,
+	getCardStateDistribution,
+	getKanjiStageDistribution,
+	getStatsByDeck,
+	getStatsRange,
+	getStreak,
+} from "$lib/db/queries/stats";
 
 let stats = $state<DailyStats[]>([]);
 let streak = $state(0);
@@ -11,62 +20,81 @@ let totalCorrect = $state(0);
 let avgTimeMs = $state(0);
 let cardStates = $state<{ label: string; value: number; color: string }[]>([]);
 let kanjiStages = $state<{ label: string; value: number; color: string }[]>([]);
+let loading = $state(true);
+
+let dateRange = $state(30);
+let decks = $state<DeckWithCounts[]>([]);
+let selectedDeckId = $state<number | null>(null);
+
+const DATE_RANGES = [
+	{ label: "7d", value: 7 },
+	{ label: "30d", value: 30 },
+	{ label: "90d", value: 90 },
+	{ label: "All", value: 3650 },
+] as const;
+
+const stateLabels = ["New", "Learning", "Review", "Relearning"];
+const stateColors = ["#3b82f6", "#f97316", "#22c55e", "#ef4444"];
+const stageLabels: Record<number, string> = {
+	1: "App 1",
+	2: "App 2",
+	3: "App 3",
+	4: "App 4",
+	5: "Guru 1",
+	6: "Guru 2",
+	7: "Master",
+	8: "Enlight",
+	9: "Burned",
+};
+const stageColors: Record<number, string> = {
+	1: "#ec4899",
+	2: "#ec4899",
+	3: "#ec4899",
+	4: "#ec4899",
+	5: "#a855f7",
+	6: "#a855f7",
+	7: "#3b82f6",
+	8: "#0ea5e9",
+	9: "#f59e0b",
+};
 
 async function loadStats() {
-	const [rangeResult, streakResult] = await Promise.all([getStatsRange(30), getStreak()]);
+	loading = true;
+
+	const [rangeResult, streakResult, stateResult, kanjiResult, decksResult] = await Promise.all([
+		selectedDeckId ? getStatsByDeck(selectedDeckId, dateRange) : getStatsRange(dateRange),
+		getStreak(),
+		getCardStateDistribution(),
+		getKanjiStageDistribution(),
+		getAllDecks(),
+	]);
 
 	if (rangeResult.ok) stats = rangeResult.data;
 	if (streakResult.ok) streak = streakResult.data;
+	if (decksResult.ok) decks = decksResult.data;
 
 	totalReviews = stats.reduce((s, d) => s + d.reviews_count, 0);
 	totalCorrect = stats.reduce((s, d) => s + d.correct_count, 0);
 	const totalTime = stats.reduce((s, d) => s + d.time_spent_ms, 0);
 	avgTimeMs = totalReviews > 0 ? totalTime / totalReviews : 0;
 
-	// Load card state distribution
-	const db = await getDb();
-	const stateRows = await db.select<{ state: number; count: number }[]>(
-		"SELECT state, COUNT(*) as count FROM cards GROUP BY state",
-	);
-	const stateLabels = ["New", "Learning", "Review", "Relearning"];
-	const stateColors = ["#3b82f6", "#f97316", "#22c55e", "#ef4444"];
-	cardStates = stateRows.map((r) => ({
-		label: stateLabels[r.state] ?? "Unknown",
-		value: r.count,
-		color: stateColors[r.state] ?? "#888",
-	}));
+	if (stateResult.ok) {
+		cardStates = stateResult.data.map((r) => ({
+			label: stateLabels[r.state] ?? "Unknown",
+			value: r.count,
+			color: stateColors[r.state] ?? "#888",
+		}));
+	}
 
-	// Load kanji SRS distribution
-	const kanjiRows = await db.select<{ srs_stage: number; count: number }[]>(
-		"SELECT srs_stage, COUNT(*) as count FROM kanji_levels WHERE srs_stage > 0 GROUP BY srs_stage ORDER BY srs_stage",
-	);
-	const stageLabels: Record<number, string> = {
-		1: "App 1",
-		2: "App 2",
-		3: "App 3",
-		4: "App 4",
-		5: "Guru 1",
-		6: "Guru 2",
-		7: "Master",
-		8: "Enlight",
-		9: "Burned",
-	};
-	const stageColors: Record<number, string> = {
-		1: "#ec4899",
-		2: "#ec4899",
-		3: "#ec4899",
-		4: "#ec4899",
-		5: "#a855f7",
-		6: "#a855f7",
-		7: "#3b82f6",
-		8: "#0ea5e9",
-		9: "#f59e0b",
-	};
-	kanjiStages = kanjiRows.map((r) => ({
-		label: stageLabels[r.srs_stage] ?? `S${r.srs_stage}`,
-		value: r.count,
-		color: stageColors[r.srs_stage] ?? "#888",
-	}));
+	if (kanjiResult.ok) {
+		kanjiStages = kanjiResult.data.map((r) => ({
+			label: stageLabels[r.srs_stage] ?? `S${r.srs_stage}`,
+			value: r.count,
+			color: stageColors[r.srs_stage] ?? "#888",
+		}));
+	}
+
+	loading = false;
 }
 
 let reviewsData = $derived(stats.map((d) => ({ label: d.date, value: d.reviews_count })));
@@ -82,81 +110,126 @@ let timeData = $derived(
 
 let accuracy = $derived(totalReviews > 0 ? Math.round((totalCorrect / totalReviews) * 100) : 0);
 
+function changeDateRange(value: number) {
+	dateRange = value;
+	loadStats();
+}
+
+function changeDeckFilter(e: Event) {
+	const val = (e.target as HTMLSelectElement).value;
+	selectedDeckId = val === "" ? null : Number(val);
+	loadStats();
+}
+
 $effect(() => {
 	loadStats();
 });
 </script>
 
 <div class="space-y-8">
-	<h2 class="text-2xl font-bold">Statistics</h2>
+	<div class="flex items-center justify-between">
+		<h2 class="text-2xl font-bold">Statistics</h2>
+		<div class="flex items-center gap-3">
+			<!-- Per-deck filter -->
+			<select
+				class="rounded border bg-background px-2 py-1 text-sm"
+				onchange={changeDeckFilter}
+			>
+				<option value="">All Decks</option>
+				{#each decks as deck}
+					<option value={deck.id}>{deck.name}</option>
+				{/each}
+			</select>
 
-	<!-- Summary cards -->
-	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-		<div class="rounded-lg border bg-card p-4">
-			<div class="text-sm text-muted-foreground">Total Reviews (30d)</div>
-			<div class="mt-1 text-3xl font-bold">{totalReviews}</div>
-		</div>
-		<div class="rounded-lg border bg-card p-4">
-			<div class="text-sm text-muted-foreground">Accuracy (30d)</div>
-			<div class="mt-1 text-3xl font-bold">{accuracy}%</div>
-		</div>
-		<div class="rounded-lg border bg-card p-4">
-			<div class="text-sm text-muted-foreground">Streak</div>
-			<div class="mt-1 text-3xl font-bold">{streak} days</div>
-		</div>
-		<div class="rounded-lg border bg-card p-4">
-			<div class="text-sm text-muted-foreground">Avg Time/Card</div>
-			<div class="mt-1 text-3xl font-bold">{(avgTimeMs / 1000).toFixed(1)}s</div>
+			<!-- Date range selector -->
+			<div class="flex gap-1 rounded-lg border bg-muted/50 p-0.5">
+				{#each DATE_RANGES as range}
+					<button
+						type="button"
+						class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors {dateRange === range.value ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+						onclick={() => changeDateRange(range.value)}
+					>
+						{range.label}
+					</button>
+				{/each}
+			</div>
 		</div>
 	</div>
 
-	<!-- Charts -->
-	{#if stats.length > 0}
-		<div class="grid gap-6 lg:grid-cols-2">
-			<div class="rounded-lg border bg-card p-4">
-				<h3 class="mb-3 font-medium">Reviews per Day</h3>
-				<BarChart data={reviewsData} color="#8b5cf6" />
-			</div>
-			<div class="rounded-lg border bg-card p-4">
-				<h3 class="mb-3 font-medium">Accuracy Trend</h3>
-				<LineChart data={accuracyData} color="#22c55e" maxY={100} yLabel="%" />
-			</div>
-			<div class="rounded-lg border bg-card p-4">
-				<h3 class="mb-3 font-medium">Time Spent (minutes)</h3>
-				<BarChart data={timeData} color="#0ea5e9" />
-			</div>
-		</div>
+	{#if loading}
+		<LoadingState message="Loading statistics..." />
 	{:else}
-		<p class="text-center text-muted-foreground">No review data yet. Start reviewing to see your stats.</p>
-	{/if}
+		<!-- Summary cards -->
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div class="rounded-lg border bg-card p-4">
+				<div class="text-sm text-muted-foreground">Total Reviews ({dateRange < 3650 ? `${dateRange}d` : 'all'})</div>
+				<div class="mt-1 text-3xl font-bold">{totalReviews}</div>
+			</div>
+			<div class="rounded-lg border bg-card p-4">
+				<div class="text-sm text-muted-foreground">Accuracy</div>
+				<div class="mt-1 text-3xl font-bold">{accuracy}%</div>
+			</div>
+			<div class="rounded-lg border bg-card p-4">
+				<div class="text-sm text-muted-foreground">Streak</div>
+				<div class="mt-1 text-3xl font-bold">{streak} days</div>
+			</div>
+			<div class="rounded-lg border bg-card p-4">
+				<div class="text-sm text-muted-foreground">Avg Time/Card</div>
+				<div class="mt-1 text-3xl font-bold">{(avgTimeMs / 1000).toFixed(1)}s</div>
+			</div>
+		</div>
 
-	<!-- Distributions -->
-	<div class="grid gap-6 lg:grid-cols-2">
-		{#if cardStates.length > 0}
-			<div class="rounded-lg border bg-card p-4">
-				<h3 class="mb-3 font-medium">Card States</h3>
-				<div class="flex gap-4">
-					{#each cardStates as cs}
-						<div class="flex items-center gap-2">
-							<div class="h-3 w-3 rounded-full" style="background: {cs.color}"></div>
-							<span class="text-sm">{cs.label}: {cs.value}</span>
-						</div>
-					{/each}
+		<!-- Charts -->
+		{#if stats.length > 0}
+			<div class="grid gap-6 lg:grid-cols-2">
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Reviews per Day</h3>
+					<BarChart data={reviewsData} color="#8b5cf6" />
+				</div>
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Accuracy Trend</h3>
+					<LineChart data={accuracyData} color="#22c55e" maxY={100} yLabel="%" />
+				</div>
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Time Spent (minutes)</h3>
+					<BarChart data={timeData} color="#0ea5e9" />
 				</div>
 			</div>
+		{:else}
+			<EmptyState
+				title="No review data yet"
+				description="Start reviewing cards to see your statistics here."
+			/>
 		{/if}
-		{#if kanjiStages.length > 0}
-			<div class="rounded-lg border bg-card p-4">
-				<h3 class="mb-3 font-medium">Kanji SRS Stages</h3>
-				<div class="flex flex-wrap gap-3">
-					{#each kanjiStages as ks}
-						<div class="flex items-center gap-1.5">
-							<div class="h-3 w-3 rounded-full" style="background: {ks.color}"></div>
-							<span class="text-sm">{ks.label}: {ks.value}</span>
-						</div>
-					{/each}
+
+		<!-- Distributions -->
+		<div class="grid gap-6 lg:grid-cols-2">
+			{#if cardStates.length > 0}
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Card States</h3>
+					<div class="flex gap-4">
+						{#each cardStates as cs}
+							<div class="flex items-center gap-2">
+								<div class="h-3 w-3 rounded-full" style="background: {cs.color}"></div>
+								<span class="text-sm">{cs.label}: {cs.value}</span>
+							</div>
+						{/each}
+					</div>
 				</div>
-			</div>
-		{/if}
-	</div>
+			{/if}
+			{#if kanjiStages.length > 0}
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Kanji SRS Stages</h3>
+					<div class="flex flex-wrap gap-3">
+						{#each kanjiStages as ks}
+							<div class="flex items-center gap-1.5">
+								<div class="h-3 w-3 rounded-full" style="background: {ks.color}"></div>
+								<span class="text-sm">{ks.label}: {ks.value}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+		</div>
+	{/if}
 </div>

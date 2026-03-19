@@ -1,14 +1,16 @@
 <script lang="ts">
 import LevelProgressBar from "$lib/components/kanji/LevelProgress.svelte";
 import SrsStageIndicator from "$lib/components/kanji/SrsStageIndicator.svelte";
+import EmptyState from "$lib/components/ui/empty-state.svelte";
 import {
+	getAllLevelProgress,
 	getKanjiByLevel,
-	getLevelProgress,
 	getUserLevel,
 	type KanjiLevelItem,
 	type LevelProgress,
 } from "$lib/db/queries/kanji";
 import { currentView, navigate, viewParams } from "$lib/stores/navigation.svelte";
+import { addToast } from "$lib/stores/toast.svelte";
 import { cn } from "$lib/utils/cn";
 import KanjiDetail from "./KanjiDetail.svelte";
 
@@ -18,18 +20,27 @@ let expandedLevel = $state<number | null>(null);
 let expandedItems = $state<KanjiLevelItem[]>([]);
 let loading = $state(true);
 
+let totalLearned = $derived(levels.reduce((sum, lp) => sum + lp.guru_plus, 0));
+let totalKanji = $derived(levels.reduce((sum, lp) => sum + lp.total, 0));
+let overallPercent = $derived(totalKanji > 0 ? Math.round((totalLearned / totalKanji) * 100) : 0);
+
 async function loadLevels() {
 	loading = true;
-	const levelResult = await getUserLevel();
-	if (levelResult.ok) userLevel = levelResult.data;
+	try {
+		const levelResult = await getUserLevel();
+		if (levelResult.ok) userLevel = levelResult.data;
 
-	const allLevels: LevelProgress[] = [];
-	for (let i = 1; i <= 60; i++) {
-		const result = await getLevelProgress(i);
-		if (result.ok) allLevels.push(result.data);
+		const allResult = await getAllLevelProgress();
+		if (allResult.ok) {
+			levels = allResult.data;
+		} else {
+			addToast("Failed to load kanji levels", "error");
+		}
+	} catch (e) {
+		addToast(e instanceof Error ? e.message : "Failed to load kanji map", "error");
+	} finally {
+		loading = false;
 	}
-	levels = allLevels;
-	loading = false;
 }
 
 async function toggleLevel(level: number) {
@@ -70,10 +81,37 @@ $effect(() => {
 		</div>
 
 		{#if loading}
-			<p class="text-muted-foreground">Loading levels...</p>
+			<!-- Skeleton grid -->
+			<div class="grid grid-cols-6 gap-2 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12">
+				{#each Array(60) as _}
+					<div class="animate-pulse rounded-lg border border-muted bg-muted/20 p-2">
+						<div class="mx-auto h-6 w-6 rounded bg-muted"></div>
+						<div class="mx-auto mt-1 h-3 w-8 rounded bg-muted"></div>
+					</div>
+				{/each}
+			</div>
 		{:else if levels.length === 0}
-			<p class="text-muted-foreground">No kanji data. Restart the app to seed the database.</p>
+			<EmptyState
+				title="No kanji data"
+				description="Restart the app to seed the kanji database."
+			/>
 		{:else}
+			<!-- Summary stats bar -->
+			<div class="flex items-center gap-6 rounded-lg border bg-card px-4 py-3 text-sm">
+				<div>
+					<span class="text-muted-foreground">Learned:</span>
+					<span class="ml-1 font-medium">{totalLearned} / {totalKanji}</span>
+				</div>
+				<div>
+					<span class="text-muted-foreground">Progress:</span>
+					<span class="ml-1 font-medium">{overallPercent}%</span>
+				</div>
+				<div>
+					<span class="text-muted-foreground">Current Level:</span>
+					<span class="ml-1 font-medium">{userLevel}</span>
+				</div>
+			</div>
+
 			<div class="grid grid-cols-6 gap-2 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12">
 				{#each levels as lp}
 					<button
@@ -83,6 +121,7 @@ $effect(() => {
 							getLevelColor(lp, userLevel),
 						)}
 						onclick={() => toggleLevel(lp.level)}
+						aria-label="Level {lp.level}, {lp.percentage}% complete"
 					>
 						<span class="text-lg font-bold">{lp.level}</span>
 						<span class="text-xs opacity-70">{lp.percentage}%</span>

@@ -4,6 +4,12 @@ import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 import { reviewKanjiItem, STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
 import { fisherYatesShuffle, getTypeColor } from "$lib/utils/kanji";
+import {
+	getAcceptedMeanings,
+	getAcceptedReadings,
+	getCorrectDisplay,
+	isKunReadingForKanji,
+} from "$lib/utils/kanji-validation";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
 interface Props {
@@ -57,6 +63,8 @@ let itemStartTime = $state(Date.now());
 
 // Track per-item results: item id -> { meaningCorrect, readingCorrect, startTime }
 type ItemResult = {
+	meaningIncorrectCount: number;
+	readingIncorrectCount: number;
 	meaningCorrect: boolean | null;
 	readingCorrect: boolean | null;
 	startTime: number;
@@ -66,7 +74,13 @@ let itemResults = $state<Map<number, ItemResult>>(new Map());
 function getOrCreateItemResult(itemId: number): ItemResult {
 	let r = itemResults.get(itemId);
 	if (!r) {
-		r = { meaningCorrect: null, readingCorrect: null, startTime: Date.now() };
+		r = {
+			meaningIncorrectCount: 0,
+			readingIncorrectCount: 0,
+			meaningCorrect: null,
+			readingCorrect: null,
+			startTime: Date.now(),
+		};
 		itemResults.set(itemId, r);
 	}
 	return r;
@@ -104,66 +118,24 @@ let isReadingQuestion = $derived(current?.type === "reading");
 // Display value: convert romaji to hiragana for reading questions
 let displayValue = $derived(isReadingQuestion ? romajiToHiragana(inputValue) : inputValue);
 
-function getAcceptedMeanings(item: KanjiLevelItem): string[] {
-	const meanings = JSON.parse(item.meanings) as string[];
-	// Add user synonyms if present
-	if (item.user_synonyms) {
-		try {
-			const synonyms = JSON.parse(item.user_synonyms) as string[];
-			meanings.push(...synonyms);
-		} catch {
-			// ignore malformed synonyms
-		}
-	}
-	return meanings.map((m) => m.toLowerCase().trim());
-}
+let shakeMessage = $state("");
 
-function getAcceptedReadings(item: KanjiLevelItem): string[] {
-	const readings: string[] = [];
-	if (item.readings_on) {
-		try {
-			const parsed = JSON.parse(item.readings_on) as string[];
-			readings.push(...parsed);
-		} catch {
-			readings.push(item.readings_on);
-		}
-	}
-	if (item.readings_kun) {
-		try {
-			const parsed = JSON.parse(item.readings_kun) as string[];
-			readings.push(...parsed);
-		} catch {
-			readings.push(item.readings_kun);
-		}
-	}
-	if (item.reading) {
-		readings.push(item.reading);
-	}
-	return readings.map((r) => r.trim());
-}
-
-function checkAnswer(): boolean {
-	if (!current) return false;
+function checkAnswer(): "correct" | "incorrect" | "wrong-reading-type" {
+	if (!current) return "incorrect";
 
 	if (current.type === "meaning") {
 		const accepted = getAcceptedMeanings(current.item);
-		return accepted.includes(inputValue.toLowerCase().trim());
+		return accepted.includes(inputValue.toLowerCase().trim()) ? "correct" : "incorrect";
 	}
 
-	// Reading: compare hiragana
+	// Reading: check for kun'yomi on kanji (shake, not wrong)
+	if (isKunReadingForKanji(current.item, inputValue)) {
+		return "wrong-reading-type";
+	}
+
 	const accepted = getAcceptedReadings(current.item);
 	const userAnswer = romajiToHiragana(inputValue).trim();
-	return accepted.includes(userAnswer);
-}
-
-function getCorrectAnswerDisplay(): string {
-	if (!current) return "";
-	if (current.type === "meaning") {
-		const meanings = JSON.parse(current.item.meanings) as string[];
-		return meanings.join(", ");
-	}
-	const readings = getAcceptedReadings(current.item);
-	return readings.join(", ");
+	return accepted.includes(userAnswer) ? "correct" : "incorrect";
 }
 
 async function submitAnswer() {
@@ -173,14 +145,24 @@ async function submitAnswer() {
 	const answer = inputValue.trim();
 	if (answer.length === 0) return;
 
-	const isCorrect = checkAnswer();
+	const answerResult = checkAnswer();
 
-	if (isCorrect) {
+	if (answerResult === "wrong-reading-type") {
+		// Kun'yomi entered for kanji -- shake, don't mark wrong
+		feedbackState = "shake";
+		shakeMessage = "We're looking for the on'yomi reading";
+		setTimeout(() => {
+			feedbackState = "none";
+			shakeMessage = "";
+		}, 1500);
+		return;
+	}
+
+	if (answerResult === "correct") {
 		feedbackState = "correct";
 		current.answered = true;
 		current.correct = true;
 
-		// Track per-item result
 		const itemId = current.item.id;
 		const result = getOrCreateItemResult(itemId);
 		if (current.type === "meaning") result.meaningCorrect = true;
@@ -189,15 +171,19 @@ async function submitAnswer() {
 		setTimeout(() => advanceToNext(), 600);
 	} else {
 		feedbackState = "incorrect";
-		correctAnswer = getCorrectAnswerDisplay();
+		correctAnswer = getCorrectDisplay(current.item, current.type);
 		current.answered = true;
 		current.correct = false;
 
-		// Track per-item result
 		const itemId = current.item.id;
 		const result = getOrCreateItemResult(itemId);
-		if (current.type === "meaning") result.meaningCorrect = false;
-		else result.readingCorrect = false;
+		if (current.type === "meaning") {
+			result.meaningCorrect = false;
+			result.meaningIncorrectCount++;
+		} else {
+			result.readingCorrect = false;
+			result.readingIncorrectCount++;
+		}
 	}
 }
 
@@ -230,15 +216,17 @@ async function processResults() {
 		processedItems.add(q.item.id);
 
 		// Determine if item was answered correctly (all questions for this item must be correct)
-		const itemQs = queue.filter((iq) => iq.item.id === q.item.id);
-		const allCorrect = itemQs.every((iq) => iq.correct);
+		const itemResult = itemResults.get(q.item.id);
+		const incorrectCount =
+			(itemResult?.meaningIncorrectCount ?? 0) + (itemResult?.readingIncorrectCount ?? 0);
+		const allCorrect = incorrectCount === 0;
 
 		totalReviewed++;
 		if (allCorrect) totalCorrect++;
 
 		// Skip SRS updates in practice mode
 		if (!practiceMode) {
-			const durationMs = Date.now() - (itemResults.get(q.item.id)?.startTime ?? sessionStartTime);
+			const durationMs = Date.now() - (itemResult?.startTime ?? sessionStartTime);
 
 			const result = await reviewKanjiItem(
 				q.item.id,
@@ -246,6 +234,9 @@ async function processResults() {
 				q.item.srs_stage,
 				q.item.level,
 				durationMs,
+				incorrectCount,
+				itemResult?.meaningIncorrectCount ?? 0,
+				itemResult?.readingIncorrectCount ?? 0,
 			);
 
 			if (result.unlockedIds.length > 0) {
@@ -337,7 +328,7 @@ function handleKeydown(e: KeyboardEvent) {
 							class:dark:text-green-400={feedbackState === "correct"}
 							placeholder="Type reading in romaji..."
 							bind:value={inputValue}
-							disabled={feedbackState === "correct" || isProcessing}
+							disabled={feedbackState === "correct" || feedbackState === "incorrect" || isProcessing}
 							aria-label="Type reading in romaji"
 						/>
 						{#if inputValue.length > 0 && displayValue !== inputValue}
@@ -352,12 +343,14 @@ function handleKeydown(e: KeyboardEvent) {
 							class:dark:text-green-400={feedbackState === "correct"}
 							placeholder="Type the {current.item.item_type === 'radical' ? 'name' : 'meaning'}..."
 							bind:value={inputValue}
-							disabled={feedbackState === "correct" || isProcessing}
+							disabled={feedbackState === "correct" || feedbackState === "incorrect" || isProcessing}
 							aria-label="Type the meaning"
 						/>
 					{/if}
 					{#if feedbackState === "correct"}
 						<p class="text-sm font-medium text-green-600 dark:text-green-400">Correct!</p>
+					{:else if feedbackState === "shake" && shakeMessage}
+						<p class="text-sm font-medium text-amber-500 dark:text-amber-400 animate-shake">{shakeMessage}</p>
 					{/if}
 				</div>
 			{/if}

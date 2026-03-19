@@ -90,7 +90,8 @@ function getReadingDisplay(item: KanjiLevelItem): string {
 	if (item.readings_on) {
 		try {
 			const parsed = JSON.parse(item.readings_on) as string[];
-			if (parsed.length > 0) return parsed[0];
+			const accepted = parsed.filter((r) => !r.startsWith("!"));
+			if (accepted.length > 0) return accepted[0];
 		} catch {
 			return item.readings_on;
 		}
@@ -217,7 +218,11 @@ $effect(() => {
 								onclick={() => openDetail(item)}
 								aria-label="{item.character} - {getMeaningDisplay(item)}{getTileStatus(item) === 'locked' ? ' (locked)' : ''}"
 							>
-								<span class="text-lg font-bold leading-tight">{item.character}</span>
+								{#if item.image_url}
+									<img src={item.image_url} alt={getMeaningDisplay(item)} class="h-6 w-6 invert dark:invert-0 opacity-90" />
+								{:else}
+									<span class="text-lg font-bold leading-tight">{item.character}</span>
+								{/if}
 								{#if itemType !== "radical"}
 									{#if getReadingDisplay(item)}
 										<span class="mt-0.5 truncate text-[10px] leading-tight opacity-80">{getReadingDisplay(item)}</span>

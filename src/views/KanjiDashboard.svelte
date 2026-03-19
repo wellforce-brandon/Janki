@@ -285,7 +285,7 @@ $effect(() => {
 					{@const kanjiNeeded = Math.ceil(levelProgress.total * 0.9) - levelProgress.guru_plus}
 					{#if kanjiNeeded > 0}
 						<p class="mt-3 text-sm text-muted-foreground">
-							Guru {kanjiNeeded} more item{kanjiNeeded > 1 ? "s" : ""} to progress
+							Guru {kanjiNeeded} more kanji to level up
 						</p>
 					{/if}
 				{/if}

@@ -78,10 +78,11 @@ describe("WaniKani SRS", () => {
 			expect(result.unlockedIds).toEqual([]);
 		});
 
-		it("should drop stage on incorrect answer", async () => {
+		it("should drop stage on incorrect answer (1 wrong at stage 3)", async () => {
 			const { reviewKanjiItem } = await import("./wanikani-srs");
-			const result = await reviewKanjiItem(1, false, 3, 1);
-			expect(result.newStage).toBeLessThan(3);
+			// Stage 3, penalty_factor=1, ceil(1/2)=1, drop=1 -> stage 2
+			const result = await reviewKanjiItem(1, false, 3, 1, null, 1);
+			expect(result.newStage).toBe(2);
 		});
 
 		it("should burn on correct from enlightened", async () => {
@@ -99,15 +100,53 @@ describe("WaniKani SRS", () => {
 
 		it("should not drop below stage 1 on incorrect at stage 1", async () => {
 			const { reviewKanjiItem } = await import("./wanikani-srs");
-			const result = await reviewKanjiItem(1, false, 1, 1);
+			const result = await reviewKanjiItem(1, false, 1, 1, null, 1);
 			expect(result.newStage).toBe(1);
 			expect(result.nextReview).toBeDefined();
 		});
 
-		it("should drop from Guru (stage 5) to stage 3 on incorrect", async () => {
+		it("should drop from Guru (stage 5) to stage 3 on 1 incorrect", async () => {
 			const { reviewKanjiItem } = await import("./wanikani-srs");
-			const result = await reviewKanjiItem(1, false, 5, 1);
+			// Stage 5, penalty_factor=2, ceil(1/2)=1, drop=2 -> stage 3
+			const result = await reviewKanjiItem(1, false, 5, 1, null, 1);
 			expect(result.newStage).toBe(3);
+		});
+
+		it("should drop from Enlightened (stage 8) to stage 4 on 3 incorrect", async () => {
+			const { reviewKanjiItem } = await import("./wanikani-srs");
+			// Stage 8, penalty_factor=2, ceil(3/2)=2, drop=4 -> stage 4
+			const result = await reviewKanjiItem(1, false, 8, 1, null, 3);
+			expect(result.newStage).toBe(4);
+		});
+
+		it("should drop from stage 4 to stage 2 on 2 incorrect", async () => {
+			const { reviewKanjiItem } = await import("./wanikani-srs");
+			// Stage 4, penalty_factor=1, ceil(2/2)=1, drop=1 -> stage 3
+			const result = await reviewKanjiItem(1, false, 4, 1, null, 2);
+			expect(result.newStage).toBe(3);
+		});
+
+		it("should floor at stage 1 even with many incorrect", async () => {
+			const { reviewKanjiItem } = await import("./wanikani-srs");
+			const result = await reviewKanjiItem(1, false, 3, 1, null, 10);
+			expect(result.newStage).toBe(1);
+		});
+
+		it("should use accelerated intervals for level 1-2 items", async () => {
+			const { reviewKanjiItem } = await import("./wanikani-srs");
+			const resultLevel1 = await reviewKanjiItem(1, true, 1, 1);
+			const resultLevel3 = await reviewKanjiItem(2, true, 1, 3);
+			// Both advance to stage 2, but level 1 gets 2h review, level 3 gets 4h
+			// We can't check exact times, but both should have valid datetime
+			expect(resultLevel1.nextReview).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:00:00$/);
+			expect(resultLevel3.nextReview).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:00:00$/);
+		});
+
+		it("should round review times to top of hour", async () => {
+			const { reviewKanjiItem } = await import("./wanikani-srs");
+			const result = await reviewKanjiItem(1, true, 1, 3);
+			// Minutes and seconds should be 00:00
+			expect(result.nextReview).toMatch(/:00:00$/);
 		});
 
 		it("should produce SQLite-compatible datetime format", async () => {

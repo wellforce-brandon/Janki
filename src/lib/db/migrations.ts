@@ -197,4 +197,32 @@ export const migrations: Migration[] = [
 			DROP TABLE IF EXISTS kanji_review_log;
 		`,
 	},
+	{
+		version: 4,
+		description: "Add image_url for radicals and incorrect counts to review log",
+		up: `
+			ALTER TABLE kanji_levels ADD COLUMN image_url TEXT;
+
+			ALTER TABLE kanji_review_log ADD COLUMN meaning_incorrect INTEGER NOT NULL DEFAULT 0;
+
+			ALTER TABLE kanji_review_log ADD COLUMN reading_incorrect INTEGER NOT NULL DEFAULT 0;
+		`,
+		down: `
+			SELECT 1;
+		`,
+	},
+	{
+		version: 5,
+		description: "Add WK subject ID and component dependencies for per-item vocab unlock",
+		up: `
+			ALTER TABLE kanji_levels ADD COLUMN wk_id INTEGER;
+
+			ALTER TABLE kanji_levels ADD COLUMN component_ids TEXT;
+
+			CREATE INDEX IF NOT EXISTS idx_kanji_levels_wk_id ON kanji_levels(wk_id);
+		`,
+		down: `
+			SELECT 1;
+		`,
+	},
 ];

@@ -5,6 +5,12 @@ import { type KanjiLevelItem, markLessonCompleted } from "$lib/db/queries/kanji"
 import { updateUserNotes, updateUserSynonyms } from "$lib/db/queries/kanji-reviews";
 import { addToast } from "$lib/stores/toast.svelte";
 import { fisherYatesShuffle, getTypeColor } from "$lib/utils/kanji";
+import {
+	getAcceptedMeanings,
+	getAcceptedReadings,
+	getCorrectDisplay,
+	isKunReadingForKanji,
+} from "$lib/utils/kanji-validation";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
 interface Props {
@@ -39,7 +45,7 @@ interface QuizQuestion {
 let quizQueue = $state<QuizQuestion[]>([]);
 let quizIndex = $state(0);
 let inputValue = $state("");
-let feedbackState = $state<"none" | "correct" | "incorrect">("none");
+let feedbackState = $state<"none" | "correct" | "incorrect" | "shake">("none");
 let correctAnswer = $state("");
 let isCompleting = $state(false);
 
@@ -137,49 +143,20 @@ async function addSynonym() {
 
 // --- Quiz phase ---
 
-function getAcceptedMeanings(item: KanjiLevelItem): string[] {
-	const meanings = getMeanings(item);
-	const synonyms = getUserSynonyms(item);
-	return [...meanings, ...synonyms].map((m) => m.toLowerCase().trim());
-}
+let shakeMessage = $state("");
 
-function getAcceptedReadings(item: KanjiLevelItem): string[] {
-	const readings: string[] = [];
-	if (item.readings_on) {
-		try {
-			readings.push(...(JSON.parse(item.readings_on) as string[]));
-		} catch {
-			readings.push(item.readings_on);
-		}
-	}
-	if (item.readings_kun) {
-		try {
-			readings.push(...(JSON.parse(item.readings_kun) as string[]));
-		} catch {
-			readings.push(item.readings_kun);
-		}
-	}
-	if (item.reading) readings.push(item.reading);
-	return readings.map((r) => r.trim());
-}
-
-function checkQuizAnswer(): boolean {
-	if (!currentQuiz) return false;
+function checkQuizAnswer(): "correct" | "incorrect" | "wrong-reading-type" {
+	if (!currentQuiz) return "incorrect";
 	if (currentQuiz.type === "meaning") {
 		const accepted = getAcceptedMeanings(currentQuiz.item);
-		return accepted.includes(inputValue.toLowerCase().trim());
+		return accepted.includes(inputValue.toLowerCase().trim()) ? "correct" : "incorrect";
+	}
+	if (isKunReadingForKanji(currentQuiz.item, inputValue)) {
+		return "wrong-reading-type";
 	}
 	const accepted = getAcceptedReadings(currentQuiz.item);
 	const userAnswer = romajiToHiragana(inputValue).trim();
-	return accepted.includes(userAnswer);
-}
-
-function getCorrectDisplay(): string {
-	if (!currentQuiz) return "";
-	if (currentQuiz.type === "meaning") {
-		return getMeanings(currentQuiz.item).join(", ");
-	}
-	return getAcceptedReadings(currentQuiz.item).join(", ");
+	return accepted.includes(userAnswer) ? "correct" : "incorrect";
 }
 
 let isReadingQ = $derived(currentQuiz?.type === "reading");
@@ -206,15 +183,26 @@ function submitQuizAnswer() {
 	if (!currentQuiz || feedbackState === "correct" || feedbackState === "incorrect") return;
 	if (inputValue.trim().length === 0) return;
 
-	const isCorrect = checkQuizAnswer();
-	if (isCorrect) {
+	const answerResult = checkQuizAnswer();
+
+	if (answerResult === "wrong-reading-type") {
+		feedbackState = "shake";
+		shakeMessage = "We're looking for the on'yomi reading";
+		setTimeout(() => {
+			feedbackState = "none";
+			shakeMessage = "";
+		}, 1500);
+		return;
+	}
+
+	if (answerResult === "correct") {
 		feedbackState = "correct";
 		currentQuiz.answered = true;
 		currentQuiz.correct = true;
 		setTimeout(() => advanceQuiz(), 600);
 	} else {
 		feedbackState = "incorrect";
-		correctAnswer = getCorrectDisplay();
+		correctAnswer = getCorrectDisplay(currentQuiz.item, currentQuiz.type);
 		currentQuiz.correct = false;
 		// Incorrect: shuffle back into queue
 		const failedQ = { ...currentQuiz, answered: false, correct: false };
@@ -247,7 +235,8 @@ function dismissIncorrect() {
 async function completeLesson() {
 	isCompleting = true;
 	const ids = items.map((i) => i.id);
-	const result = await markLessonCompleted(ids);
+	const level = items[0]?.level ?? 1;
+	const result = await markLessonCompleted(ids, level);
 	if (result.ok) {
 		addToast(`${items.length} item${items.length > 1 ? "s" : ""} learned!`, "success");
 	} else {

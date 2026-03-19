@@ -8,7 +8,11 @@ import App from "./App.svelte";
 
 async function init() {
 	await getDb();
-	await seedKanjiData();
+	try {
+		await seedKanjiData();
+	} catch (e) {
+		console.error("[SEED FAILED]", e);
+	}
 	await loadSettings();
 
 	// Non-blocking: auto-backup and update check run after app is ready

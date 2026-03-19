@@ -23,13 +23,23 @@ export async function logKanjiReview(
 	stageBefore: number,
 	stageAfter: number,
 	durationMs: number | null,
+	meaningIncorrect = 0,
+	readingIncorrect = 0,
 ): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		await db.execute(
-			`INSERT INTO kanji_review_log (kanji_level_id, correct, srs_stage_before, srs_stage_after, duration_ms)
-			VALUES (?, ?, ?, ?, ?)`,
-			[kanjiLevelId, correct ? 1 : 0, stageBefore, stageAfter, durationMs],
+			`INSERT INTO kanji_review_log (kanji_level_id, correct, srs_stage_before, srs_stage_after, duration_ms, meaning_incorrect, reading_incorrect)
+			VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			[
+				kanjiLevelId,
+				correct ? 1 : 0,
+				stageBefore,
+				stageAfter,
+				durationMs,
+				meaningIncorrect,
+				readingIncorrect,
+			],
 		);
 	});
 }

@@ -6,6 +6,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.9.0.0] - 2026-03-19
+
+### Added
+
+- Full WaniKani subject data: 490 radicals, 2,094 kanji, and 6,737 vocabulary with proper level assignments, meanings, readings, and mnemonics
+- WK data export files (wk-radicals.json, wk-kanji.json, wk-vocabulary.json) replace kanji-data.json as seed source
+- SVG images for 14 WK radicals without Unicode characters (stored locally in public/data/radical-images/)
+- Shared answer validation utility (kanji-validation.ts) with proper reading filtering and on'yomi-only enforcement
+- Accelerated SRS intervals for levels 1-2 (2h/4h/8h/23h for stages 1-4, matching WK)
+- Per-item vocab unlock based on component_subject_ids (vocab unlocks when its component kanji reach Guru, not when 90% of all level kanji do)
+- WK subject IDs (wk_id) and component dependencies (component_ids) stored on all items
+- Per-question incorrect count tracking (meaning_incorrect, reading_incorrect) in review log
+- Kanji on'yomi-only reading validation with shake feedback ("We're looking for the on'yomi reading")
+- Migration v4: image_url column and review log incorrect counts
+- Migration v5: wk_id and component_ids columns with index
+
+### Changed
+
+- SRS intervals corrected to match WK API exactly (23h, 47h, 167h, 335h, 719h, 2879h instead of rounded values)
+- Drop formula now uses WK's real formula: stage - ceil(incorrectCount/2) * penaltyFactor (was fixed drop-by-1 or drop-by-2)
+- Review times round up to top of hour (WK behavior)
+- getUserLevel now returns lowest level where <90% kanji at Guru (was MAX level with any unlocked item)
+- getLevelProgress and getAllLevelProgress count kanji only for level-up percentage
+- checkAndUnlockLevel unlocks next-level radicals when 90% kanji reach Guru
+- Dashboard shows "Guru X more kanji to level up" instead of "items to progress"
+- ItemTypeBrowser sorts items alphabetically by first meaning within each level
+- ItemTypeBrowser displays SVG images for radicals without Unicode characters
+- Readings with ! prefix (non-accepted) now properly filtered from review validation (1,821 readings affected)
+- Seed script rewritten to use WK export data instead of deriving radicals from kanji-data.json
+- getDb() uses promise lock to prevent concurrent initialization race condition
+- Removed explicit BEGIN TRANSACTION from migrations (conflicts with SQLite DDL auto-transactions)
+
+### Fixed
+
+- Database initialization race condition causing "cannot start a transaction within a transaction" errors
+- Radicals displayed English names instead of Unicode characters (seed now uses proper WK character data)
+- Radical level assignments were wrong (derived from kanji references instead of WK's actual radical levels)
+- Incorrect answers only dropped 1-2 stages regardless of how many times wrong (now uses WK's cumulative formula)
+
 ## [0.8.1.0] - 2026-03-19
 
 ### Fixed

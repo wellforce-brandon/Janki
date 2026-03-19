@@ -1,27 +1,31 @@
 import { checkAndUnlockLevel, updateKanjiSrsState } from "../db/queries/kanji";
 import { logKanjiReview } from "../db/queries/kanji-reviews";
 
-// WaniKani-style fixed-interval SRS stages
-// Stage 0: Locked (not yet unlocked)
-// Stage 1: Apprentice 1 (4 hours)
-// Stage 2: Apprentice 2 (8 hours)
-// Stage 3: Apprentice 3 (1 day)
-// Stage 4: Apprentice 4 (2 days)
-// Stage 5: Guru 1 (1 week)
-// Stage 6: Guru 2 (2 weeks)
-// Stage 7: Master (1 month)
-// Stage 8: Enlightened (4 months)
-// Stage 9: Burned (done)
+// WaniKani SRS stages (intervals match WK API: /v2/spaced_repetition_systems)
+// Stage 0: Locked | Stage 1-4: Apprentice | Stage 5-6: Guru
+// Stage 7: Master | Stage 8: Enlightened | Stage 9: Burned
 
 const STAGE_INTERVALS_HOURS: Record<number, number> = {
-	1: 4,
-	2: 8,
-	3: 24,
-	4: 48,
-	5: 168, // 1 week
-	6: 336, // 2 weeks
-	7: 720, // ~1 month
-	8: 2880, // ~4 months
+	1: 4, // 14400s
+	2: 8, // 28800s
+	3: 23, // 82800s
+	4: 47, // 169200s
+	5: 167, // 601200s
+	6: 335, // 1206000s
+	7: 719, // 2588400s
+	8: 2879, // 10364400s
+};
+
+// Accelerated intervals for levels 1-2 (stages 1-4 halved, 5-8 unchanged)
+const ACCELERATED_INTERVALS_HOURS: Record<number, number> = {
+	1: 2, // 7200s
+	2: 4, // 14400s
+	3: 8, // 28800s
+	4: 23, // 82800s
+	5: 167,
+	6: 335,
+	7: 719,
+	8: 2879,
 };
 
 export const STAGE_NAMES: Record<number, string> = {
@@ -57,20 +61,26 @@ function toSqliteDateTime(date: Date): string {
 		.replace(/\.\d{3}Z$/, "");
 }
 
-function calculateNextReview(stage: number): string | null {
+function calculateNextReview(stage: number, level: number): string | null {
 	if (stage <= 0 || stage >= 9) return null;
-	const hours = STAGE_INTERVALS_HOURS[stage] ?? 4;
+	const intervals = level <= 2 ? ACCELERATED_INTERVALS_HOURS : STAGE_INTERVALS_HOURS;
+	const hours = intervals[stage] ?? 4;
 	const next = new Date();
 	next.setTime(next.getTime() + hours * 60 * 60 * 1000);
+	// Round up to top of next hour (WK behavior)
+	next.setMinutes(0, 0, 0);
+	if (next.getTime() <= Date.now()) {
+		next.setTime(next.getTime() + 3600000);
+	}
 	return toSqliteDateTime(next);
 }
 
-function calculateDrop(currentStage: number): number {
-	// Wrong answer drops by more for higher stages
-	if (currentStage <= 2) return Math.max(1, currentStage - 1);
-	if (currentStage <= 4) return currentStage - 2;
-	// Guru+ drops to Apprentice range
-	return Math.max(1, currentStage - 2);
+// WK drop formula: new_stage = current - ceil(incorrectCount / 2) * penaltyFactor
+// penaltyFactor = 2 for Guru+ (stage >= 5), 1 otherwise. Min stage = 1.
+function calculateDrop(currentStage: number, incorrectCount: number): number {
+	const penaltyFactor = currentStage >= 5 ? 2 : 1;
+	const adjustment = Math.ceil(incorrectCount / 2) * penaltyFactor;
+	return Math.max(1, currentStage - adjustment);
 }
 
 export async function reviewKanjiItem(
@@ -79,21 +89,31 @@ export async function reviewKanjiItem(
 	currentStage: number,
 	level: number,
 	durationMs: number | null = null,
+	incorrectCount = 1,
+	meaningIncorrect = 0,
+	readingIncorrect = 0,
 ): Promise<{ newStage: number; nextReview: string | null; unlockedIds: number[] }> {
 	let newStage: number;
 
 	if (correct) {
 		newStage = Math.min(9, currentStage + 1);
 	} else {
-		newStage = calculateDrop(currentStage);
+		newStage = calculateDrop(currentStage, incorrectCount);
 	}
 
-	const nextReview = calculateNextReview(newStage);
+	const nextReview = calculateNextReview(newStage, level);
 
 	await updateKanjiSrsState(id, newStage, nextReview, correct ? 1 : 0, correct ? 0 : 1);
 
-	// Log the review to kanji_review_log
-	await logKanjiReview(id, correct, currentStage, newStage, durationMs);
+	await logKanjiReview(
+		id,
+		correct,
+		currentStage,
+		newStage,
+		durationMs,
+		meaningIncorrect,
+		readingIncorrect,
+	);
 
 	// Trigger unlock cascade when item is promoted (correct answer)
 	let unlockedIds: number[] = [];

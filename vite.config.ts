@@ -8,6 +8,7 @@ const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
 	plugins: [svelte(), tailwindcss()],
+	publicDir: "public",
 	resolve: {
 		alias: {
 			$lib: path.resolve("./src/lib"),
@@ -15,14 +16,14 @@ export default defineConfig({
 	},
 	clearScreen: false,
 	server: {
-		port: 1420,
+		port: 7755,
 		strictPort: true,
 		host: host || false,
 		hmr: host
 			? {
 					protocol: "ws",
 					host,
-					port: 1421,
+					port: 7756,
 				}
 			: undefined,
 		watch: {

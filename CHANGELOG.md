@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.4.0.0] - 2026-03-18
+
+### Added
+
+- FSRS-6 SRS engine wrapping ts-fsrs: createNewCard, reviewCard, getNextIntervals
+- Review scheduler with configurable daily new/review card limits
+- WaniKani-style fixed-interval SRS engine (10 stages: Locked through Burned)
+- Anki .apkg import pipeline using JSZip + sql.js (browser-compatible, no Node.js deps)
+- Import deck mapper with DOMPurify sanitization of all card HTML
+- Media extractor with hybrid storage (BLOBs < 1MB, filesystem for larger)
+- DB query modules: cards, decks, notes, reviews, kanji, stats (all with safeQuery wrapper)
+- Flashcard review UI with 3D flip animation and keyboard shortcuts (Space to flip, 1-4 to rate)
+- Color-coded rating buttons (Again/Hard/Good/Easy) with next interval preview
+- Review session flow controller with post-session summary (accuracy, time, count)
+- Deck management: grid view, create/edit/delete, import dialog with progress
+- Deck browse view with card table, sorting, and front/back preview
+- WaniKani-style kanji level map (60 levels, color-coded by progress)
+- Kanji detail view with large character, meanings, readings, stroke order, radicals
+- SRS stage indicator badges (color-coded: Apprentice pink, Guru purple, Master blue, etc.)
+- Level progress bar component
+- Stroke order SVG loader component (KanjiVG on-demand loading)
+- Dashboard with summary cards (due count, kanji due, streak, total cards)
+- Dashboard quick actions and today's stats display
+- Kanji data seeding from davidluzgouveia/kanji-data (13,108 entries, 60 WK levels)
+- DB initialization and kanji seeding on app startup
+- shadcn-svelte UI components: button, card, dialog, input, label, separator, badge, tooltip, scroll-area, tabs, progress
+- cn() utility for Tailwind class merging (clsx + tailwind-merge)
+- 25 new tests (34 total): FSRS wrapper (7), WaniKani SRS (12), deck-mapper (6)
+
+### Changed
+
+- Dev server port changed to 7755
+- Vite publicDir set to "public" for static data files
+- tsconfig.json: added bare $lib path alias for shadcn-svelte compatibility
+- Biome config: excluded public/data from linting (large JSON files)
+
 ## [0.3.0.0] - 2026-03-18
 
 ### Added

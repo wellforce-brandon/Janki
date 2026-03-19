@@ -12,6 +12,7 @@
 		"isolatedModules": true,
 		"verbatimModuleSyntax": true,
 		"paths": {
+			"$lib": ["./src/lib"],
 			"$lib/*": ["./src/lib/*"]
 		}
 	},

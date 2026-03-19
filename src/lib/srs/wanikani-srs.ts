@@ -50,12 +50,19 @@ export const STAGE_CATEGORIES: Record<number, string> = {
 	9: "burned",
 };
 
+function toSqliteDateTime(date: Date): string {
+	return date
+		.toISOString()
+		.replace("T", " ")
+		.replace(/\.\d{3}Z$/, "");
+}
+
 function calculateNextReview(stage: number): string | null {
 	if (stage <= 0 || stage >= 9) return null;
 	const hours = STAGE_INTERVALS_HOURS[stage] ?? 4;
 	const next = new Date();
 	next.setTime(next.getTime() + hours * 60 * 60 * 1000);
-	return next.toISOString();
+	return toSqliteDateTime(next);
 }
 
 function calculateDrop(currentStage: number): number {

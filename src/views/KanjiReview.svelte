@@ -1,11 +1,13 @@
 <script lang="ts">
 import type { ReviewSummary } from "$lib/components/kanji/KanjiReviewSession.svelte";
 import KanjiReviewSession from "$lib/components/kanji/KanjiReviewSession.svelte";
+import LevelUpCelebration from "$lib/components/kanji/LevelUpCelebration.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import { getDueKanjiReviews, type KanjiLevelItem } from "$lib/db/queries/kanji";
+import { getDueKanjiReviews, getUserLevel, type KanjiLevelItem } from "$lib/db/queries/kanji";
 import { getTodayKanjiReviewCount } from "$lib/db/queries/kanji-reviews";
+import { getSettings } from "$lib/stores/app-settings.svelte";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -14,15 +16,20 @@ let dueItems = $state<KanjiLevelItem[]>([]);
 let todayCount = $state(0);
 let sessionActive = $state(false);
 let summary = $state<ReviewSummary | null>(null);
+let levelBefore = $state(1);
+let showLevelUp = $state(false);
+let newLevel = $state(1);
 
 async function loadDueItems() {
 	loading = true;
-	const [dueResult, countResult] = await Promise.all([
-		getDueKanjiReviews(),
+	const [dueResult, countResult, levelResult] = await Promise.all([
+		getDueKanjiReviews(getSettings().kanjiReviewOrder),
 		getTodayKanjiReviewCount(),
+		getUserLevel(),
 	]);
 	if (dueResult.ok) dueItems = dueResult.data;
 	if (countResult.ok) todayCount = countResult.data;
+	if (levelResult.ok) levelBefore = levelResult.data;
 	loading = false;
 }
 
@@ -32,7 +39,7 @@ function startSession() {
 	sessionActive = true;
 }
 
-function handleComplete(result: ReviewSummary) {
+async function handleComplete(result: ReviewSummary) {
 	summary = result;
 	sessionActive = false;
 	const accuracy = result.reviewed > 0 ? Math.round((result.correct / result.reviewed) * 100) : 0;
@@ -40,7 +47,15 @@ function handleComplete(result: ReviewSummary) {
 		`Review complete! ${result.correct}/${result.reviewed} correct (${accuracy}%)`,
 		"success",
 	);
-	loadDueItems();
+
+	// Check if user leveled up
+	const levelResult = await getUserLevel();
+	if (levelResult.ok && levelResult.data > levelBefore) {
+		newLevel = levelResult.data;
+		showLevelUp = true;
+	}
+
+	await loadDueItems();
 }
 
 function formatTime(ms: number): string {
@@ -54,6 +69,10 @@ $effect(() => {
 	loadDueItems();
 });
 </script>
+
+{#if showLevelUp}
+	<LevelUpCelebration level={newLevel} onclose={() => { showLevelUp = false; }} />
+{/if}
 
 <div class="space-y-6">
 	{#if sessionActive}
@@ -96,6 +115,7 @@ $effect(() => {
 					{#if dueItems.length > 0}
 						<Button onclick={startSession}>Continue Reviews ({dueItems.length})</Button>
 					{/if}
+					<Button variant="outline" onclick={() => navigate("kanji-extra-study")}>Extra Study</Button>
 					<Button variant="outline" onclick={() => navigate("kanji-dashboard")}>Back to Overview</Button>
 				</div>
 			</div>
@@ -107,6 +127,8 @@ $effect(() => {
 			description="You have no kanji reviews due right now. Come back later when more items are ready."
 			actionLabel="Back to Overview"
 			onaction={() => navigate("kanji-dashboard")}
+			secondaryLabel="Extra Study"
+			onsecondary={() => navigate("kanji-extra-study")}
 		/>
 		{#if todayCount > 0}
 			<p class="text-center text-sm text-muted-foreground">

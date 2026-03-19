@@ -3,11 +3,14 @@ import Button from "$lib/components/ui/button/button.svelte";
 import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 import { reviewKanjiItem, STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
+import { fisherYatesShuffle, getTypeColor } from "$lib/utils/kanji";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
 interface Props {
 	items: KanjiLevelItem[];
 	oncomplete: (summary: ReviewSummary) => void;
+	/** When true, skip SRS updates (extra study / practice mode) */
+	practiceMode?: boolean;
 }
 
 export interface ReviewSummary {
@@ -26,13 +29,13 @@ interface ReviewQuestion {
 	correct: boolean;
 }
 
-let { items, oncomplete }: Props = $props();
+let { items, oncomplete, practiceMode = false }: Props = $props();
 
 // Build question queue: each item gets meaning + reading (if applicable)
 function buildQueue(reviewItems: KanjiLevelItem[]): ReviewQuestion[] {
 	const questions: ReviewQuestion[] = [];
 	// Shuffle items
-	const shuffled = [...reviewItems].sort(() => Math.random() - 0.5);
+	const shuffled = fisherYatesShuffle(reviewItems);
 	for (const item of shuffled) {
 		questions.push({ item, type: "meaning", answered: false, correct: false });
 		// Radicals don't have reading questions
@@ -230,20 +233,24 @@ async function processResults() {
 		const itemQs = queue.filter((iq) => iq.item.id === q.item.id);
 		const allCorrect = itemQs.every((iq) => iq.correct);
 
-		const durationMs = Date.now() - (itemResults.get(q.item.id)?.startTime ?? sessionStartTime);
-
-		const result = await reviewKanjiItem(
-			q.item.id,
-			allCorrect,
-			q.item.srs_stage,
-			q.item.level,
-			durationMs,
-		);
-
 		totalReviewed++;
 		if (allCorrect) totalCorrect++;
-		if (result.unlockedIds.length > 0) {
-			unlocked += result.unlockedIds.length;
+
+		// Skip SRS updates in practice mode
+		if (!practiceMode) {
+			const durationMs = Date.now() - (itemResults.get(q.item.id)?.startTime ?? sessionStartTime);
+
+			const result = await reviewKanjiItem(
+				q.item.id,
+				allCorrect,
+				q.item.srs_stage,
+				q.item.level,
+				durationMs,
+			);
+
+			if (result.unlockedIds.length > 0) {
+				unlocked += result.unlockedIds.length;
+			}
 		}
 	}
 
@@ -270,20 +277,6 @@ function handleKeydown(e: KeyboardEvent) {
 		} else if (feedbackState === "none") {
 			submitAnswer();
 		}
-	}
-}
-
-// Item type background colors (WaniKani style)
-function getTypeColor(itemType: string): string {
-	switch (itemType) {
-		case "radical":
-			return "bg-blue-500 dark:bg-blue-600";
-		case "kanji":
-			return "bg-pink-500 dark:bg-pink-600";
-		case "vocab":
-			return "bg-purple-500 dark:bg-purple-600";
-		default:
-			return "bg-blue-500 dark:bg-blue-600";
 	}
 }
 </script>

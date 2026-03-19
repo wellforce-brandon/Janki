@@ -9,9 +9,13 @@ import Dashboard from "./views/Dashboard.svelte";
 import Decks from "./views/Decks.svelte";
 import Grammar from "./views/Grammar.svelte";
 import KanjiDashboard from "./views/KanjiDashboard.svelte";
+import KanjiExtraStudy from "./views/KanjiExtraStudy.svelte";
+import KanjiKanji from "./views/KanjiKanji.svelte";
+import KanjiLessonPicker from "./views/KanjiLessonPicker.svelte";
 import KanjiLessons from "./views/KanjiLessons.svelte";
-import KanjiMap from "./views/KanjiMap.svelte";
+import KanjiRadicals from "./views/KanjiRadicals.svelte";
 import KanjiReview from "./views/KanjiReview.svelte";
+import KanjiVocabulary from "./views/KanjiVocabulary.svelte";
 import Reading from "./views/Reading.svelte";
 import Review from "./views/Review.svelte";
 import Search from "./views/Search.svelte";
@@ -55,10 +59,6 @@ function handleKeydown(e: KeyboardEvent) {
 		e.preventDefault();
 		navigate("search");
 	}
-	if (e.key === "i") {
-		e.preventDefault();
-		navigate("decks");
-	}
 }
 </script>
 
@@ -75,12 +75,20 @@ function handleKeydown(e: KeyboardEvent) {
 				<Review />
 			{:else if currentView() === "kanji-dashboard"}
 				<KanjiDashboard />
-			{:else if currentView() === "kanji-map" || currentView() === "kanji-detail"}
-				<KanjiMap />
+			{:else if currentView() === "kanji-radicals" || currentView() === "kanji-detail"}
+				<KanjiRadicals />
+			{:else if currentView() === "kanji-kanji"}
+				<KanjiKanji />
+			{:else if currentView() === "kanji-vocabulary"}
+				<KanjiVocabulary />
 			{:else if currentView() === "kanji-lessons"}
 				<KanjiLessons />
+			{:else if currentView() === "kanji-lesson-picker"}
+				<KanjiLessonPicker />
 			{:else if currentView() === "kanji-review"}
 				<KanjiReview />
+			{:else if currentView() === "kanji-extra-study"}
+				<KanjiExtraStudy />
 			{:else if currentView() === "decks" || currentView() === "deck-browse"}
 				<Decks />
 			{:else if currentView() === "grammar"}

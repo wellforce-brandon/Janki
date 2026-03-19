@@ -22,6 +22,7 @@ import { getRecentMistakes, getTodayKanjiReviewCount } from "$lib/db/queries/kan
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
+import { getTypeColor, parseMeanings } from "$lib/utils/kanji";
 
 let loading = $state(true);
 let refreshing = $state(false);
@@ -144,19 +145,6 @@ let srsSpread = $derived.by((): SrsSpreadRow[] => {
 	});
 });
 
-function getTypeColor(itemType: string): string {
-	switch (itemType) {
-		case "radical":
-			return "bg-blue-500 dark:bg-blue-600";
-		case "kanji":
-			return "bg-pink-500 dark:bg-pink-600";
-		case "vocab":
-			return "bg-purple-500 dark:bg-purple-600";
-		default:
-			return "bg-gray-500";
-	}
-}
-
 function getCategoryColor(category: string): string {
 	switch (category) {
 		case "Apprentice":
@@ -171,15 +159,6 @@ function getCategoryColor(category: string): string {
 			return "text-amber-500 dark:text-amber-400";
 		default:
 			return "";
-	}
-}
-
-function parseMeanings(json: string): string {
-	try {
-		const arr = JSON.parse(json) as string[];
-		return arr.join(", ");
-	} catch {
-		return json;
 	}
 }
 
@@ -219,7 +198,7 @@ $effect(() => {
 			actionLabel="Start Learning"
 			onaction={handleStartLearning}
 			secondaryLabel="Kanji Map"
-			onsecondary={() => navigate("kanji-map")}
+			onsecondary={() => navigate("kanji-radicals")}
 		/>
 	{:else}
 		<!-- Row 1: Core Actions -->
@@ -236,6 +215,13 @@ $effect(() => {
 							Start Lessons ({Math.min(lessonCount, 5)})
 						</Button>
 					{:else}
+						<button
+							type="button"
+							class="mt-2 text-xs text-muted-foreground hover:text-foreground"
+							onclick={() => navigate("kanji-lesson-picker")}
+						>
+							Advanced picker
+						</button>
 						<p class="text-sm text-muted-foreground">No lessons available</p>
 					{/if}
 				</div>
@@ -258,6 +244,13 @@ $effect(() => {
 					{:else}
 						<p class="text-sm text-muted-foreground">No reviews due</p>
 					{/if}
+					<button
+						type="button"
+						class="mt-2 text-xs text-muted-foreground hover:text-foreground"
+						onclick={() => navigate("kanji-extra-study")}
+					>
+						Extra study
+					</button>
 				</div>
 			</div>
 
@@ -296,9 +289,15 @@ $effect(() => {
 						</p>
 					{/if}
 				{/if}
-				<div class="mt-3">
-					<Button size="sm" variant="outline" onclick={() => navigate("kanji-map")}>
-						View Kanji Map
+				<div class="mt-3 flex gap-2">
+					<Button size="sm" variant="outline" onclick={() => navigate("kanji-radicals")}>
+						Radicals
+					</Button>
+					<Button size="sm" variant="outline" onclick={() => navigate("kanji-kanji")}>
+						Kanji
+					</Button>
+					<Button size="sm" variant="outline" onclick={() => navigate("kanji-vocabulary")}>
+						Vocabulary
 					</Button>
 				</div>
 			</div>
@@ -345,7 +344,7 @@ $effect(() => {
 						{#each recentlyUnlocked as item}
 							<span
 								class="inline-flex h-8 w-8 items-center justify-center rounded text-sm font-bold text-white {getTypeColor(item.item_type)}"
-								title="{parseMeanings(item.meanings)} - {STAGE_NAMES[item.srs_stage]}"
+								title="{parseMeanings(item.meanings).join(', ')} - {STAGE_NAMES[item.srs_stage]}"
 							>
 								{item.character}
 							</span>
@@ -370,7 +369,7 @@ $effect(() => {
 									<span class="inline-flex h-6 w-6 items-center justify-center rounded text-xs font-bold text-white {getTypeColor(item.item_type)}">
 										{item.character}
 									</span>
-									<span class="truncate">{parseMeanings(item.meanings)}</span>
+									<span class="truncate">{parseMeanings(item.meanings).join(", ")}</span>
 								</div>
 								<span class="text-xs text-destructive font-medium">{accuracy}%</span>
 							</div>
@@ -391,7 +390,7 @@ $effect(() => {
 								<span class="inline-flex h-6 w-6 items-center justify-center rounded text-xs font-bold text-white {getTypeColor(mistake.item_type)}">
 									{mistake.character}
 								</span>
-								<span class="truncate">{parseMeanings(mistake.meanings)}</span>
+								<span class="truncate">{parseMeanings(mistake.meanings).join(", ")}</span>
 							</div>
 						{/each}
 					</div>

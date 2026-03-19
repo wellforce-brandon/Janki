@@ -4,6 +4,8 @@ import LineChart from "$lib/components/stats/LineChart.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
 import { type DeckWithCounts, getAllDecks } from "$lib/db/queries/decks";
+import { getUserLevel } from "$lib/db/queries/kanji";
+import { getKanjiReviewStats, type KanjiReviewDayStats } from "$lib/db/queries/kanji-reviews";
 import {
 	type DailyStats,
 	getCardStateDistribution,
@@ -20,6 +22,8 @@ let totalCorrect = $state(0);
 let avgTimeMs = $state(0);
 let cardStates = $state<{ label: string; value: number; color: string }[]>([]);
 let kanjiStages = $state<{ label: string; value: number; color: string }[]>([]);
+let kanjiStats = $state<KanjiReviewDayStats[]>([]);
+let kanjiLevel = $state(1);
 let loading = $state(true);
 
 let dateRange = $state(30);
@@ -61,12 +65,22 @@ const stageColors: Record<number, string> = {
 async function loadStats() {
 	loading = true;
 
-	const [rangeResult, streakResult, stateResult, kanjiResult, decksResult] = await Promise.all([
+	const [
+		rangeResult,
+		streakResult,
+		stateResult,
+		kanjiResult,
+		decksResult,
+		kanjiStatsR,
+		kanjiLevelR,
+	] = await Promise.all([
 		selectedDeckId ? getStatsByDeck(selectedDeckId, dateRange) : getStatsRange(dateRange),
 		getStreak(),
 		getCardStateDistribution(),
 		getKanjiStageDistribution(),
 		getAllDecks(),
+		getKanjiReviewStats(dateRange),
+		getUserLevel(),
 	]);
 
 	if (rangeResult.ok) stats = rangeResult.data;
@@ -77,6 +91,9 @@ async function loadStats() {
 	totalCorrect = stats.reduce((s, d) => s + d.correct_count, 0);
 	const totalTime = stats.reduce((s, d) => s + d.time_spent_ms, 0);
 	avgTimeMs = totalReviews > 0 ? totalTime / totalReviews : 0;
+
+	if (kanjiStatsR.ok) kanjiStats = kanjiStatsR.data;
+	if (kanjiLevelR.ok) kanjiLevel = kanjiLevelR.data;
 
 	if (stateResult.ok) {
 		cardStates = stateResult.data.map((r) => ({
@@ -109,6 +126,14 @@ let timeData = $derived(
 );
 
 let accuracy = $derived(totalReviews > 0 ? Math.round((totalCorrect / totalReviews) * 100) : 0);
+
+let kanjiReviewsData = $derived(kanjiStats.map((d) => ({ label: d.date, value: d.total })));
+let kanjiAccuracyData = $derived(
+	kanjiStats.map((d) => ({
+		label: d.date,
+		value: d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0,
+	})),
+);
 
 function changeDateRange(value: number) {
 	dateRange = value;
@@ -210,7 +235,8 @@ $effect(() => {
 					<div class="flex gap-4">
 						{#each cardStates as cs}
 							<div class="flex items-center gap-2">
-								<div class="h-3 w-3 rounded-full" style="background: {cs.color}"></div>
+								<!-- Dynamic hex colors require inline style -->
+							<div class="h-3 w-3 rounded-full" style="background: {cs.color}"></div>
 								<span class="text-sm">{cs.label}: {cs.value}</span>
 							</div>
 						{/each}
@@ -223,7 +249,8 @@ $effect(() => {
 					<div class="flex flex-wrap gap-3">
 						{#each kanjiStages as ks}
 							<div class="flex items-center gap-1.5">
-								<div class="h-3 w-3 rounded-full" style="background: {ks.color}"></div>
+								<!-- Dynamic hex colors require inline style -->
+							<div class="h-3 w-3 rounded-full" style="background: {ks.color}"></div>
 								<span class="text-sm">{ks.label}: {ks.value}</span>
 							</div>
 						{/each}
@@ -231,5 +258,20 @@ $effect(() => {
 				</div>
 			{/if}
 		</div>
+
+		<!-- Kanji Review Charts -->
+		{#if kanjiStats.length > 0}
+			<h3 class="mt-2 text-lg font-semibold">Kanji Reviews <span class="text-sm font-normal text-muted-foreground">(Level {kanjiLevel})</span></h3>
+			<div class="grid gap-6 lg:grid-cols-2">
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Kanji Reviews per Day</h3>
+					<BarChart data={kanjiReviewsData} color="#ec4899" />
+				</div>
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Kanji Accuracy Trend</h3>
+					<LineChart data={kanjiAccuracyData} color="#a855f7" maxY={100} yLabel="%" />
+				</div>
+			</div>
+		{/if}
 	{/if}
 </div>

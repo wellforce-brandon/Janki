@@ -85,6 +85,10 @@ export async function getCardsByDeck(
 	offset = 0,
 	stateFilter?: number,
 ): Promise<QueryResult<CardWithContent[]>> {
+	const SAFE_SORT_COLS = ["due", "created_at", "state", "stability"] as const;
+	if (!(SAFE_SORT_COLS as readonly string[]).includes(sortBy)) {
+		return { ok: false, error: `Invalid sort column: ${sortBy}` };
+	}
 	return safeQuery(async () => {
 		const db = await getDb();
 		const params: (number | string)[] = [deckId];

@@ -4,6 +4,7 @@ import Button from "$lib/components/ui/button/button.svelte";
 import { type KanjiLevelItem, markLessonCompleted } from "$lib/db/queries/kanji";
 import { updateUserNotes, updateUserSynonyms } from "$lib/db/queries/kanji-reviews";
 import { addToast } from "$lib/stores/toast.svelte";
+import { fisherYatesShuffle, getTypeColor } from "$lib/utils/kanji";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
 interface Props {
@@ -67,7 +68,7 @@ function startQuiz() {
 
 function buildQuizQueue() {
 	const questions: QuizQuestion[] = [];
-	const shuffled = [...items].sort(() => Math.random() - 0.5);
+	const shuffled = fisherYatesShuffle(items);
 	for (const item of shuffled) {
 		questions.push({ item, type: "meaning", answered: false, correct: false });
 		if (item.item_type !== "radical") {
@@ -132,19 +133,6 @@ async function addSynonym() {
 	await updateUserSynonyms(current.id, json);
 	current.user_synonyms = json;
 	synonymInput = "";
-}
-
-function getTypeColor(itemType: string): string {
-	switch (itemType) {
-		case "radical":
-			return "bg-blue-500 dark:bg-blue-600";
-		case "kanji":
-			return "bg-pink-500 dark:bg-pink-600";
-		case "vocab":
-			return "bg-purple-500 dark:bg-purple-600";
-		default:
-			return "bg-blue-500 dark:bg-blue-600";
-	}
 }
 
 // --- Quiz phase ---

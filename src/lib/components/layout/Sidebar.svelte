@@ -30,9 +30,11 @@ const sections: NavSection[] = [
 		label: "Kanji",
 		items: [
 			{ id: "kanji-dashboard", label: "Overview", shortcut: "Ctrl+4" },
-			{ id: "kanji-map", label: "Kanji Map", subViews: ["kanji-detail"] },
-			{ id: "kanji-lessons", label: "Lessons" },
-			{ id: "kanji-review", label: "Reviews" },
+			{ id: "kanji-radicals", label: "Radicals", subViews: ["kanji-detail"] },
+			{ id: "kanji-kanji", label: "Kanji" },
+			{ id: "kanji-vocabulary", label: "Vocabulary" },
+			{ id: "kanji-lessons", label: "Lessons", subViews: ["kanji-lesson-picker"] },
+			{ id: "kanji-review", label: "Reviews", subViews: ["kanji-extra-study"] },
 		],
 	},
 	{

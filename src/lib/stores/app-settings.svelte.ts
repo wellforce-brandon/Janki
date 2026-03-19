@@ -1,5 +1,7 @@
 import { getDb } from "$lib/db/database";
 
+export type KanjiReviewOrder = "shuffled" | "apprentice-first" | "lower-srs" | "lower-level";
+
 export interface AppSettings {
 	theme: "dark" | "light" | "system";
 	dailyNewLimit: number;
@@ -9,6 +11,11 @@ export interface AppSettings {
 	ttsPitch: number;
 	kanjiAutoSpeak: boolean;
 	showReviewTimer: boolean;
+	kanjiBatchSize: number;
+	kanjiMaxDailyLessons: number;
+	kanjiReviewOrder: KanjiReviewOrder;
+	kanjiShowSrsIndicator: boolean;
+	kanjiAutoplayAudio: boolean;
 }
 
 const DEFAULTS: AppSettings = {
@@ -20,6 +27,11 @@ const DEFAULTS: AppSettings = {
 	ttsPitch: 1.0,
 	kanjiAutoSpeak: false,
 	showReviewTimer: true,
+	kanjiBatchSize: 5,
+	kanjiMaxDailyLessons: 15,
+	kanjiReviewOrder: "shuffled",
+	kanjiShowSrsIndicator: true,
+	kanjiAutoplayAudio: false,
 };
 
 let settings = $state<AppSettings>({ ...DEFAULTS });
@@ -53,8 +65,8 @@ export async function loadSettings(): Promise<void> {
 				}
 			}
 		}
-	} catch {
-		// Use defaults if DB not ready
+	} catch (e) {
+		console.error("[Settings] Failed to load settings:", e);
 	}
 	loaded = true;
 
@@ -74,8 +86,8 @@ export async function saveSetting<K extends keyof AppSettings>(
 			`app_${key}`,
 			String(value),
 		]);
-	} catch {
-		// Silently fail
+	} catch (e) {
+		console.error("[Settings] Failed to save setting:", key, e);
 	}
 
 	if (key === "theme") applyTheme(value as string);
@@ -90,8 +102,8 @@ export async function resetAllSettings(): Promise<void> {
 	try {
 		const db = await getDb();
 		await db.execute("DELETE FROM settings WHERE key LIKE 'app_%'");
-	} catch {
-		// Silently fail
+	} catch (e) {
+		console.error("[Settings] Failed to reset settings:", e);
 	}
 	applyTheme(DEFAULTS.theme);
 }

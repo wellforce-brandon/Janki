@@ -96,5 +96,24 @@ describe("WaniKani SRS", () => {
 			const result = await reviewKanjiItem(1, true, 8, 1);
 			expect(result.newStage).toBeLessThanOrEqual(9);
 		});
+
+		it("should not drop below stage 1 on incorrect at stage 1", async () => {
+			const { reviewKanjiItem } = await import("./wanikani-srs");
+			const result = await reviewKanjiItem(1, false, 1, 1);
+			expect(result.newStage).toBe(1);
+			expect(result.nextReview).toBeDefined();
+		});
+
+		it("should drop from Guru (stage 5) to stage 3 on incorrect", async () => {
+			const { reviewKanjiItem } = await import("./wanikani-srs");
+			const result = await reviewKanjiItem(1, false, 5, 1);
+			expect(result.newStage).toBe(3);
+		});
+
+		it("should produce SQLite-compatible datetime format", async () => {
+			const { reviewKanjiItem } = await import("./wanikani-srs");
+			const result = await reviewKanjiItem(1, true, 1, 1);
+			expect(result.nextReview).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+		});
 	});
 });

@@ -61,7 +61,16 @@ export async function getKanjiByCharacter(
 	});
 }
 
-export async function getDueKanjiReviews(): Promise<QueryResult<KanjiLevelItem[]>> {
+export async function getDueKanjiReviews(
+	order: "shuffled" | "apprentice-first" | "lower-srs" | "lower-level" = "shuffled",
+): Promise<QueryResult<KanjiLevelItem[]>> {
+	const ORDER_CLAUSES: Record<string, string> = {
+		shuffled: "next_review ASC",
+		"apprentice-first": "CASE WHEN srs_stage <= 4 THEN 0 ELSE 1 END, srs_stage ASC",
+		"lower-srs": "srs_stage ASC, next_review ASC",
+		"lower-level": "level ASC, next_review ASC",
+	};
+	const orderBy = ORDER_CLAUSES[order] ?? "next_review ASC";
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<KanjiLevelItem[]>(
@@ -69,7 +78,7 @@ export async function getDueKanjiReviews(): Promise<QueryResult<KanjiLevelItem[]
 			WHERE srs_stage > 0 AND srs_stage < 9
 			AND lesson_completed_at IS NOT NULL
 			AND next_review IS NOT NULL AND next_review <= datetime('now')
-			ORDER BY next_review ASC`,
+			ORDER BY ${orderBy}`,
 		);
 	});
 }
@@ -157,63 +166,69 @@ export async function unlockItems(ids: number[]): Promise<QueryResult<void>> {
 export async function checkAndUnlockLevel(level: number): Promise<QueryResult<number[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-
-		// Get radicals at Guru+ for this level
-		const radicalProgress = await db.select<{ total: number; guru: number }[]>(
-			`SELECT COUNT(*) as total,
+		await db.execute("BEGIN TRANSACTION");
+		try {
+			// Get radicals at Guru+ for this level
+			const radicalProgress = await db.select<{ total: number; guru: number }[]>(
+				`SELECT COUNT(*) as total,
 				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru
 			FROM kanji_levels WHERE level = ? AND item_type = 'radical'`,
-			[level],
-		);
-
-		const unlockedIds: number[] = [];
-
-		// If 90%+ radicals at Guru, unlock kanji for this level
-		const rp = radicalProgress[0];
-		if (rp.total > 0 && rp.guru / rp.total >= 0.9) {
-			const lockedKanji = await db.select<{ id: number }[]>(
-				"SELECT id FROM kanji_levels WHERE level = ? AND item_type = 'kanji' AND srs_stage = 0",
 				[level],
 			);
-			const kanjiIds = lockedKanji.map((r) => r.id);
-			if (kanjiIds.length > 0) {
-				const ph = kanjiIds.map(() => "?").join(",");
-				await db.execute(
-					`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
-					WHERE id IN (${ph})`,
-					kanjiIds,
-				);
-				unlockedIds.push(...kanjiIds);
-			}
-		}
 
-		// If 90%+ kanji at Guru, unlock vocab for this level
-		const kanjiProgress = await db.select<{ total: number; guru: number }[]>(
-			`SELECT COUNT(*) as total,
+			const unlockedIds: number[] = [];
+
+			// If 90%+ radicals at Guru, unlock kanji for this level
+			const rp = radicalProgress[0];
+			if (rp.total > 0 && rp.guru / rp.total >= 0.9) {
+				const lockedKanji = await db.select<{ id: number }[]>(
+					"SELECT id FROM kanji_levels WHERE level = ? AND item_type = 'kanji' AND srs_stage = 0",
+					[level],
+				);
+				const kanjiIds = lockedKanji.map((r) => r.id);
+				if (kanjiIds.length > 0) {
+					const ph = kanjiIds.map(() => "?").join(",");
+					await db.execute(
+						`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
+					WHERE id IN (${ph})`,
+						kanjiIds,
+					);
+					unlockedIds.push(...kanjiIds);
+				}
+			}
+
+			// If 90%+ kanji at Guru, unlock vocab for this level
+			const kanjiProgress = await db.select<{ total: number; guru: number }[]>(
+				`SELECT COUNT(*) as total,
 				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru
 			FROM kanji_levels WHERE level = ? AND item_type = 'kanji'`,
-			[level],
-		);
-
-		const kp = kanjiProgress[0];
-		if (kp.total > 0 && kp.guru / kp.total >= 0.9) {
-			const lockedVocab = await db.select<{ id: number }[]>(
-				"SELECT id FROM kanji_levels WHERE level = ? AND item_type = 'vocab' AND srs_stage = 0",
 				[level],
 			);
-			const vocabIds = lockedVocab.map((r) => r.id);
-			if (vocabIds.length > 0) {
-				const ph = vocabIds.map(() => "?").join(",");
-				await db.execute(
-					`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
-					WHERE id IN (${ph})`,
-					vocabIds,
-				);
-				unlockedIds.push(...vocabIds);
-			}
-		}
 
-		return unlockedIds;
+			const kp = kanjiProgress[0];
+			if (kp.total > 0 && kp.guru / kp.total >= 0.9) {
+				const lockedVocab = await db.select<{ id: number }[]>(
+					"SELECT id FROM kanji_levels WHERE level = ? AND item_type = 'vocab' AND srs_stage = 0",
+					[level],
+				);
+				const vocabIds = lockedVocab.map((r) => r.id);
+				if (vocabIds.length > 0) {
+					const ph = vocabIds.map(() => "?").join(",");
+					await db.execute(
+						`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
+					WHERE id IN (${ph})`,
+						vocabIds,
+					);
+					unlockedIds.push(...vocabIds);
+				}
+			}
+
+			await db.execute("COMMIT");
+			return unlockedIds;
+		} catch (e) {
+			await db.execute("ROLLBACK");
+			throw e;
+		}
 	});
 }
 
@@ -408,6 +423,108 @@ export async function initializeKanjiProgression(): Promise<QueryResult<number[]
 			ids,
 		);
 		return ids;
+	});
+}
+
+export interface ItemsByLevel {
+	level: number;
+	total: number;
+	unlocked: number;
+	items: KanjiLevelItem[];
+}
+
+export async function getItemsByTypeAndTier(
+	itemType: string,
+	startLevel: number,
+	endLevel: number,
+): Promise<QueryResult<ItemsByLevel[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const items = await db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE item_type = ? AND level >= ? AND level <= ?
+			ORDER BY level ASC, character ASC`,
+			[itemType, startLevel, endLevel],
+		);
+
+		// Group by level
+		const byLevel = new Map<number, KanjiLevelItem[]>();
+		for (let lvl = startLevel; lvl <= endLevel; lvl++) {
+			byLevel.set(lvl, []);
+		}
+		for (const item of items) {
+			const arr = byLevel.get(item.level);
+			if (arr) arr.push(item);
+		}
+
+		const result: ItemsByLevel[] = [];
+		for (const [level, levelItems] of byLevel) {
+			if (levelItems.length === 0) continue;
+			result.push({
+				level,
+				total: levelItems.length,
+				unlocked: levelItems.filter((i) => i.srs_stage > 0).length,
+				items: levelItems,
+			});
+		}
+		return result;
+	});
+}
+
+export async function getAllAvailableLessons(): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE srs_stage >= 1 AND lesson_completed_at IS NULL
+			ORDER BY level ASC,
+				CASE item_type WHEN 'radical' THEN 0 WHEN 'kanji' THEN 1 WHEN 'vocab' THEN 2 ELSE 3 END,
+				character ASC`,
+		);
+	});
+}
+
+export async function getRecentLessonItems(limit = 50): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE lesson_completed_at IS NOT NULL
+			ORDER BY lesson_completed_at DESC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
+export async function getBurnedItems(limit = 100): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE srs_stage = 9
+			ORDER BY level ASC, item_type ASC, character ASC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
+export async function getRecentMistakeItems(limit = 50): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<KanjiLevelItem[]>(
+			`SELECT kl.* FROM kanji_levels kl
+			WHERE kl.id IN (
+				SELECT DISTINCT kanji_level_id FROM kanji_review_log WHERE correct = 0
+			)
+			ORDER BY (
+				SELECT MAX(reviewed_at) FROM kanji_review_log
+				WHERE kanji_level_id = kl.id AND correct = 0
+			) DESC
+			LIMIT ?`,
+			[limit],
+		);
 	});
 }
 

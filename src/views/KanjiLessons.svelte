@@ -8,6 +8,7 @@ import {
 	getAvailableLessons,
 	type KanjiLevelItem,
 } from "$lib/db/queries/kanji";
+import { getSettings } from "$lib/stores/app-settings.svelte";
 import { navigate } from "$lib/stores/navigation.svelte";
 
 let loading = $state(true);
@@ -18,7 +19,11 @@ let completedCount = $state(0);
 
 async function loadLessons() {
 	loading = true;
-	const [countR, itemsR] = await Promise.all([getAvailableLessonCount(), getAvailableLessons(5)]);
+	const batchSize = getSettings().kanjiBatchSize;
+	const [countR, itemsR] = await Promise.all([
+		getAvailableLessonCount(),
+		getAvailableLessons(batchSize),
+	]);
 	if (countR.ok) availableCount = countR.data;
 	if (itemsR.ok) batchItems = itemsR.data;
 	loading = false;
@@ -61,7 +66,7 @@ $effect(() => {
 			<div class="mt-6 flex justify-center gap-2">
 				{#if availableCount > 0}
 					<Button onclick={startSession}>
-						Next Batch ({Math.min(availableCount, 5)})
+						Next Batch ({Math.min(availableCount, getSettings().kanjiBatchSize)})
 					</Button>
 				{/if}
 				<Button variant="outline" onclick={() => navigate("kanji-dashboard")}>
@@ -85,9 +90,12 @@ $effect(() => {
 				lesson{availableCount > 1 ? "s" : ""} available
 			</p>
 
-			<div class="mt-6">
+			<div class="mt-6 flex justify-center gap-2">
 				<Button onclick={startSession}>
-					Start Lessons ({Math.min(availableCount, 5)})
+					Start Lessons ({Math.min(availableCount, getSettings().kanjiBatchSize)})
+				</Button>
+				<Button variant="outline" onclick={() => navigate("kanji-lesson-picker")}>
+					Advanced
 				</Button>
 			</div>
 		</div>

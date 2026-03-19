@@ -6,6 +6,7 @@ import { type CardSearchResult, searchCards } from "$lib/db/queries/cards";
 import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { speakJapanese } from "$lib/tts/speech";
+import { parseMeanings } from "$lib/utils/kanji";
 import { highlightMatch } from "$lib/utils/search";
 import n5Data from "../../data/grammar/n5.json";
 
@@ -40,14 +41,6 @@ let grammarResults = $derived.by(() => {
 		)
 		.slice(0, 50);
 });
-
-function parseMeanings(json: string): string {
-	try {
-		return (JSON.parse(json) as string[]).join(", ");
-	} catch {
-		return json;
-	}
-}
 
 function parseCardFields(fields: string): string {
 	try {
@@ -161,7 +154,7 @@ $effect(() => {
 								>
 									<span class="text-2xl font-bold">{item.character}</span>
 									<div class="flex-1">
-										<div class="text-sm">{@html highlightMatch(parseMeanings(item.meanings), query)}</div>
+										<div class="text-sm">{@html highlightMatch(parseMeanings(item.meanings).join(", "), query)}</div>
 										<div class="text-xs text-muted-foreground capitalize">
 											{item.item_type} &middot; Level {item.level}
 										</div>

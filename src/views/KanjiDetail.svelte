@@ -8,6 +8,7 @@ import LoadingState from "$lib/components/ui/loading-state.svelte";
 import { getAdjacentKanji, getKanjiItemById, type KanjiLevelItem } from "$lib/db/queries/kanji";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { speakJapanese } from "$lib/tts/speech";
+import { parseMeanings } from "$lib/utils/kanji";
 
 interface Props {
 	itemId: number;
@@ -19,14 +20,6 @@ let item = $state<KanjiLevelItem | null>(null);
 let loading = $state(true);
 let prevItem = $state<KanjiLevelItem | null>(null);
 let nextItem = $state<KanjiLevelItem | null>(null);
-
-function parseMeanings(json: string): string[] {
-	try {
-		return JSON.parse(json);
-	} catch {
-		return [json];
-	}
-}
 
 function parseReadings(json: string | null): string[] {
 	if (!json) return [];
@@ -72,16 +65,13 @@ function handleKeydown(e: KeyboardEvent) {
 $effect(() => {
 	loadItem(itemId);
 });
-
-$effect(() => {
-	window.addEventListener("keydown", handleKeydown);
-	return () => window.removeEventListener("keydown", handleKeydown);
-});
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <div class="space-y-6">
 	<div class="flex items-center gap-2">
-		<Button variant="ghost" onclick={() => navigate("kanji-map")}>
+		<Button variant="ghost" onclick={() => navigate("kanji-dashboard")}>
 			&larr; Back to Kanji Map
 		</Button>
 		<div class="ml-auto flex gap-1">
@@ -115,7 +105,7 @@ $effect(() => {
 			title="Kanji not found"
 			description="This item doesn't exist or may have been removed."
 			actionLabel="Back to Kanji Map"
-			onaction={() => navigate("kanji-map")}
+			onaction={() => navigate("kanji-dashboard")}
 		/>
 	{:else}
 		<div class="mx-auto max-w-2xl space-y-8">

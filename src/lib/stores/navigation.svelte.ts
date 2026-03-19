@@ -2,11 +2,15 @@ export type View =
 	| "dashboard"
 	| "deck-review"
 	| "deck-stats"
-	| "kanji-map"
 	| "kanji-detail"
 	| "kanji-dashboard"
+	| "kanji-radicals"
+	| "kanji-kanji"
+	| "kanji-vocabulary"
 	| "kanji-lessons"
+	| "kanji-lesson-picker"
 	| "kanji-review"
+	| "kanji-extra-study"
 	| "decks"
 	| "deck-browse"
 	| "search"
@@ -22,10 +26,14 @@ const SECTION_ROOTS: Record<string, View> = {
 	"deck-review": "decks",
 	"deck-stats": "decks",
 	"kanji-dashboard": "kanji-dashboard",
-	"kanji-map": "kanji-dashboard",
+	"kanji-radicals": "kanji-dashboard",
+	"kanji-kanji": "kanji-dashboard",
+	"kanji-vocabulary": "kanji-dashboard",
 	"kanji-detail": "kanji-dashboard",
 	"kanji-lessons": "kanji-dashboard",
+	"kanji-lesson-picker": "kanji-dashboard",
 	"kanji-review": "kanji-dashboard",
+	"kanji-extra-study": "kanji-dashboard",
 	grammar: "grammar",
 	reading: "reading",
 	search: "search",

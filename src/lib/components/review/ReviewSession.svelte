@@ -152,13 +152,8 @@ async function undo() {
 
 function playTts() {
 	if (!currentCard) return;
-	try {
-		const fields = JSON.parse(currentCard.fields) as Record<string, string>;
-		const text = Object.values(fields).join(" ");
-		speakJapanese(text);
-	} catch {
-		// Silently fail
-	}
+	const text = Object.values(currentFields).join(" ");
+	speakJapanese(text);
 }
 
 function handleKeydown(e: KeyboardEvent) {

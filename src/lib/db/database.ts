@@ -18,9 +18,17 @@ export async function safeQuery<T>(fn: () => Promise<T>): Promise<QueryResult<T>
 
 export async function getDb(): Promise<Database> {
 	if (db) return db;
-	db = await Database.load("sqlite:janki.db");
-	await runMigrations(db);
+	const instance = await Database.load("sqlite:janki.db");
+	await runMigrations(instance);
+	db = instance;
 	return db;
+}
+
+export async function closeDb(): Promise<void> {
+	if (db) {
+		await db.close();
+		db = null;
+	}
 }
 
 async function runMigrations(database: Database): Promise<void> {
@@ -40,18 +48,24 @@ async function runMigrations(database: Database): Promise<void> {
 	for (const migration of migrations) {
 		if (migration.version > currentVersion) {
 			console.log(`Running migration v${migration.version}: ${migration.description}`);
-			// Split on semicolons and execute each statement separately
-			const statements = migration.up
-				.split(";")
-				.map((s) => s.trim())
-				.filter((s) => s.length > 0);
-			for (const stmt of statements) {
-				await database.execute(stmt);
+			await database.execute("BEGIN TRANSACTION");
+			try {
+				const statements = migration.up
+					.split(";")
+					.map((s) => s.trim())
+					.filter((s) => s.length > 0);
+				for (const stmt of statements) {
+					await database.execute(stmt);
+				}
+				await database.execute(
+					"INSERT OR REPLACE INTO settings (key, value) VALUES ('schema_version', ?)",
+					[String(migration.version)],
+				);
+				await database.execute("COMMIT");
+			} catch (e) {
+				await database.execute("ROLLBACK");
+				throw e;
 			}
-			await database.execute(
-				"INSERT OR REPLACE INTO settings (key, value) VALUES ('schema_version', ?)",
-				[String(migration.version)],
-			);
 		}
 	}
 }

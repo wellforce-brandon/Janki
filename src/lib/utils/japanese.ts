@@ -84,7 +84,10 @@ export function simpleFurigana(text: string, reading: string): FuriganaSegment[]
 			}
 			// Fallback: assign remaining reading to kanji block
 			const remainingKana = [...text.slice(kanjiEnd)].filter((c) => isKana(c)).length;
-			const readingForKanji = reading.slice(readIdx, reading.length - remainingKana || undefined);
+			const readingForKanji =
+				remainingKana > 0
+					? reading.slice(readIdx, reading.length - remainingKana)
+					: reading.slice(readIdx);
 			segments.push({
 				text: text.slice(textIdx, kanjiEnd),
 				reading: readingForKanji,

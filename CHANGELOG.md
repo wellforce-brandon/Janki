@@ -6,6 +6,70 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.1.0] - 2026-03-19
+
+### Fixed
+
+- Migration runner now wraps each migration in BEGIN/COMMIT/ROLLBACK to prevent corrupt half-applied schemas
+- DB singleton only assigned after migrations succeed, preventing use of partially-migrated databases
+- checkAndUnlockLevel wrapped in transaction to prevent TOCTOU race on concurrent unlock calls
+- getRecentMistakeItems query rewritten for correct DISTINCT + ORDER BY behavior
+- Stray "t" characters removed from KanjiDashboard that rendered as visible text in the UI
+- Biased shuffle (sort with Math.random) replaced with Fisher-Yates in review and lesson sessions
+- Missing await on loadDueItems in KanjiReview handleComplete causing stale UI after review
+- DateTime format mismatch between JS ISO strings and SQLite datetime() -- now stores YYYY-MM-DD HH:MM:SS
+- sortBy parameter in getCardsByDeck now validated against whitelist to prevent SQL injection
+- Furigana off-by-one when remainingKana is 0 at end of word
+- kanjiReviewOrder and kanjiBatchSize settings now actually affect lesson and review queries
+- Silent error swallowing in app-settings catch blocks replaced with console.error logging
+- Manual window.addEventListener in KanjiDetail replaced with svelte:window directive
+- Type-unsafe "as any" cast in Settings replaced with proper KanjiReviewOrder type
+- DB connection now closed before file replacement during backup import
+- Ctrl+I shortcut removed (conflicted with system default, redundant with Ctrl+2)
+
+### Added
+
+- Shared utility module (src/lib/utils/kanji.ts) with getTypeColor, parseMeanings, fisherYatesShuffle
+- closeDb() export in database.ts for safe DB file replacement
+- LevelUpCelebration: aria-modal, Escape key dismiss, autofocus on Continue button
+- Three new wanikani-srs tests: stage 1 incorrect floor, Guru drop, datetime format validation
+- Inline style exception comments in Stats for dynamic hex color dots
+
+### Changed
+
+- getTypeColor and parseMeanings extracted from 6 files into shared kanji utility
+- ReviewSession playTts uses existing currentFields derived state instead of re-parsing JSON
+- getDueKanjiReviews accepts optional order parameter for review ordering setting
+
+## [0.8.0.0] - 2026-03-19
+
+### Added
+
+- Three WaniKani-style item type browser pages: Radicals, Kanji, and Vocabulary with tier pagination (Levels 1-10, 11-20, etc.), per-level grids, status-styled tiles (Locked/In Lessons/In Reviews/Burned), and level sub-tab navigation
+- Shared ItemTypeBrowser component with color-configurable tile status styling
+- Extra Study modes: Recent Lessons, Recent Mistakes, and Burned Items with practice-only sessions (no SRS impact)
+- Practice mode for KanjiReviewSession (practiceMode prop skips SRS updates)
+- Advanced Lesson Picker with hierarchical Select All (per level, per type), auto-batch selection, interleave toggle, and custom item selection
+- Kanji settings: batch size, max daily lessons, review ordering (shuffled/apprentice-first/lower-srs/lower-level), SRS indicator toggle, autoplay audio toggle
+- Kanji review charts in Stats page: reviews per day and accuracy trend with date range filter
+- Level-up celebration modal when user advances to a new kanji level after review session
+- Extra Study link in review completion screen and empty review state
+- Advanced picker link in lessons view and dashboard
+- Database queries: getItemsByTypeAndTier(), getAllAvailableLessons(), getRecentLessonItems(), getBurnedItems(), getRecentMistakeItems()
+
+### Changed
+
+- Replaced Kanji Map with three separate pages: Radicals, Kanji, and Vocabulary in sidebar navigation
+- Removed kanji-map view type; added kanji-radicals, kanji-kanji, kanji-vocabulary, kanji-extra-study, kanji-lesson-picker view types
+- KanjiDashboard Level Progress section now links to Radicals/Kanji/Vocabulary pages instead of Kanji Map
+- KanjiDetail back navigation updated from kanji-map to kanji-dashboard
+- Sidebar Kanji section expanded: Overview, Radicals, Kanji, Vocabulary, Lessons, Reviews
+
+### Removed
+
+- KanjiMap.svelte view (replaced by three item type browser pages)
+- kanji-map view type from navigation
+
 ## [0.7.0.0] - 2026-03-19
 
 ### Added

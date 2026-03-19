@@ -2,7 +2,12 @@
 import { getVersion } from "@tauri-apps/api/app";
 import { exportBackup, importBackup } from "$lib/backup/backup";
 import Button from "$lib/components/ui/button/button.svelte";
-import { getSettings, resetAllSettings, saveSetting } from "$lib/stores/app-settings.svelte";
+import {
+	getSettings,
+	type KanjiReviewOrder,
+	resetAllSettings,
+	saveSetting,
+} from "$lib/stores/app-settings.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
 import { checkForUpdates } from "$lib/updater/check-update";
@@ -194,6 +199,87 @@ async function handleResetDefaults() {
 				}}
 			/>
 			<span class="text-sm">Show timer during review</span>
+		</label>
+	</section>
+
+	<!-- Kanji -->
+	<section class="space-y-3 rounded-lg border bg-card p-4">
+		<h3 class="font-medium">Kanji</h3>
+		<div class="grid grid-cols-2 gap-4">
+			<div class="space-y-1">
+				<label class="text-sm text-muted-foreground" for="kanji-batch">Lesson batch size</label>
+				<select
+					id="kanji-batch"
+					class="w-full rounded-md border bg-background px-3 py-2 text-sm"
+					value={String(s.kanjiBatchSize)}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLSelectElement).value);
+						saveSetting("kanjiBatchSize", val);
+						addToast("Batch size updated", "success");
+					}}
+				>
+					{#each [3, 5, 7, 10] as size}
+						<option value={String(size)}>{size} items</option>
+					{/each}
+				</select>
+			</div>
+			<div class="space-y-1">
+				<label class="text-sm text-muted-foreground" for="kanji-daily">Max daily lessons</label>
+				<input
+					id="kanji-daily"
+					type="number"
+					min="0"
+					max="100"
+					class="w-full rounded-md border bg-background px-3 py-2"
+					value={s.kanjiMaxDailyLessons}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLInputElement).value);
+						saveSetting("kanjiMaxDailyLessons", val);
+						addToast("Daily lesson limit saved", "success");
+					}}
+				/>
+			</div>
+		</div>
+		<div class="space-y-1">
+			<label class="text-sm text-muted-foreground" for="kanji-order">Review ordering</label>
+			<select
+				id="kanji-order"
+				class="w-full rounded-md border bg-background px-3 py-2 text-sm"
+				value={s.kanjiReviewOrder}
+				onchange={(e) => {
+					saveSetting("kanjiReviewOrder", (e.target as HTMLSelectElement).value as KanjiReviewOrder);
+					addToast("Review order updated", "success");
+				}}
+			>
+				<option value="shuffled">Shuffled</option>
+				<option value="apprentice-first">Apprentice First</option>
+				<option value="lower-srs">Lower SRS Stages First</option>
+				<option value="lower-level">Lower Levels First</option>
+			</select>
+		</div>
+		<label class="flex items-center gap-2">
+			<input
+				type="checkbox"
+				checked={s.kanjiShowSrsIndicator}
+				onchange={(e) => {
+					const val = (e.target as HTMLInputElement).checked;
+					saveSetting("kanjiShowSrsIndicator", val);
+					addToast(val ? "SRS indicator shown" : "SRS indicator hidden", "success");
+				}}
+			/>
+			<span class="text-sm">Show SRS stage change after each review</span>
+		</label>
+		<label class="flex items-center gap-2">
+			<input
+				type="checkbox"
+				checked={s.kanjiAutoplayAudio}
+				onchange={(e) => {
+					const val = (e.target as HTMLInputElement).checked;
+					saveSetting("kanjiAutoplayAudio", val);
+					addToast(val ? "Audio autoplay enabled" : "Audio autoplay disabled", "success");
+				}}
+			/>
+			<span class="text-sm">Autoplay audio in lessons and reviews</span>
 		</label>
 	</section>
 

@@ -1,6 +1,7 @@
 import { appDataDir, join } from "@tauri-apps/api/path";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { copyFile, exists, mkdir, readDir, remove } from "@tauri-apps/plugin-fs";
+import { closeDb } from "$lib/db/database";
 
 const BACKUP_DIR = "backups";
 const MAX_BACKUPS = 7;
@@ -51,6 +52,9 @@ export async function importBackup(): Promise<boolean> {
 	const backupDir = await getBackupDir();
 	const safeName = await join(backupDir, `pre-restore-${formatBackupName()}`);
 	await copyFile(dbPath, safeName);
+
+	// Close active DB connection before replacing the file
+	await closeDb();
 
 	// Replace current DB with selected backup
 	await copyFile(selected, dbPath);

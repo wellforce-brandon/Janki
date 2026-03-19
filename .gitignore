@@ -74,7 +74,8 @@ Thumbs.db
 .DS_Store
 Desktop.ini
 ehthumbs.db
-Icon?
+# macOS Icon\r files (not app icons)
+Icon[^a-zA-Z]
 
 # Logs
 *.log

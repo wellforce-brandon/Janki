@@ -13,6 +13,8 @@ import KanjiExtraStudy from "./views/KanjiExtraStudy.svelte";
 import KanjiKanji from "./views/KanjiKanji.svelte";
 import KanjiLessonPicker from "./views/KanjiLessonPicker.svelte";
 import KanjiLessons from "./views/KanjiLessons.svelte";
+import KanjiLevel from "./views/KanjiLevel.svelte";
+import KanjiLevels from "./views/KanjiLevels.svelte";
 import KanjiRadicals from "./views/KanjiRadicals.svelte";
 import KanjiReview from "./views/KanjiReview.svelte";
 import KanjiVocabulary from "./views/KanjiVocabulary.svelte";
@@ -89,6 +91,10 @@ function handleKeydown(e: KeyboardEvent) {
 				<KanjiReview />
 			{:else if currentView() === "kanji-extra-study"}
 				<KanjiExtraStudy />
+			{:else if currentView() === "kanji-levels"}
+				<KanjiLevels />
+			{:else if currentView() === "kanji-level"}
+				<KanjiLevel />
 			{:else if currentView() === "decks" || currentView() === "deck-browse"}
 				<Decks />
 			{:else if currentView() === "grammar"}

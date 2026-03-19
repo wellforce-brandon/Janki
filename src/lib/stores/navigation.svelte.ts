@@ -11,6 +11,8 @@ export type View =
 	| "kanji-lesson-picker"
 	| "kanji-review"
 	| "kanji-extra-study"
+	| "kanji-levels"
+	| "kanji-level"
 	| "decks"
 	| "deck-browse"
 	| "search"
@@ -34,6 +36,8 @@ const SECTION_ROOTS: Record<string, View> = {
 	"kanji-lesson-picker": "kanji-dashboard",
 	"kanji-review": "kanji-dashboard",
 	"kanji-extra-study": "kanji-dashboard",
+	"kanji-levels": "kanji-dashboard",
+	"kanji-level": "kanji-levels",
 	grammar: "grammar",
 	reading: "reading",
 	search: "search",

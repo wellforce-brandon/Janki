@@ -12,10 +12,12 @@ const colors = {
 	legendLesson: "bg-blue-500/30 dark:bg-blue-400/30 border border-blue-500/50",
 	legendReview: "bg-blue-500 dark:bg-blue-600",
 };
+
+let initialTier = $derived(Number(viewParams().tier) || 0);
 </script>
 
 {#if currentView() === "kanji-detail" && viewParams().id}
 	<KanjiDetail itemId={Number(viewParams().id)} />
 {:else}
-	<ItemTypeBrowser itemType="radical" title="Radicals" {colors} />
+	<ItemTypeBrowser itemType="radical" title="Radicals" {colors} {initialTier} />
 {/if}

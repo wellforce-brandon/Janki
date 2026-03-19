@@ -1,5 +1,6 @@
 <script lang="ts">
 import ItemTypeBrowser from "$lib/components/kanji/ItemTypeBrowser.svelte";
+import { viewParams } from "$lib/stores/navigation.svelte";
 
 const colors = {
 	locked:
@@ -10,6 +11,8 @@ const colors = {
 	legendLesson: "bg-pink-500/30 dark:bg-pink-400/30 border border-pink-500/50",
 	legendReview: "bg-pink-500 dark:bg-pink-600",
 };
+
+let initialTier = $derived(Number(viewParams().tier) || 0);
 </script>
 
-<ItemTypeBrowser itemType="kanji" title="Kanji" {colors} />
+<ItemTypeBrowser itemType="kanji" title="Kanji" {colors} {initialTier} />

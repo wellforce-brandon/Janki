@@ -523,6 +523,32 @@ export async function getItemsByTypeAndTier(
 	});
 }
 
+export interface LevelItemsByType {
+	radicals: KanjiLevelItem[];
+	kanji: KanjiLevelItem[];
+	vocab: KanjiLevelItem[];
+}
+
+export async function getItemsByLevel(level: number): Promise<QueryResult<LevelItemsByType>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const items = await db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE level = ?
+			ORDER BY CASE item_type WHEN 'radical' THEN 0 WHEN 'kanji' THEN 1 WHEN 'vocab' THEN 2 ELSE 3 END,
+				json_extract(meanings, '$[0]') ASC`,
+			[level],
+		);
+		const result: LevelItemsByType = { radicals: [], kanji: [], vocab: [] };
+		for (const item of items) {
+			if (item.item_type === "radical") result.radicals.push(item);
+			else if (item.item_type === "kanji") result.kanji.push(item);
+			else if (item.item_type === "vocab") result.vocab.push(item);
+		}
+		return result;
+	});
+}
+
 export async function getAllAvailableLessons(): Promise<QueryResult<KanjiLevelItem[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();

@@ -20,9 +20,10 @@ interface Props {
 	itemType: "radical" | "kanji" | "vocab";
 	title: string;
 	colors: ColorConfig;
+	initialTier?: number;
 }
 
-let { itemType, title, colors }: Props = $props();
+let { itemType, title, colors, initialTier = 0 }: Props = $props();
 
 const TIERS = [
 	{ label: "1-10", start: 1, end: 10 },
@@ -113,7 +114,7 @@ function getMeaningDisplay(item: KanjiLevelItem): string {
 }
 
 $effect(() => {
-	loadTier(0);
+	loadTier(initialTier);
 });
 </script>
 

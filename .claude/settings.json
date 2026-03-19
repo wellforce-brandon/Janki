@@ -1,94 +1,114 @@
 {
-	"$schema": "https://json.schemastore.org/claude-code-settings.json",
-	"permissions": {
-		"allow": ["Read", "Glob", "Grep", "WebFetch", "WebSearch"],
-		"deny": [
-			"Read(~/.ssh/**)",
-			"Read(~/.aws/**)",
-			"Read(~/.azure/**)",
-			"Read(~/.kube/**)",
-			"Read(~/.docker/config.json)",
-			"Read(~/.npmrc)",
-			"Read(~/.git-credentials)",
-			"Read(~/.config/gh/**)",
-			"Edit(~/.ssh/**)",
-			"Edit(~/.aws/**)",
-			"Edit(~/.azure/**)",
-			"Edit(~/.kube/**)",
-			"Edit(~/.docker/**)",
-			"Edit(~/.npmrc)",
-			"Edit(~/.gitconfig)",
-			"Edit(~/.git-credentials)",
-			"Edit(~/.bashrc)",
-			"Edit(~/.zshrc)",
-			"Edit(~/.profile)",
-			"Edit(~/.bash_history)",
-			"Edit(~/.zsh_history)",
-			"Edit(**/.env)",
-			"Edit(**/.env.local)",
-			"Edit(**/.env.*.local)",
-			"Edit(**/*.pem)",
-			"Edit(**/*.key)",
-			"Edit(**/*.cert)"
-		]
-	},
-	"env": {
-		"ENABLE_TOOL_SEARCH": "true"
-	},
-	"plansDirectory": "tasks",
-	"hooks": {
-		"PreToolUse": [
-			{
-				"matcher": "Bash(git commit*)",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "bash .claude/scripts/check-changelog-staged.sh",
-						"statusMessage": "Checking changelog is staged..."
-					}
-				]
-			},
-			{
-				"matcher": "Bash(rm -rf*)",
-				"hooks": [
-					{
-						"type": "prompt",
-						"prompt": "A destructive rm -rf command is about to run. Review the target path and determine if this is safe. Block if it targets the repo root, home directory, or system paths. Allow if it targets node_modules, dist, build, or other generated directories."
-					}
-				]
-			}
-		],
-		"PostToolUse": [
-			{
-				"matcher": "Edit|Write",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "if echo \"$TOOL_INPUT\" | grep -qE '\\.(svelte|ts|js|json|jsonc)\"'; then npx @biomejs/biome check --write \"$(echo \"$TOOL_INPUT\" | grep -oP '\"file_path\":\\s*\"\\K[^\"]+')\" 2>/dev/null; fi",
-						"statusMessage": "Auto-formatting with Biome..."
-					}
-				]
-			}
-		],
-		"Stop": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "echo '\\a'"
-					}
-				]
-			}
-		],
-		"Notification": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "echo '\\a'"
-					}
-				]
-			}
-		]
-	}
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "ENABLE_TOOL_SEARCH": "true"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Bash(curl -s -H \"Authorization: Bearer 70c365ce-aeb1-43de-a3b8-18881bc9b60c\" \"https://api.wanikani.com/v2/subjects?types=radical&levels=1,2,3,4,5,6,7,8,9,10\")",
+      "Bash(python -c \":*)",
+      "Bash(curl -s -H \"Authorization: Bearer 70c365ce-aeb1-43de-a3b8-18881bc9b60c\" \"https://api.wanikani.com/v2/subjects?types=kanji\")",
+      "Bash(mkdir -p c:/Github/Janki/public/data/radical-images)",
+      "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri\"\" } | Stop-Process -Force 2>$null; \"\"Stopped\"\"')",
+      "Bash(powershell.exe -NoProfile -Command 'Remove-Item \"\"$env:APPDATA\\\\com.janki.app\\\\janki.db\"\" -Force -ErrorAction SilentlyContinue; \"\"Deleted DB\"\"')",
+      "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri|cargo|rustc\"\" } | Stop-Process -Force 2>$null; Start-Sleep -Seconds 2; \"\"Processes cleared\"\"')",
+      "Bash(powershell.exe -NoProfile -Command 'Get-ChildItem -Path \"\"$env:APPDATA\"\" -Recurse -Filter \"\"janki.db\"\" -ErrorAction SilentlyContinue | Select-Object FullName; Get-ChildItem -Path \"\"$env:LOCALAPPDATA\"\" -Recurse -Filter \"\"janki.db\"\" -ErrorAction SilentlyContinue | Select-Object FullName')",
+      "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri\"\" } | Stop-Process -Force 2>$null; Start-Sleep -Seconds 1; Remove-Item \"\"C:\\\\Users\\\\B_StL\\\\AppData\\\\Roaming\\\\com.janki.desktop\\\\janki.db\"\" -Force; \"\"DB deleted\"\"')",
+      "Bash(powershell.exe -NoProfile -Command 'Test-Path \"\"C:\\\\Users\\\\B_StL\\\\AppData\\\\Roaming\\\\com.janki.desktop\\\\janki.db\"\"')",
+      "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri\"\" } | Stop-Process -Force 2>$null; Remove-Item \"\"C:\\\\Users\\\\B_StL\\\\AppData\\\\Roaming\\\\com.janki.desktop\\\\janki.db\"\" -Force -ErrorAction SilentlyContinue; \"\"Ready\"\"')",
+      "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri\"\" } | Stop-Process -Force 2>$null; Start-Sleep -Seconds 1; Remove-Item \"\"C:\\\\Users\\\\B_StL\\\\AppData\\\\Roaming\\\\com.janki.desktop\\\\janki.db\"\" -Force -ErrorAction SilentlyContinue; \"\"Done\"\"')",
+      "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri\"\" } | Stop-Process -Force 2>$null; Start-Sleep -Seconds 1; Remove-Item \"\"C:\\\\Users\\\\B_StL\\\\AppData\\\\Roaming\\\\com.janki.desktop\\\\janki.db\"\" -Force -ErrorAction SilentlyContinue; \"\"Ready\"\"')",
+      "Bash(npm run:*)"
+    ],
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.azure/**)",
+      "Read(~/.kube/**)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.npmrc)",
+      "Read(~/.git-credentials)",
+      "Read(~/.config/gh/**)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.aws/**)",
+      "Edit(~/.azure/**)",
+      "Edit(~/.kube/**)",
+      "Edit(~/.docker/**)",
+      "Edit(~/.npmrc)",
+      "Edit(~/.gitconfig)",
+      "Edit(~/.git-credentials)",
+      "Edit(~/.bashrc)",
+      "Edit(~/.zshrc)",
+      "Edit(~/.profile)",
+      "Edit(~/.bash_history)",
+      "Edit(~/.zsh_history)",
+      "Edit(**/.env)",
+      "Edit(**/.env.local)",
+      "Edit(**/.env.*.local)",
+      "Edit(**/*.pem)",
+      "Edit(**/*.key)",
+      "Edit(**/*.cert)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git commit*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/check-changelog-staged.sh",
+            "statusMessage": "Checking changelog is staged..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(rm -rf*)",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "A destructive rm -rf command is about to run. Review the target path and determine if this is safe. Block if it targets the repo root, home directory, or system paths. Allow if it targets node_modules, dist, build, or other generated directories."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | grep -qE '\\.(svelte|ts|js|json|jsonc)\"'; then npx @biomejs/biome check --write \"$(echo \"$TOOL_INPUT\" | grep -oP '\"file_path\":\\s*\"\\K[^\"]+')\" 2>/dev/null; fi",
+            "statusMessage": "Auto-formatting with Biome..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '\\a'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '\\a'"
+          }
+        ]
+      }
+    ]
+  },
+  "plansDirectory": "tasks"
 }

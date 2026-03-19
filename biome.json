@@ -11,7 +11,14 @@
 		"lineWidth": 100
 	},
 	"files": {
-		"includes": ["**", "!**/src/lib/components/ui", "!**/src-tauri", "!**/dist", "!**/public/data"]
+		"includes": [
+			"**",
+			"!**/src/lib/components/ui",
+			"!**/src-tauri",
+			"!**/dist",
+			"!**/public/data",
+			"!**/.claude"
+		]
 	},
 	"overrides": [
 		{

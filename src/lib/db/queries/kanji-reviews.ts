@@ -65,6 +65,27 @@ export async function getKanjiReviewStats(
 	});
 }
 
+export async function getRecentMistakes(
+	limit = 10,
+): Promise<
+	QueryResult<(KanjiReviewLogEntry & { character: string; meanings: string; item_type: string })[]>
+> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<
+			(KanjiReviewLogEntry & { character: string; meanings: string; item_type: string })[]
+		>(
+			`SELECT r.*, k.character, k.meanings, k.item_type
+			FROM kanji_review_log r
+			JOIN kanji_levels k ON r.kanji_level_id = k.id
+			WHERE r.correct = 0
+			ORDER BY r.reviewed_at DESC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
 export async function updateUserNotes(id: number, notes: string): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();

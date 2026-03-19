@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.0.0] - 2026-03-19
+
+### Added
+
+- WaniKani-style kanji lesson session with teaching phase (tabbed content: meaning/examples/reading, batch thumbnails, arrow navigation) and quiz phase (typed input with romaji-to-hiragana, incorrect items shuffle back)
+- Lesson queries: getAvailableLessons(), getAvailableLessonCount(), markLessonCompleted()
+- Kanji dashboard with 3-row widget layout: lessons/reviews/forecast, level progress/item spread, recently unlocked/critical items/recent mistakes
+- Dashboard queries: getUpcomingReviews(), getSrsDistribution(), getCriticalItems(), getRecentlyUnlocked(), getRecentMistakes()
+- initializeKanjiProgression() to unlock level 1 radicals for new users
+- User notes and synonyms editing in lesson teaching phase
+- Phase 4 plan update for WaniKani-style separate Radicals/Kanji/Vocabulary pages
+
+### Changed
+
+- Main dashboard reorganized into grouped Decks/Kanji/Language sections with kanji lesson count, review count, and level display
+- KanjiLessons view replaced from stub to full lesson flow with batch of 5, completion screen, and next-batch option
+- KanjiDashboard view replaced from stub to full widget dashboard with empty state for new users
+
 ## [0.6.0.0] - 2026-03-19
 
 ### Added

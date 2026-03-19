@@ -279,6 +279,138 @@ export async function getDueKanjiCount(): Promise<QueryResult<number>> {
 	});
 }
 
+export async function getAvailableLessons(limit = 5): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE srs_stage >= 1 AND lesson_completed_at IS NULL
+			ORDER BY level ASC,
+				CASE item_type WHEN 'radical' THEN 0 WHEN 'kanji' THEN 1 WHEN 'vocab' THEN 2 ELSE 3 END,
+				character ASC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
+export async function getAvailableLessonCount(): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ count: number }[]>(
+			`SELECT COUNT(*) as count FROM kanji_levels
+			WHERE srs_stage >= 1 AND lesson_completed_at IS NULL`,
+		);
+		return rows[0].count;
+	});
+}
+
+export async function markLessonCompleted(ids: number[]): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const placeholders = ids.map(() => "?").join(",");
+		await db.execute(
+			`UPDATE kanji_levels
+			SET lesson_completed_at = datetime('now'),
+				next_review = datetime('now', '+4 hours')
+			WHERE id IN (${placeholders})`,
+			ids,
+		);
+	});
+}
+
+export async function getUpcomingReviews(
+	hours = 24,
+): Promise<QueryResult<{ hour: string; count: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ hour: string; count: number }[]>(
+			`SELECT strftime('%Y-%m-%d %H:00', next_review) as hour, COUNT(*) as count
+			FROM kanji_levels
+			WHERE srs_stage > 0 AND srs_stage < 9
+			AND lesson_completed_at IS NOT NULL
+			AND next_review IS NOT NULL
+			AND next_review > datetime('now')
+			AND next_review <= datetime('now', '+' || ? || ' hours')
+			GROUP BY strftime('%Y-%m-%d %H:00', next_review)
+			ORDER BY hour ASC`,
+			[hours],
+		);
+	});
+}
+
+export async function getSrsDistribution(): Promise<
+	QueryResult<{ item_type: string; srs_stage: number; count: number }[]>
+> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ item_type: string; srs_stage: number; count: number }[]>(
+			`SELECT item_type, srs_stage, COUNT(*) as count
+			FROM kanji_levels
+			WHERE srs_stage > 0
+			GROUP BY item_type, srs_stage
+			ORDER BY srs_stage, item_type`,
+		);
+	});
+}
+
+export async function getCriticalItems(
+	threshold = 0.7,
+	limit = 10,
+): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE (correct_count + incorrect_count) >= 4
+			AND CAST(correct_count AS REAL) / (correct_count + incorrect_count) < ?
+			AND srs_stage > 0 AND srs_stage < 9
+			ORDER BY CAST(correct_count AS REAL) / (correct_count + incorrect_count) ASC
+			LIMIT ?`,
+			[threshold, limit],
+		);
+	});
+}
+
+export async function getRecentlyUnlocked(limit = 10): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels
+			WHERE unlocked_at IS NOT NULL AND srs_stage > 0
+			ORDER BY unlocked_at DESC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
+export async function initializeKanjiProgression(): Promise<QueryResult<number[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		// Check if any items already have srs_stage > 0
+		const existing = await db.select<{ count: number }[]>(
+			"SELECT COUNT(*) as count FROM kanji_levels WHERE srs_stage > 0",
+		);
+		if (existing[0].count > 0) return [];
+
+		// Unlock all level 1 radicals
+		const radicals = await db.select<{ id: number }[]>(
+			"SELECT id FROM kanji_levels WHERE level = 1 AND item_type = 'radical' AND srs_stage = 0",
+		);
+		const ids = radicals.map((r) => r.id);
+		if (ids.length === 0) return [];
+
+		const placeholders = ids.map(() => "?").join(",");
+		await db.execute(
+			`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
+			WHERE id IN (${placeholders})`,
+			ids,
+		);
+		return ids;
+	});
+}
+
 export async function isKanjiSeeded(): Promise<QueryResult<boolean>> {
 	return safeQuery(async () => {
 		const db = await getDb();

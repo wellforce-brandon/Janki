@@ -3,9 +3,9 @@ import { RefreshCw } from "@lucide/svelte";
 import LevelProgressBar from "$lib/components/kanji/LevelProgress.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
 import { getTotalCardCount, getTotalDueCount } from "$lib/db/queries/cards";
 import {
+	getAvailableLessonCount,
 	getDueKanjiCount,
 	getLevelProgress,
 	getUserLevel,
@@ -19,6 +19,7 @@ let loading = $state(true);
 let error = $state<string | null>(null);
 let dueCount = $state(0);
 let kanjiDueCount = $state(0);
+let kanjiLessonCount = $state(0);
 let totalCards = $state(0);
 let streak = $state(0);
 let userLevel = $state(1);
@@ -29,9 +30,10 @@ let refreshing = $state(false);
 async function loadDashboard() {
 	error = null;
 	try {
-		const [dueR, kanjiR, totalR, streakR, levelR, statsR] = await Promise.all([
+		const [dueR, kanjiR, lessonR, totalR, streakR, levelR, statsR] = await Promise.all([
 			getTotalDueCount(),
 			getDueKanjiCount(),
+			getAvailableLessonCount(),
 			getTotalCardCount(),
 			getStreak(),
 			getUserLevel(),
@@ -40,12 +42,13 @@ async function loadDashboard() {
 
 		if (dueR.ok) dueCount = dueR.data;
 		if (kanjiR.ok) kanjiDueCount = kanjiR.data;
+		if (lessonR.ok) kanjiLessonCount = lessonR.data;
 		if (totalR.ok) totalCards = totalR.data;
 		if (streakR.ok) streak = streakR.data;
 		if (levelR.ok) userLevel = levelR.data;
 		if (statsR.ok) todayStats = statsR.data;
 
-		const anyFailed = [dueR, kanjiR, totalR, streakR, levelR, statsR].some((r) => !r.ok);
+		const anyFailed = [dueR, kanjiR, lessonR, totalR, streakR, levelR, statsR].some((r) => !r.ok);
 		if (anyFailed) {
 			error = "Some stats failed to load.";
 		}
@@ -100,41 +103,94 @@ $effect(() => {
 			<p class="text-sm text-destructive">{error}</p>
 			<Button variant="outline" class="mt-3" onclick={handleRefresh}>Retry</Button>
 		</div>
-	{:else if totalCards === 0}
+	{:else if totalCards === 0 && kanjiDueCount === 0 && kanjiLessonCount === 0}
 		<EmptyState
 			title="Welcome to Janki!"
 			description="Import a deck to start reviewing flashcards and learning kanji."
 			actionLabel="Import your first deck"
 			onaction={() => navigate("decks")}
+			secondaryLabel="Start Kanji"
+			onsecondary={() => navigate("kanji-dashboard")}
 		/>
 	{:else}
-		<!-- Summary cards -->
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			<div class="rounded-lg border bg-card p-4" aria-label="Cards due: {dueCount}">
-				<div class="text-sm text-muted-foreground">Cards Due</div>
-				<div class="mt-1 text-3xl font-bold">{dueCount}</div>
+		<!-- Decks Section -->
+		<div class="space-y-3">
+			<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Decks</h3>
+			<div class="grid gap-4 sm:grid-cols-3">
+				<div class="rounded-lg border bg-card p-4" aria-label="Cards due: {dueCount}">
+					<div class="text-sm text-muted-foreground">Cards Due</div>
+					<div class="mt-1 text-3xl font-bold">{dueCount}</div>
+				</div>
+				<div class="rounded-lg border bg-card p-4" aria-label="Total cards: {totalCards}">
+					<div class="text-sm text-muted-foreground">Total Cards</div>
+					<div class="mt-1 text-3xl font-bold">{totalCards}</div>
+				</div>
+				<div class="rounded-lg border bg-card p-4" aria-label="Streak: {streak} days">
+					<div class="text-sm text-muted-foreground">Streak</div>
+					<div class="mt-1 text-3xl font-bold">{streak} days</div>
+				</div>
 			</div>
-			<div class="rounded-lg border bg-card p-4" aria-label="Kanji due: {kanjiDueCount}">
-				<div class="text-sm text-muted-foreground">Kanji Due</div>
-				<div class="mt-1 text-3xl font-bold">{kanjiDueCount}</div>
-			</div>
-			<div class="rounded-lg border bg-card p-4" aria-label="Streak: {streak} days">
-				<div class="text-sm text-muted-foreground">Streak</div>
-				<div class="mt-1 text-3xl font-bold">{streak} days</div>
-			</div>
-			<div class="rounded-lg border bg-card p-4" aria-label="Total cards: {totalCards}">
-				<div class="text-sm text-muted-foreground">Total Cards</div>
-				<div class="mt-1 text-3xl font-bold">{totalCards}</div>
+			<div class="flex gap-2">
+				<Button size="sm" onclick={() => navigate("deck-review")} disabled={dueCount === 0}>
+					Start Review {#if dueCount > 0}({dueCount}){/if}
+				</Button>
+				<Button size="sm" variant="outline" onclick={() => navigate("decks")}>
+					Manage Decks
+				</Button>
 			</div>
 		</div>
 
-		<!-- Kanji level progress -->
-		{#if levelProgress}
-			<div class="rounded-lg border bg-card p-4">
-				<h3 class="mb-3 font-medium">Kanji Progress</h3>
-				<LevelProgressBar progress={levelProgress} />
+		<!-- Kanji Section -->
+		<div class="space-y-3">
+			<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Kanji</h3>
+			<div class="grid gap-4 sm:grid-cols-3">
+				<div class="rounded-lg border bg-card p-4" aria-label="Lessons available: {kanjiLessonCount}">
+					<div class="text-sm text-muted-foreground">Lessons</div>
+					<div class="mt-1 text-3xl font-bold text-pink-500">{kanjiLessonCount}</div>
+				</div>
+				<div class="rounded-lg border bg-card p-4" aria-label="Reviews due: {kanjiDueCount}">
+					<div class="text-sm text-muted-foreground">Reviews Due</div>
+					<div class="mt-1 text-3xl font-bold text-blue-500">{kanjiDueCount}</div>
+				</div>
+				<div class="rounded-lg border bg-card p-4" aria-label="Current level: {userLevel}">
+					<div class="text-sm text-muted-foreground">Level</div>
+					<div class="mt-1 text-3xl font-bold">{userLevel}</div>
+				</div>
 			</div>
-		{/if}
+			{#if levelProgress}
+				<div class="rounded-lg border bg-card p-4">
+					<LevelProgressBar progress={levelProgress} />
+				</div>
+			{/if}
+			<div class="flex gap-2">
+				{#if kanjiLessonCount > 0}
+					<Button size="sm" onclick={() => navigate("kanji-lessons")}>
+						Start Lessons ({Math.min(kanjiLessonCount, 5)})
+					</Button>
+				{/if}
+				{#if kanjiDueCount > 0}
+					<Button size="sm" variant="outline" onclick={() => navigate("kanji-review")}>
+						Start Reviews ({kanjiDueCount})
+					</Button>
+				{/if}
+				<Button size="sm" variant="outline" onclick={() => navigate("kanji-dashboard")}>
+					Kanji Overview
+				</Button>
+			</div>
+		</div>
+
+		<!-- Language Section -->
+		<div class="space-y-3">
+			<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Language</h3>
+			<div class="flex gap-2">
+				<Button size="sm" variant="outline" onclick={() => navigate("grammar")}>
+					Grammar
+				</Button>
+				<Button size="sm" variant="outline" onclick={() => navigate("reading")}>
+					Reading Practice
+				</Button>
+			</div>
+		</div>
 
 		<!-- Today's stats -->
 		{#if todayStats}
@@ -156,18 +212,5 @@ $effect(() => {
 				</div>
 			</div>
 		{/if}
-
-		<!-- Quick actions -->
-		<div class="flex flex-wrap gap-3">
-			<Button onclick={() => navigate("deck-review")} disabled={dueCount === 0}>
-				Start Review {#if dueCount > 0}({dueCount}){/if}
-			</Button>
-			<Button variant="outline" onclick={() => navigate("kanji-map")}>
-				Kanji Map
-			</Button>
-			<Button variant="outline" onclick={() => navigate("decks")}>
-				Manage Decks
-			</Button>
-		</div>
 	{/if}
 </div>

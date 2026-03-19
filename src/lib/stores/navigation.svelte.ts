@@ -7,6 +7,8 @@ type View =
 	| "deck-browse"
 	| "search"
 	| "stats"
+	| "grammar"
+	| "reading"
 	| "settings";
 
 interface NavigationState {

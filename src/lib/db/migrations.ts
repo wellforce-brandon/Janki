@@ -147,4 +147,24 @@ export const migrations: Migration[] = [
 			DROP TABLE IF EXISTS settings;
 		`,
 	},
+	{
+		version: 2,
+		description: "Add FTS5 search tables for cards and kanji",
+		up: `
+			CREATE VIRTUAL TABLE IF NOT EXISTS kanji_fts USING fts5(
+				character,
+				meanings,
+				readings,
+				content=kanji_levels,
+				content_rowid=id
+			);
+
+			INSERT INTO kanji_fts(rowid, character, meanings, readings)
+			SELECT id, character, meanings, COALESCE(readings_on, '') || ' ' || COALESCE(readings_kun, '') || ' ' || COALESCE(reading, '')
+			FROM kanji_levels;
+		`,
+		down: `
+			DROP TABLE IF EXISTS kanji_fts;
+		`,
+	},
 ];

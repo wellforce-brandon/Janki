@@ -5,7 +5,9 @@ import { currentView, navigate } from "$lib/stores/navigation.svelte";
 
 import Dashboard from "./views/Dashboard.svelte";
 import Decks from "./views/Decks.svelte";
+import Grammar from "./views/Grammar.svelte";
 import KanjiMap from "./views/KanjiMap.svelte";
+import Reading from "./views/Reading.svelte";
 import Review from "./views/Review.svelte";
 import Search from "./views/Search.svelte";
 import Settings from "./views/Settings.svelte";
@@ -18,7 +20,9 @@ function handleKeydown(e: KeyboardEvent) {
 		"2": "review",
 		"3": "kanji",
 		"4": "decks",
-		"5": "stats",
+		"5": "grammar",
+		"6": "reading",
+		"7": "stats",
 	};
 	const view = shortcuts[e.key];
 	if (view) {
@@ -28,6 +32,10 @@ function handleKeydown(e: KeyboardEvent) {
 	if (e.key === "f") {
 		e.preventDefault();
 		navigate("search");
+	}
+	if (e.key === "i") {
+		e.preventDefault();
+		navigate("decks");
 	}
 }
 </script>
@@ -47,6 +55,10 @@ function handleKeydown(e: KeyboardEvent) {
 				<KanjiMap />
 			{:else if currentView() === "decks" || currentView() === "deck-browse"}
 				<Decks />
+			{:else if currentView() === "grammar"}
+				<Grammar />
+			{:else if currentView() === "reading"}
+				<Reading />
 			{:else if currentView() === "stats"}
 				<Stats />
 			{:else if currentView() === "search"}

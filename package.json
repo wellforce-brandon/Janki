@@ -1,6 +1,6 @@
 {
 	"name": "janki",
-	"version": "0.4.0.0",
+	"version": "0.5.0.0",
 	"description": "Personal Japanese learning desktop app with FSRS-6 SRS and WaniKani-style kanji progression",
 	"private": true,
 	"type": "module",
@@ -20,6 +20,7 @@
 		"@tauri-apps/plugin-dialog": "^2",
 		"@tauri-apps/plugin-fs": "^2",
 		"@tauri-apps/plugin-sql": "^2",
+		"@tauri-apps/plugin-updater": "^2.10.0",
 		"bits-ui": "^2.16.3",
 		"clsx": "^2.1.1",
 		"dompurify": "^3",

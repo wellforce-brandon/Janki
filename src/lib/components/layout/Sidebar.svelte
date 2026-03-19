@@ -6,7 +6,9 @@ const navItems = [
 	{ id: "review" as const, label: "Review", shortcut: "Ctrl+2" },
 	{ id: "kanji" as const, label: "Kanji", shortcut: "Ctrl+3" },
 	{ id: "decks" as const, label: "Decks", shortcut: "Ctrl+4" },
-	{ id: "stats" as const, label: "Stats", shortcut: "Ctrl+5" },
+	{ id: "grammar" as const, label: "Grammar", shortcut: "Ctrl+5" },
+	{ id: "reading" as const, label: "Reading", shortcut: "Ctrl+6" },
+	{ id: "stats" as const, label: "Stats", shortcut: "Ctrl+7" },
 	{ id: "search" as const, label: "Search", shortcut: "Ctrl+F" },
 	{ id: "settings" as const, label: "Settings", shortcut: "" },
 ];

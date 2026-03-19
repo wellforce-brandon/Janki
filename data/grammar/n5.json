@@ -1,0 +1,745 @@
+{
+	"level": "N5",
+	"points": [
+		{
+			"id": "n5-desu",
+			"pattern": "~です",
+			"meaning": "is, am, are (polite copula)",
+			"formation": "Noun/Na-adj + です",
+			"explanation": "The polite copula, used to assert identity or state. Attaches to nouns and na-adjectives to form polite sentences.",
+			"examples": [
+				{ "ja": "学生です。", "en": "I am a student.", "reading": "がくせいです。" },
+				{ "ja": "日本人です。", "en": "I am Japanese.", "reading": "にほんじんです。" },
+				{ "ja": "元気です。", "en": "I am fine.", "reading": "げんきです。" }
+			],
+			"related_grammar": ["n5-ja-nai", "n5-deshita"],
+			"related_kanji": ["学", "生"],
+			"tags": ["polite", "copula", "beginner"]
+		},
+		{
+			"id": "n5-ja-nai",
+			"pattern": "~じゃない / ~ではない",
+			"meaning": "is not, am not, are not (negative copula)",
+			"formation": "Noun/Na-adj + じゃない (casual) / ではありません (polite)",
+			"explanation": "Negative form of です. じゃない is casual, ではありません is polite.",
+			"examples": [
+				{
+					"ja": "学生じゃないです。",
+					"en": "I am not a student.",
+					"reading": "がくせいじゃないです。"
+				},
+				{
+					"ja": "日本人ではありません。",
+					"en": "I am not Japanese.",
+					"reading": "にほんじんではありません。"
+				}
+			],
+			"related_grammar": ["n5-desu"],
+			"related_kanji": ["学", "生"],
+			"tags": ["negative", "copula"]
+		},
+		{
+			"id": "n5-deshita",
+			"pattern": "~でした",
+			"meaning": "was, were (past copula)",
+			"formation": "Noun/Na-adj + でした",
+			"explanation": "Past tense polite copula. For negation, use じゃなかったです or ではありませんでした.",
+			"examples": [
+				{
+					"ja": "昨日は暑かったです。",
+					"en": "Yesterday was hot.",
+					"reading": "きのうはあつかったです。"
+				},
+				{ "ja": "学生でした。", "en": "I was a student.", "reading": "がくせいでした。" }
+			],
+			"related_grammar": ["n5-desu"],
+			"related_kanji": [],
+			"tags": ["past", "copula"]
+		},
+		{
+			"id": "n5-wa",
+			"pattern": "~は",
+			"meaning": "topic marker particle",
+			"formation": "Noun + は",
+			"explanation": "Marks the topic of the sentence -- what the sentence is about. Pronounced 'wa' when used as a particle.",
+			"examples": [
+				{ "ja": "私は学生です。", "en": "I am a student.", "reading": "わたしはがくせいです。" },
+				{ "ja": "これは本です。", "en": "This is a book.", "reading": "これはほんです。" }
+			],
+			"related_grammar": ["n5-ga"],
+			"related_kanji": ["私"],
+			"tags": ["particle", "topic"]
+		},
+		{
+			"id": "n5-ga",
+			"pattern": "~が",
+			"meaning": "subject marker particle",
+			"formation": "Noun + が",
+			"explanation": "Marks the grammatical subject, often used to introduce new information, with existence verbs (ある/いる), and to mark the object of desire/ability.",
+			"examples": [
+				{ "ja": "猫がいます。", "en": "There is a cat.", "reading": "ねこがいます。" },
+				{
+					"ja": "水が飲みたいです。",
+					"en": "I want to drink water.",
+					"reading": "みずがのみたいです。"
+				},
+				{ "ja": "誰が来ましたか？", "en": "Who came?", "reading": "だれがきましたか？" }
+			],
+			"related_grammar": ["n5-wa"],
+			"related_kanji": ["猫", "水"],
+			"tags": ["particle", "subject"]
+		},
+		{
+			"id": "n5-wo",
+			"pattern": "~を",
+			"meaning": "direct object marker",
+			"formation": "Noun + を + Verb",
+			"explanation": "Marks the direct object of a transitive verb -- the thing being acted upon.",
+			"examples": [
+				{ "ja": "本を読みます。", "en": "I read a book.", "reading": "ほんをよみます。" },
+				{ "ja": "水を飲みます。", "en": "I drink water.", "reading": "みずをのみます。" }
+			],
+			"related_grammar": [],
+			"related_kanji": ["本", "読", "水", "飲"],
+			"tags": ["particle", "object"]
+		},
+		{
+			"id": "n5-ni",
+			"pattern": "~に",
+			"meaning": "direction, time, location of existence",
+			"formation": "Noun + に",
+			"explanation": "Multi-purpose particle indicating: (1) specific time, (2) destination/direction, (3) location of existence (with ある/いる), (4) indirect object.",
+			"examples": [
+				{ "ja": "学校に行きます。", "en": "I go to school.", "reading": "がっこうにいきます。" },
+				{ "ja": "七時に起きます。", "en": "I wake up at 7.", "reading": "しちじにおきます。" },
+				{
+					"ja": "部屋に猫がいます。",
+					"en": "There is a cat in the room.",
+					"reading": "へやにねこがいます。"
+				}
+			],
+			"related_grammar": ["n5-e", "n5-de"],
+			"related_kanji": ["学", "校", "行"],
+			"tags": ["particle", "direction", "time", "location"]
+		},
+		{
+			"id": "n5-de",
+			"pattern": "~で",
+			"meaning": "at, by means of, in (location of action)",
+			"formation": "Noun + で",
+			"explanation": "Indicates: (1) location where an action takes place, (2) means/instrument used, (3) reason/cause.",
+			"examples": [
+				{
+					"ja": "図書館で勉強します。",
+					"en": "I study at the library.",
+					"reading": "としょかんでべんきょうします。"
+				},
+				{ "ja": "バスで行きます。", "en": "I go by bus.", "reading": "バスでいきます。" },
+				{ "ja": "箸で食べます。", "en": "I eat with chopsticks.", "reading": "はしでたべます。" }
+			],
+			"related_grammar": ["n5-ni"],
+			"related_kanji": ["図", "書"],
+			"tags": ["particle", "location", "means"]
+		},
+		{
+			"id": "n5-e",
+			"pattern": "~へ",
+			"meaning": "toward, to (direction)",
+			"formation": "Place + へ",
+			"explanation": "Direction particle, indicates movement toward a place. Pronounced 'e'. Similar to に but emphasizes direction over destination.",
+			"examples": [
+				{ "ja": "日本へ行きます。", "en": "I am going to Japan.", "reading": "にほんへいきます。" }
+			],
+			"related_grammar": ["n5-ni"],
+			"related_kanji": ["日", "本"],
+			"tags": ["particle", "direction"]
+		},
+		{
+			"id": "n5-no",
+			"pattern": "~の",
+			"meaning": "possessive, modifier, nominalizer",
+			"formation": "Noun + の + Noun",
+			"explanation": "Connects nouns, indicating possession, description, or apposition. Also nominalizes verbs.",
+			"examples": [
+				{ "ja": "私の本です。", "en": "It is my book.", "reading": "わたしのほんです。" },
+				{ "ja": "日本語の先生", "en": "Japanese language teacher", "reading": "にほんごのせんせい" }
+			],
+			"related_grammar": [],
+			"related_kanji": ["私", "本"],
+			"tags": ["particle", "possessive"]
+		},
+		{
+			"id": "n5-ka",
+			"pattern": "~か",
+			"meaning": "question marker",
+			"formation": "Sentence + か",
+			"explanation": "Placed at the end of a sentence to form a question. In polite speech, rising intonation is optional with か.",
+			"examples": [
+				{ "ja": "学生ですか？", "en": "Are you a student?", "reading": "がくせいですか？" },
+				{ "ja": "何を食べますか？", "en": "What will you eat?", "reading": "なにをたべますか？" }
+			],
+			"related_grammar": [],
+			"related_kanji": ["何", "食"],
+			"tags": ["particle", "question"]
+		},
+		{
+			"id": "n5-mo",
+			"pattern": "~も",
+			"meaning": "also, too, even",
+			"formation": "Noun + も",
+			"explanation": "Replaces は, が, or を to mean 'also'. When used with question words + negative, means 'nothing/nobody'.",
+			"examples": [
+				{
+					"ja": "私も学生です。",
+					"en": "I am also a student.",
+					"reading": "わたしもがくせいです。"
+				},
+				{
+					"ja": "何も食べませんでした。",
+					"en": "I didn't eat anything.",
+					"reading": "なにもたべませんでした。"
+				}
+			],
+			"related_grammar": ["n5-wa"],
+			"related_kanji": ["私"],
+			"tags": ["particle", "also"]
+		},
+		{
+			"id": "n5-to",
+			"pattern": "~と",
+			"meaning": "and, with, quotation",
+			"formation": "Noun + と + Noun / Person + と",
+			"explanation": "Connects nouns exhaustively (all items listed), indicates companionship, or marks quotations.",
+			"examples": [
+				{
+					"ja": "パンと牛乳を買いました。",
+					"en": "I bought bread and milk.",
+					"reading": "パンとぎゅうにゅうをかいました。"
+				},
+				{
+					"ja": "友達と映画を見ました。",
+					"en": "I watched a movie with a friend.",
+					"reading": "ともだちとえいがをみました。"
+				}
+			],
+			"related_grammar": ["n5-ya"],
+			"related_kanji": ["友", "達"],
+			"tags": ["particle", "and", "with"]
+		},
+		{
+			"id": "n5-ya",
+			"pattern": "~や",
+			"meaning": "and (non-exhaustive list)",
+			"formation": "Noun + や + Noun + (など)",
+			"explanation": "Lists items non-exhaustively, implying there are more. Often paired with など (etc.).",
+			"examples": [
+				{
+					"ja": "りんごやバナナを食べます。",
+					"en": "I eat apples, bananas, etc.",
+					"reading": "りんごやバナナをたべます。"
+				}
+			],
+			"related_grammar": ["n5-to"],
+			"related_kanji": ["食"],
+			"tags": ["particle", "listing"]
+		},
+		{
+			"id": "n5-masu",
+			"pattern": "~ます",
+			"meaning": "polite verb ending (present/future)",
+			"formation": "Verb stem + ます",
+			"explanation": "The polite non-past form of verbs. Used in formal/polite speech. Negative: ~ません. Past: ~ました. Past negative: ~ませんでした.",
+			"examples": [
+				{ "ja": "食べます。", "en": "I eat / I will eat.", "reading": "たべます。" },
+				{ "ja": "飲みません。", "en": "I don't drink.", "reading": "のみません。" },
+				{ "ja": "行きました。", "en": "I went.", "reading": "いきました。" }
+			],
+			"related_grammar": ["n5-te-form"],
+			"related_kanji": ["食", "飲", "行"],
+			"tags": ["verb", "polite", "conjugation"]
+		},
+		{
+			"id": "n5-te-form",
+			"pattern": "~て / ~で",
+			"meaning": "te-form (connecting, requesting, progressive)",
+			"formation": "Verb て-form (varies by verb group)",
+			"explanation": "The most versatile verb form. Used for: connecting actions, making requests (~てください), progressive (~ている), permission (~てもいい), and more.",
+			"examples": [
+				{ "ja": "食べてください。", "en": "Please eat.", "reading": "たべてください。" },
+				{
+					"ja": "本を読んでいます。",
+					"en": "I am reading a book.",
+					"reading": "ほんをよんでいます。"
+				},
+				{
+					"ja": "朝起きて、顔を洗います。",
+					"en": "I wake up in the morning and wash my face.",
+					"reading": "あさおきて、かおをあらいます。"
+				}
+			],
+			"related_grammar": ["n5-teiru", "n5-tekudasai", "n5-temoii"],
+			"related_kanji": ["食", "本", "読"],
+			"tags": ["verb", "conjugation", "essential"]
+		},
+		{
+			"id": "n5-teiru",
+			"pattern": "~ている",
+			"meaning": "is doing, state of being (progressive/resultative)",
+			"formation": "Verb て-form + いる/います",
+			"explanation": "Indicates ongoing action (progressive) or resultant state. With motion verbs, indicates the resulting state rather than ongoing motion.",
+			"examples": [
+				{ "ja": "今、食べています。", "en": "I am eating now.", "reading": "いま、たべています。" },
+				{ "ja": "結婚しています。", "en": "I am married.", "reading": "けっこんしています。" }
+			],
+			"related_grammar": ["n5-te-form"],
+			"related_kanji": ["今", "食"],
+			"tags": ["verb", "progressive", "state"]
+		},
+		{
+			"id": "n5-tekudasai",
+			"pattern": "~てください",
+			"meaning": "please do~",
+			"formation": "Verb て-form + ください",
+			"explanation": "Polite request form. Negative: ~ないでください (please don't).",
+			"examples": [
+				{
+					"ja": "ここに座ってください。",
+					"en": "Please sit here.",
+					"reading": "ここにすわってください。"
+				},
+				{
+					"ja": "写真を撮ってください。",
+					"en": "Please take a photo.",
+					"reading": "しゃしんをとってください。"
+				}
+			],
+			"related_grammar": ["n5-te-form", "n5-naidekudasai"],
+			"related_kanji": ["写", "真"],
+			"tags": ["request", "polite"]
+		},
+		{
+			"id": "n5-naidekudasai",
+			"pattern": "~ないでください",
+			"meaning": "please don't do~",
+			"formation": "Verb ない-form + でください",
+			"explanation": "Polite negative request. Asks someone not to do something.",
+			"examples": [
+				{
+					"ja": "ここで写真を撮らないでください。",
+					"en": "Please don't take photos here.",
+					"reading": "ここでしゃしんをとらないでください。"
+				}
+			],
+			"related_grammar": ["n5-tekudasai", "n5-nai"],
+			"related_kanji": ["写", "真"],
+			"tags": ["request", "negative"]
+		},
+		{
+			"id": "n5-nai",
+			"pattern": "~ない",
+			"meaning": "not do~ (plain negative)",
+			"formation": "Verb ない-form",
+			"explanation": "Plain/casual negative form of verbs. Group 1: change u-vowel to a-vowel + ない. Group 2: drop る, add ない. する→しない, くる→こない.",
+			"examples": [
+				{ "ja": "食べない。", "en": "I don't eat.", "reading": "たべない。" },
+				{ "ja": "行かない。", "en": "I don't go.", "reading": "いかない。" }
+			],
+			"related_grammar": ["n5-masu", "n5-naidekudasai"],
+			"related_kanji": ["食", "行"],
+			"tags": ["verb", "negative", "conjugation"]
+		},
+		{
+			"id": "n5-tai",
+			"pattern": "~たい",
+			"meaning": "want to do~",
+			"formation": "Verb stem + たい",
+			"explanation": "Expresses the speaker's desire to do something. Conjugates like an i-adjective. Cannot be used for third person.",
+			"examples": [
+				{
+					"ja": "日本に行きたいです。",
+					"en": "I want to go to Japan.",
+					"reading": "にほんにいきたいです。"
+				},
+				{
+					"ja": "寿司を食べたいです。",
+					"en": "I want to eat sushi.",
+					"reading": "すしをたべたいです。"
+				}
+			],
+			"related_grammar": ["n5-masu"],
+			"related_kanji": ["日", "本", "行", "食"],
+			"tags": ["desire", "want"]
+		},
+		{
+			"id": "n5-temoii",
+			"pattern": "~てもいい",
+			"meaning": "may, it's okay to~",
+			"formation": "Verb て-form + もいい",
+			"explanation": "Asks or grants permission. Often used as a question: ~てもいいですか (May I...).",
+			"examples": [
+				{
+					"ja": "写真を撮ってもいいですか？",
+					"en": "May I take a photo?",
+					"reading": "しゃしんをとってもいいですか？"
+				},
+				{
+					"ja": "ここに座ってもいいですよ。",
+					"en": "You may sit here.",
+					"reading": "ここにすわってもいいですよ。"
+				}
+			],
+			"related_grammar": ["n5-te-form", "n5-tewaikenai"],
+			"related_kanji": ["写", "真"],
+			"tags": ["permission"]
+		},
+		{
+			"id": "n5-tewaikenai",
+			"pattern": "~てはいけない",
+			"meaning": "must not, may not",
+			"formation": "Verb て-form + はいけない/はいけません",
+			"explanation": "Expresses prohibition. Stronger than ~ないでください.",
+			"examples": [
+				{
+					"ja": "ここで泳いではいけません。",
+					"en": "You must not swim here.",
+					"reading": "ここでおよいではいけません。"
+				}
+			],
+			"related_grammar": ["n5-temoii", "n5-nakereba"],
+			"related_kanji": [],
+			"tags": ["prohibition", "must not"]
+		},
+		{
+			"id": "n5-nakereba",
+			"pattern": "~なければならない",
+			"meaning": "must, have to",
+			"formation": "Verb ない-form (drop い) + ければならない",
+			"explanation": "Expresses obligation or necessity. Casual: ~なきゃ. There is no nuance of external pressure like English 'must'.",
+			"examples": [
+				{
+					"ja": "薬を飲まなければなりません。",
+					"en": "I must take medicine.",
+					"reading": "くすりをのまなければなりません。"
+				},
+				{
+					"ja": "宿題をしなければならない。",
+					"en": "I have to do homework.",
+					"reading": "しゅくだいをしなければならない。"
+				}
+			],
+			"related_grammar": ["n5-tewaikenai"],
+			"related_kanji": ["薬", "飲"],
+			"tags": ["obligation", "must"]
+		},
+		{
+			"id": "n5-aru-iru",
+			"pattern": "ある / いる",
+			"meaning": "exist, there is (inanimate / animate)",
+			"formation": "Place + に + Noun + が + ある/いる",
+			"explanation": "ある for inanimate objects, plants. いる for animate beings (people, animals). Both mean 'to exist' or 'there is'.",
+			"examples": [
+				{
+					"ja": "机の上に本があります。",
+					"en": "There is a book on the desk.",
+					"reading": "つくえのうえにほんがあります。"
+				},
+				{
+					"ja": "公園に子供がいます。",
+					"en": "There are children in the park.",
+					"reading": "こうえんにこどもがいます。"
+				}
+			],
+			"related_grammar": ["n5-ni", "n5-ga"],
+			"related_kanji": ["机", "上", "本", "公", "園", "子", "供"],
+			"tags": ["existence", "essential"]
+		},
+		{
+			"id": "n5-adjective-i",
+			"pattern": "い-adjective conjugation",
+			"meaning": "i-adjective past, negative, and adverb forms",
+			"formation": "Drop い: + くない (neg), + かった (past), + くなかった (past neg), + く (adverb)",
+			"explanation": "い-adjectives conjugate directly. Remove final い and add the conjugation ending. Exception: いい→よい for conjugation (よくない, よかった).",
+			"examples": [
+				{ "ja": "高くないです。", "en": "It is not expensive.", "reading": "たかくないです。" },
+				{
+					"ja": "面白かったです。",
+					"en": "It was interesting.",
+					"reading": "おもしろかったです。"
+				},
+				{ "ja": "早く起きます。", "en": "I wake up early.", "reading": "はやくおきます。" }
+			],
+			"related_grammar": ["n5-adjective-na"],
+			"related_kanji": ["高", "面", "白", "早"],
+			"tags": ["adjective", "conjugation"]
+		},
+		{
+			"id": "n5-adjective-na",
+			"pattern": "な-adjective conjugation",
+			"meaning": "na-adjective modification and conjugation",
+			"formation": "Na-adj + な + Noun (modification), Na-adj + じゃない/でした (conjugation)",
+			"explanation": "な-adjectives use な when modifying nouns directly. They conjugate like nouns using です/じゃない/でした.",
+			"examples": [
+				{ "ja": "静かな部屋です。", "en": "It is a quiet room.", "reading": "しずかなへやです。" },
+				{ "ja": "元気じゃないです。", "en": "I am not well.", "reading": "げんきじゃないです。" }
+			],
+			"related_grammar": ["n5-adjective-i", "n5-desu"],
+			"related_kanji": ["静", "部", "屋"],
+			"tags": ["adjective", "conjugation"]
+		},
+		{
+			"id": "n5-kara-made",
+			"pattern": "~から~まで",
+			"meaning": "from~ to/until~",
+			"formation": "Time/Place + から + Time/Place + まで",
+			"explanation": "から marks the starting point (from), まで marks the endpoint (to/until). Can be used for both time and place.",
+			"examples": [
+				{
+					"ja": "九時から五時まで働きます。",
+					"en": "I work from 9 to 5.",
+					"reading": "くじからごじまではたらきます。"
+				},
+				{
+					"ja": "東京から大阪まで新幹線で行きます。",
+					"en": "I go from Tokyo to Osaka by bullet train.",
+					"reading": "とうきょうからおおさかまでしんかんせんでいきます。"
+				}
+			],
+			"related_grammar": [],
+			"related_kanji": ["九", "五", "働", "東", "京", "大"],
+			"tags": ["time", "place", "range"]
+		},
+		{
+			"id": "n5-kara-reason",
+			"pattern": "~から (reason)",
+			"meaning": "because, since",
+			"formation": "Clause + から",
+			"explanation": "Placed after a reason clause to indicate cause. The reason comes before から, the result after.",
+			"examples": [
+				{
+					"ja": "暑いから、窓を開けます。",
+					"en": "Because it's hot, I'll open the window.",
+					"reading": "あついから、まどをあけます。"
+				},
+				{
+					"ja": "忙しかったから、行きませんでした。",
+					"en": "Because I was busy, I didn't go.",
+					"reading": "いそがしかったから、いきませんでした。"
+				}
+			],
+			"related_grammar": [],
+			"related_kanji": ["暑", "窓", "忙"],
+			"tags": ["reason", "conjunction"]
+		},
+		{
+			"id": "n5-ga-but",
+			"pattern": "~が (but)",
+			"meaning": "but, however",
+			"formation": "Clause + が + Clause",
+			"explanation": "Connects two contrasting clauses. More formal than けど. Often used after すみませんが or to softly introduce a topic.",
+			"examples": [
+				{
+					"ja": "日本語は難しいですが、面白いです。",
+					"en": "Japanese is difficult, but interesting.",
+					"reading": "にほんごはむずかしいですが、おもしろいです。"
+				}
+			],
+			"related_grammar": [],
+			"related_kanji": ["日", "本", "語", "難"],
+			"tags": ["conjunction", "contrast"]
+		},
+		{
+			"id": "n5-counter",
+			"pattern": "Counters (~つ, ~人, ~本, ~枚)",
+			"meaning": "counting objects with appropriate counters",
+			"formation": "Number + Counter",
+			"explanation": "Japanese uses counters when counting things. ~つ is general, ~人 for people, ~本 for long/thin objects, ~枚 for flat objects, ~匹 for small animals.",
+			"examples": [
+				{
+					"ja": "りんごを三つください。",
+					"en": "Please give me three apples.",
+					"reading": "りんごをみっつください。"
+				},
+				{
+					"ja": "学生が五人います。",
+					"en": "There are five students.",
+					"reading": "がくせいがごにんいます。"
+				},
+				{
+					"ja": "ペンを二本買いました。",
+					"en": "I bought two pens.",
+					"reading": "ペンをにほんかいました。"
+				}
+			],
+			"related_grammar": [],
+			"related_kanji": ["三", "五", "人", "本", "二"],
+			"tags": ["counter", "numbers"]
+		},
+		{
+			"id": "n5-ni-iku",
+			"pattern": "~に行く / ~に来る",
+			"meaning": "go/come to do~",
+			"formation": "Verb stem + に + 行く/来る",
+			"explanation": "Expresses going or coming somewhere for the purpose of doing something.",
+			"examples": [
+				{
+					"ja": "映画を見に行きます。",
+					"en": "I'm going to see a movie.",
+					"reading": "えいがをみにいきます。"
+				},
+				{
+					"ja": "友達が遊びに来ました。",
+					"en": "A friend came to hang out.",
+					"reading": "ともだちがあそびにきました。"
+				}
+			],
+			"related_grammar": ["n5-ni"],
+			"related_kanji": ["映", "画", "見", "行", "友", "達"],
+			"tags": ["purpose", "movement"]
+		},
+		{
+			"id": "n5-sugiru",
+			"pattern": "~すぎる",
+			"meaning": "too much, excessively",
+			"formation": "Verb stem / Adj stem + すぎる",
+			"explanation": "Indicates excess. For i-adj: drop い, add すぎる. For na-adj: add すぎる directly. For verbs: stem + すぎる.",
+			"examples": [
+				{ "ja": "食べすぎました。", "en": "I ate too much.", "reading": "たべすぎました。" },
+				{
+					"ja": "この本は難しすぎます。",
+					"en": "This book is too difficult.",
+					"reading": "このほんはむずかしすぎます。"
+				}
+			],
+			"related_grammar": [],
+			"related_kanji": ["食", "本", "難"],
+			"tags": ["excess", "degree"]
+		},
+		{
+			"id": "n5-hou-ga-ii",
+			"pattern": "~ほうがいい",
+			"meaning": "had better, should",
+			"formation": "Verb た-form + ほうがいい (positive) / Verb ない-form + ほうがいい (negative)",
+			"explanation": "Gives advice or suggestion. Past form for positive advice, ない-form for negative advice.",
+			"examples": [
+				{
+					"ja": "早く寝たほうがいいですよ。",
+					"en": "You should go to bed early.",
+					"reading": "はやくねたほうがいいですよ。"
+				},
+				{
+					"ja": "食べないほうがいいです。",
+					"en": "You'd better not eat.",
+					"reading": "たべないほうがいいです。"
+				}
+			],
+			"related_grammar": [],
+			"related_kanji": ["早"],
+			"tags": ["advice", "suggestion"]
+		},
+		{
+			"id": "n5-tsumori",
+			"pattern": "~つもり",
+			"meaning": "plan to, intend to",
+			"formation": "Verb dictionary form + つもり / Verb ない-form + つもり",
+			"explanation": "Expresses the speaker's intention or plan. Not used for third person directly.",
+			"examples": [
+				{
+					"ja": "来年、日本に行くつもりです。",
+					"en": "I plan to go to Japan next year.",
+					"reading": "らいねん、にほんにいくつもりです。"
+				}
+			],
+			"related_grammar": ["n5-tai"],
+			"related_kanji": ["来", "年", "日", "本", "行"],
+			"tags": ["intention", "plan"]
+		},
+		{
+			"id": "n5-mae-ni",
+			"pattern": "~前に",
+			"meaning": "before~",
+			"formation": "Verb dictionary form + 前に / Noun + の前に",
+			"explanation": "Indicates doing something before an action or event.",
+			"examples": [
+				{
+					"ja": "寝る前に、歯を磨きます。",
+					"en": "I brush my teeth before sleeping.",
+					"reading": "ねるまえに、はをみがきます。"
+				},
+				{
+					"ja": "食事の前に手を洗います。",
+					"en": "I wash my hands before meals.",
+					"reading": "しょくじのまえにてをあらいます。"
+				}
+			],
+			"related_grammar": ["n5-ato-de"],
+			"related_kanji": ["前", "歯"],
+			"tags": ["time", "before"]
+		},
+		{
+			"id": "n5-ato-de",
+			"pattern": "~後で / ~てから",
+			"meaning": "after~",
+			"formation": "Verb た-form + 後で / Verb て-form + から",
+			"explanation": "Indicates doing something after another action. ~てから emphasizes sequence more strongly.",
+			"examples": [
+				{
+					"ja": "食べた後で、散歩します。",
+					"en": "After eating, I take a walk.",
+					"reading": "たべたあとで、さんぽします。"
+				},
+				{
+					"ja": "宿題をしてから、遊びます。",
+					"en": "After doing homework, I'll play.",
+					"reading": "しゅくだいをしてから、あそびます。"
+				}
+			],
+			"related_grammar": ["n5-mae-ni"],
+			"related_kanji": ["後", "食", "散", "歩"],
+			"tags": ["time", "after"]
+		},
+		{
+			"id": "n5-toki",
+			"pattern": "~時",
+			"meaning": "when, at the time of",
+			"formation": "Verb/Adj + 時 / Noun + の時",
+			"explanation": "Describes when something happens or happened. The tense before 時 can differ from the main clause.",
+			"examples": [
+				{
+					"ja": "日本にいた時、毎日寿司を食べました。",
+					"en": "When I was in Japan, I ate sushi every day.",
+					"reading": "にほんにいたとき、まいにちすしをたべました。"
+				},
+				{
+					"ja": "暇な時、本を読みます。",
+					"en": "When I'm free, I read books.",
+					"reading": "ひまなとき、ほんをよみます。"
+				}
+			],
+			"related_grammar": [],
+			"related_kanji": ["時", "日", "本", "毎"],
+			"tags": ["time", "when"]
+		},
+		{
+			"id": "n5-to-omou",
+			"pattern": "~と思う",
+			"meaning": "I think that~",
+			"formation": "Plain form + と思う",
+			"explanation": "Expresses the speaker's opinion or thought. Use と思います for polite form. Always use plain form before と.",
+			"examples": [
+				{
+					"ja": "明日は雨だと思います。",
+					"en": "I think it will rain tomorrow.",
+					"reading": "あしたはあめだとおもいます。"
+				},
+				{
+					"ja": "この映画は面白いと思います。",
+					"en": "I think this movie is interesting.",
+					"reading": "このえいがはおもしろいとおもいます。"
+				}
+			],
+			"related_grammar": [],
+			"related_kanji": ["明", "日", "雨", "思", "映", "画"],
+			"tags": ["opinion", "quotation"]
+		}
+	]
+}

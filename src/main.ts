@@ -1,14 +1,19 @@
 import { mount } from "svelte";
+import { autoBackup } from "$lib/backup/backup";
 import { getDb } from "$lib/db/database";
 import { seedKanjiData } from "$lib/db/seed/kanji-data";
+import { loadSettings } from "$lib/stores/app-settings.svelte";
+import { checkForUpdates } from "$lib/updater/check-update";
 import App from "./App.svelte";
 
 async function init() {
-	// Initialize database and run migrations
 	await getDb();
-
-	// Seed kanji data on first launch
 	await seedKanjiData();
+	await loadSettings();
+
+	// Non-blocking: auto-backup and update check run after app is ready
+	autoBackup().catch(console.error);
+	checkForUpdates().catch(console.error);
 }
 
 init().catch(console.error);

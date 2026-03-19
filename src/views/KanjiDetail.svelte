@@ -4,6 +4,7 @@ import StrokeOrder from "$lib/components/kanji/StrokeOrder.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import { getKanjiItemById, type KanjiLevelItem } from "$lib/db/queries/kanji";
 import { navigate } from "$lib/stores/navigation.svelte";
+import { speakJapanese } from "$lib/tts/speech";
 
 interface Props {
 	itemId: number;
@@ -54,8 +55,14 @@ $effect(() => {
 			<!-- Character display -->
 			<div class="text-center">
 				<div class="text-8xl font-bold">{item.character}</div>
-				<div class="mt-2">
+				<div class="mt-2 flex items-center justify-center gap-3">
 					<SrsStageIndicator stage={item.srs_stage} nextReview={item.next_review} />
+					<button
+						type="button"
+						class="rounded-md border px-3 py-1 text-sm hover:bg-muted"
+						onclick={() => speakJapanese(item.character)}
+						aria-label="Pronounce"
+					>&#9654; Speak</button>
 				</div>
 			</div>
 

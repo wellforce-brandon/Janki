@@ -6,6 +6,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.5.0.0] - 2026-03-18
+
+### Added
+
+- Auto-updater via tauri-plugin-updater with GitHub Releases endpoint
+- Non-blocking update check on app launch with dialog prompt
+- Manual "Check for Updates" button in Settings
+- System tray with icon, "Open Janki" and "Quit" menu items
+- Left-click tray icon to restore window, right-click for menu
+- Tray tooltip showing "Janki"
+- Backup & restore: export database to user-chosen location
+- Backup & restore: import/restore from backup file (with pre-restore safety backup)
+- Auto-backup on each launch to $APPDATA/janki/backups/ (keeps last 7)
+- Backup & Restore section in Settings with Export/Import buttons
+- Grammar reference view with 37 N5 grammar points (particles, conjugations, expressions)
+- Grammar point detail with pattern, formation, explanation, examples, and related grammar links
+- Grammar search by pattern, meaning, tags, and example text
+- Reading practice view with N5 and N4 example sentences
+- Furigana rendering via ruby HTML tags with show/hide toggle
+- Japanese text utilities: isKanji, isHiragana, isKatakana, isKana, containsKanji
+- simpleFurigana() for basic kanji-reading alignment
+- furiganaToHtml() for building ruby tag markup from segments
+- TTS integration in Reading practice (speak current sentence)
+- Translation toggle in Reading practice (show/hide English)
+- Navigation items for Grammar (Ctrl+5) and Reading (Ctrl+6)
+- 17 new tests for Japanese text utilities (56 total)
+
+### Changed
+
+- Sidebar navigation expanded: Grammar and Reading added between Decks and Stats
+- Keyboard shortcuts renumbered: Grammar=Ctrl+5, Reading=Ctrl+6, Stats=Ctrl+7
+- Tauri config: added updater plugin config and createUpdaterArtifacts bundle flag
+- Tauri features: added tray-icon and image-png to core tauri dependency
+- Capabilities: added fs:allow-copy-file, fs:allow-remove, fs:allow-rename, fs:allow-read-dir, dialog:allow-ask, dialog:allow-message, updater permissions
+- Version synced across package.json (0.5.0.0), Cargo.toml (0.5.0), tauri.conf.json (0.5.0)
+- About section in Settings updated to v0.5.0
+- FTS5 query string concatenation changed to template literal (lint fix)
+
 ## [0.4.0.0] - 2026-03-18
 
 ### Added

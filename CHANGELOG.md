@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.3.0.0] - 2026-03-18
+
+### Added
+
+- Tauri 2.x + Svelte 5 app scaffold (src/ and src-tauri/)
+- Vite config with Tailwind CSS 4 and $lib path alias
+- Biome 2.x linter/formatter with Svelte overrides
+- Vitest config with jsdom environment and 9 passing tests
+- SQLite database layer with migration system (version-tracked, safeQuery wrapper)
+- Full initial schema: settings, decks, note_types, notes, cards, review_log, kanji_levels, kanji_dependencies, media, daily_stats
+- DOMPurify sanitization utility for Anki card HTML
+- App shell with sidebar navigation, header, and dark/light theme toggle
+- Placeholder views: Dashboard, Review, KanjiMap, Decks, Stats, Search, Settings
+- Store-based SPA routing with keyboard shortcuts (Ctrl+1-5, Ctrl+F)
+- Tauri plugin registration: tauri-plugin-sql, tauri-plugin-fs, tauri-plugin-dialog
+- Tauri capabilities for SQL, filesystem, and dialog permissions
+- Subfolder CLAUDE.md files for src/ and src-tauri/
+- 6 new LL-G lessons contributed (Tauri: 1, Svelte: 3, TypeScript: 3)
+
 ## [0.2.0.0] - 2026-03-18
 
 ### Added

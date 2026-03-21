@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.17.0.1] - 2026-03-21
+
+### Changed
+
+- Integrate BoardPandas Design Studio theme into app.css with full color token system (light/dark), custom fonts, radii, and shadows
+- Switch WaniKani mnemonic dark mode styles from media query to class-based `.dark` selector
+
 ## [0.17.0.0] - 2026-03-21
 
 ### Added

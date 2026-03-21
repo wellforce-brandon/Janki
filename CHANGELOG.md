@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.12.0.0] - 2026-03-21
+
+### Added
+
+- Migration v9: content_tags, content_type_fields, builtin_items, and builtin_review_log tables for unified Language section
+- Content classifier that auto-detects 7 content types (kana, kanji, vocabulary, grammar, sentence, radical, conjugation) from Anki deck field names
+- Semantic field-to-role mapping for normalized access to heterogeneous note type fields
+- Language query layer for cross-deck content browsing, content type counts, and WaniKani cross-references
+- Builtin items seeder to promote static grammar points and reading sentences to SRS-trackable items
+- Auto-classification of imported decks integrated into the .apkg import pipeline
+- 19 classifier tests covering all major Anki deck field patterns
+- Design plan for unified Language section at tasks/purrfect-cooking-zephyr.md
+
 ## [0.11.0.0] - 2026-03-20
 
 ### Added

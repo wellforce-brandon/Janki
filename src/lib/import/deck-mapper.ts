@@ -3,6 +3,7 @@ import { createDeck } from "../db/queries/decks";
 import { createNote, createNoteType } from "../db/queries/notes";
 import { sanitizeCardHtml } from "../utils/sanitize";
 import type { AnkiPackage, ProgressCallback } from "./apkg-parser";
+import { classifyDeckContent } from "./content-classifier";
 
 export interface ImportResult {
 	deckId: number;
@@ -93,6 +94,14 @@ export async function mapAnkiToDeck(
 			}
 		}
 	}
+
+	// Classify content types for the imported deck
+	onProgress?.("Classifying content", 0, 1);
+	const classifyResult = await classifyDeckContent(deckId);
+	if (!classifyResult.ok) {
+		errors.push(`Content classification failed: ${classifyResult.error}`);
+	}
+	onProgress?.("Classifying content", 1, 1);
 
 	return {
 		deckId,

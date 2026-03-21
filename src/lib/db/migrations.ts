@@ -268,4 +268,74 @@ export const migrations: Migration[] = [
 			SELECT 1;
 		`,
 	},
+	{
+		version: 9,
+		description:
+			"Add content classification tables and builtin SRS items for unified Language section",
+		up: `
+			CREATE TABLE IF NOT EXISTS content_tags (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				note_id INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+				content_type TEXT NOT NULL,
+				confidence REAL NOT NULL DEFAULT 1.0,
+				source TEXT NOT NULL DEFAULT 'auto',
+				created_at TEXT NOT NULL DEFAULT (datetime('now')),
+				UNIQUE(note_id, content_type)
+			);
+			CREATE INDEX idx_content_tags_type ON content_tags(content_type);
+			CREATE INDEX idx_content_tags_note ON content_tags(note_id);
+
+			CREATE TABLE IF NOT EXISTS content_type_fields (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				note_type_id INTEGER NOT NULL REFERENCES note_types(id) ON DELETE CASCADE,
+				content_type TEXT NOT NULL,
+				field_name TEXT NOT NULL,
+				semantic_role TEXT NOT NULL,
+				UNIQUE(note_type_id, content_type, field_name)
+			);
+			CREATE INDEX idx_ctf_notetype ON content_type_fields(note_type_id);
+
+			CREATE TABLE IF NOT EXISTS builtin_items (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				content_type TEXT NOT NULL,
+				item_key TEXT NOT NULL UNIQUE,
+				data TEXT NOT NULL,
+				jlpt_level TEXT,
+				stability REAL NOT NULL DEFAULT 0,
+				difficulty REAL NOT NULL DEFAULT 0,
+				due TEXT NOT NULL DEFAULT (datetime('now')),
+				last_review TEXT,
+				reps INTEGER NOT NULL DEFAULT 0,
+				lapses INTEGER NOT NULL DEFAULT 0,
+				state INTEGER NOT NULL DEFAULT 0,
+				scheduled_days INTEGER NOT NULL DEFAULT 0,
+				elapsed_days INTEGER NOT NULL DEFAULT 0,
+				created_at TEXT NOT NULL DEFAULT (datetime('now')),
+				updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+			);
+			CREATE INDEX idx_builtin_type ON builtin_items(content_type);
+			CREATE INDEX idx_builtin_due ON builtin_items(due);
+			CREATE INDEX idx_builtin_state ON builtin_items(state);
+
+			CREATE TABLE IF NOT EXISTS builtin_review_log (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				builtin_item_id INTEGER NOT NULL REFERENCES builtin_items(id) ON DELETE CASCADE,
+				rating INTEGER NOT NULL,
+				state INTEGER NOT NULL,
+				scheduled_days INTEGER NOT NULL,
+				elapsed_days INTEGER NOT NULL,
+				stability REAL NOT NULL,
+				difficulty REAL NOT NULL,
+				duration_ms INTEGER,
+				reviewed_at TEXT NOT NULL DEFAULT (datetime('now'))
+			);
+			CREATE INDEX idx_builtin_review_item ON builtin_review_log(builtin_item_id);
+		`,
+		down: `
+			DROP TABLE IF EXISTS builtin_review_log;
+			DROP TABLE IF EXISTS builtin_items;
+			DROP TABLE IF EXISTS content_type_fields;
+			DROP TABLE IF EXISTS content_tags;
+		`,
+	},
 ];

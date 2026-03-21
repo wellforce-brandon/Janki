@@ -1,6 +1,5 @@
 <script lang="ts">
 import { RefreshCw } from "@lucide/svelte";
-import LevelProgressBar from "$lib/components/kanji/LevelProgress.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import { getTotalCardCount, getTotalDueCount } from "$lib/db/queries/cards";
@@ -159,7 +158,18 @@ $effect(() => {
 			</div>
 			{#if levelProgress}
 				<div class="rounded-lg border bg-card p-4">
-					<LevelProgressBar progress={levelProgress} />
+					<div class="space-y-2">
+					<div class="flex items-center justify-between text-sm">
+						<span>Level {levelProgress.level}</span>
+						<span class="text-muted-foreground">{levelProgress.guru_plus} / {levelProgress.total} at Guru+</span>
+					</div>
+					<div class="h-2 rounded-full bg-muted">
+						<div
+							class="h-full rounded-full bg-purple-500 transition-all"
+							style="width: {levelProgress.percentage}%"
+						></div>
+					</div>
+				</div>
 				</div>
 			{/if}
 			<div class="flex gap-2">

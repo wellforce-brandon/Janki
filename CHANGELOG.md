@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.11.0.0] - 2026-03-20
+
+### Added
+
+- Level Progress widget on Kanji Dashboard with inline level cycling (chevron arrows), level picker grid, per-type progress cards (Radicals/Kanji/Vocabulary with Guru'd counts), and SRS-colored kanji block progress bar
+- Inline "See All" type detail view within the Level Progress widget with scrollable item grid and SRS stage dots
+- Inline level picker (60-level grid) within the widget when clicking "Level X" text
+- SRS stage dots (Apprentice progress indicators) on item tiles in KanjiLevel detail view
+- `getStageDots()` utility for rendering 4-dot Apprentice stage progress
+- `getLevelProgressByType()` query for per-type Guru/total/unlocked counts in a single query
+
+### Changed
+
+- Level Progress section no longer navigates away from the dashboard for browsing
+
+### Removed
+
+- Old `LevelProgress.svelte` component (replaced by `LevelProgressWidget.svelte`)
+
 ## [0.10.1.0] - 2026-03-20
 
 ### Fixed

@@ -148,6 +148,37 @@ export async function getLevelProgress(level: number): Promise<QueryResult<Level
 	});
 }
 
+export interface LevelProgressByType {
+	level: number;
+	radicals: { total: number; guru_plus: number; unlocked: number };
+	kanji: { total: number; guru_plus: number; unlocked: number };
+	vocab: { total: number; guru_plus: number; unlocked: number };
+}
+
+export async function getLevelProgressByType(level: number): Promise<QueryResult<LevelProgressByType>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ item_type: string; total: number; guru_plus: number; unlocked: number }[]>(
+			`SELECT item_type,
+				COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus,
+				COUNT(CASE WHEN srs_stage > 0 THEN 1 END) as unlocked
+			FROM kanji_levels WHERE level = ?
+			GROUP BY item_type`,
+			[level],
+		);
+		const empty = { total: 0, guru_plus: 0, unlocked: 0 };
+		const result: LevelProgressByType = { level, radicals: { ...empty }, kanji: { ...empty }, vocab: { ...empty } };
+		for (const row of rows) {
+			const counts = { total: row.total, guru_plus: row.guru_plus, unlocked: row.unlocked };
+			if (row.item_type === "radical") result.radicals = counts;
+			else if (row.item_type === "kanji") result.kanji = counts;
+			else if (row.item_type === "vocab") result.vocab = counts;
+		}
+		return result;
+	});
+}
+
 // WK level = lowest level where <90% of kanji are at Guru+
 export async function getUserLevel(): Promise<QueryResult<number>> {
 	return safeQuery(async () => {

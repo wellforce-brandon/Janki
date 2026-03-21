@@ -9,7 +9,7 @@ import {
 } from "$lib/db/queries/kanji";
 import { navigate, viewParams } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
-import { getTileClasses } from "$lib/utils/kanji";
+import { getStageDots, getTileClasses } from "$lib/utils/kanji";
 
 let loading = $state(true);
 let items = $state<LevelItemsByType>({ radicals: [], kanji: [], vocab: [] });
@@ -136,6 +136,7 @@ const sections = $derived([
 
 					<div class="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
 						{#each section.items as item}
+							{@const dots = getStageDots(item.srs_stage)}
 							<button
 								type="button"
 								class="flex flex-col items-center rounded-lg p-2 transition-all hover:brightness-110 {getTileClasses(item)}"
@@ -159,6 +160,16 @@ const sections = $derived([
 								<span class="mt-0.5 max-w-full truncate text-[10px] leading-tight opacity-70">
 									{getMeaningDisplay(item)}
 								</span>
+								<!-- SRS stage dots -->
+								{#if item.srs_stage > 0 && item.srs_stage < 9}
+									<div class="mt-1 flex gap-0.5">
+										{#each { length: dots.total } as _, i}
+											<div
+												class="h-0.5 w-2 rounded-full {i < dots.filled ? 'bg-green-400' : 'bg-current opacity-30'}"
+											></div>
+										{/each}
+									</div>
+								{/if}
 							</button>
 						{/each}
 					</div>

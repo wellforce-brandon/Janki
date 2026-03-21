@@ -102,6 +102,13 @@ export function getTileClasses(item: { item_type: string; srs_stage: number; les
 	return colorSet.review;
 }
 
+/** Returns how many of the 4 Apprentice stage dots should be filled (green) vs unfilled (gray). */
+export function getStageDots(srsStage: number): { filled: number; total: number } {
+	if (srsStage === 0) return { filled: 0, total: 4 }; // locked
+	if (srsStage <= 4) return { filled: srsStage - 1, total: 4 }; // apprentice: 0-3 dots filled
+	return { filled: 4, total: 4 }; // guru+ = all 4 filled
+}
+
 export function fisherYatesShuffle<T>(arr: T[]): T[] {
 	const shuffled = [...arr];
 	for (let i = shuffled.length - 1; i > 0; i--) {

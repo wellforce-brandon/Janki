@@ -1,6 +1,6 @@
 <script lang="ts">
 import { RefreshCw } from "@lucide/svelte";
-import LevelProgressBar from "$lib/components/kanji/LevelProgress.svelte";
+import LevelProgressWidget from "$lib/components/kanji/LevelProgressWidget.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
@@ -8,7 +8,6 @@ import {
 	getAvailableLessonCount,
 	getCriticalItems,
 	getDueKanjiCount,
-	getLevelProgress,
 	getRecentlyUnlocked,
 	getSrsDistribution,
 	getUpcomingReviews,
@@ -16,7 +15,6 @@ import {
 	initializeKanjiProgression,
 	isKanjiSeeded,
 	type KanjiLevelItem,
-	type LevelProgress,
 } from "$lib/db/queries/kanji";
 import { getRecentMistakes, getTodayKanjiReviewCount } from "$lib/db/queries/kanji-reviews";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
@@ -33,7 +31,6 @@ let lessonCount = $state(0);
 let reviewCount = $state(0);
 let todayReviewCount = $state(0);
 let userLevel = $state(1);
-let levelProgress = $state<LevelProgress | null>(null);
 
 // Forecast
 let forecast = $state<{ hour: string; count: number }[]>([]);
@@ -80,9 +77,6 @@ async function loadDashboard() {
 		if (unlockedR.ok) recentlyUnlocked = unlockedR.data;
 		if (criticalR.ok) criticalItems = criticalR.data;
 		if (mistakesR.ok) recentMistakes = mistakesR.data;
-
-		const lpR = await getLevelProgress(userLevel);
-		if (lpR.ok) levelProgress = lpR.data;
 	} catch (e) {
 		addToast("Failed to load kanji dashboard", "error");
 	} finally {
@@ -145,22 +139,6 @@ let srsSpread = $derived.by((): SrsSpreadRow[] => {
 	});
 });
 
-function getCategoryColor(category: string): string {
-	switch (category) {
-		case "Apprentice":
-			return "text-pink-500 dark:text-pink-400";
-		case "Guru":
-			return "text-purple-500 dark:text-purple-400";
-		case "Master":
-			return "text-blue-500 dark:text-blue-400";
-		case "Enlightened":
-			return "text-sky-500 dark:text-sky-400";
-		case "Burned":
-			return "text-amber-500 dark:text-amber-400";
-		default:
-			return "";
-	}
-}
 
 $effect(() => {
 	loadDashboard();
@@ -278,58 +256,45 @@ $effect(() => {
 		<!-- Row 2: Progress -->
 		<div class="grid gap-4 lg:grid-cols-2">
 			<!-- Level Progress -->
-			<div class="rounded-lg border bg-card p-5">
-				<h3 class="mb-3 font-medium">Level {userLevel} Progress</h3>
-				{#if levelProgress}
-					<LevelProgressBar progress={levelProgress} />
-					{@const kanjiNeeded = Math.ceil(levelProgress.total * 0.9) - levelProgress.guru_plus}
-					{#if kanjiNeeded > 0}
-						<p class="mt-3 text-sm text-muted-foreground">
-							Guru {kanjiNeeded} more kanji to level up
-						</p>
-					{/if}
-				{/if}
-				<div class="mt-3 flex gap-2">
-					<Button size="sm" variant="outline" onclick={() => navigate("kanji-radicals")}>
-						Radicals
-					</Button>
-					<Button size="sm" variant="outline" onclick={() => navigate("kanji-kanji")}>
-						Kanji
-					</Button>
-					<Button size="sm" variant="outline" onclick={() => navigate("kanji-vocabulary")}>
-						Vocabulary
-					</Button>
-				</div>
-			</div>
+			<LevelProgressWidget {userLevel} />
 
 			<!-- Item Spread -->
 			<div class="rounded-lg border bg-card p-5">
-				<h3 class="mb-3 font-medium">Item Spread</h3>
-				<div class="overflow-x-auto">
-					<table class="w-full text-sm">
-						<thead>
-							<tr class="border-b text-left text-xs text-muted-foreground">
-								<th class="pb-2 pr-4">Stage</th>
-								<th class="pb-2 pr-3 text-right">Rad</th>
-								<th class="pb-2 pr-3 text-right">Kan</th>
-								<th class="pb-2 pr-3 text-right">Voc</th>
-								<th class="pb-2 text-right">Total</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each srsSpread as row}
-								<tr class="border-b last:border-0">
-									<td class="py-1.5 pr-4 font-medium {getCategoryColor(row.category)}">
-										{row.category}
-									</td>
-									<td class="py-1.5 pr-3 text-right tabular-nums">{row.radical || "-"}</td>
-									<td class="py-1.5 pr-3 text-right tabular-nums">{row.kanji || "-"}</td>
-									<td class="py-1.5 pr-3 text-right tabular-nums">{row.vocab || "-"}</td>
-									<td class="py-1.5 text-right font-medium tabular-nums">{row.total || "-"}</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
+				<div class="mb-4 flex items-center justify-between">
+					<h3 class="font-medium">Item Spread</h3>
+					<div class="flex items-center gap-3 text-xs">
+						<span class="flex items-center gap-1.5">
+							<span class="inline-block h-3 w-3 rounded-sm bg-blue-500 dark:bg-blue-600"></span>
+							Radicals
+						</span>
+						<span class="flex items-center gap-1.5">
+							<span class="inline-block h-3 w-3 rounded-sm bg-pink-500 dark:bg-pink-600"></span>
+							Kanji
+						</span>
+						<span class="flex items-center gap-1.5">
+							<span class="inline-block h-3 w-3 rounded-sm bg-purple-500 dark:bg-purple-600"></span>
+							Vocabulary
+						</span>
+					</div>
+				</div>
+				<div class="space-y-1.5">
+					{#each srsSpread as row}
+						<div class="flex items-center gap-3 rounded-md bg-accent px-3 py-2">
+							<span class="flex-1 text-sm font-medium">{row.category}</span>
+							<span class="inline-flex min-w-[2.5rem] items-center justify-center rounded-full bg-blue-500 px-2.5 py-0.5 text-xs font-bold text-white dark:bg-blue-600">
+								{row.radical}
+							</span>
+							<span class="inline-flex min-w-[2.5rem] items-center justify-center rounded-full bg-pink-500 px-2.5 py-0.5 text-xs font-bold text-white dark:bg-pink-600">
+								{row.kanji}
+							</span>
+							<span class="inline-flex min-w-[2.5rem] items-center justify-center rounded-full bg-purple-500 px-2.5 py-0.5 text-xs font-bold text-white dark:bg-purple-600">
+								{row.vocab}
+							</span>
+							<span class="min-w-[2rem] text-right text-sm font-medium tabular-nums text-muted-foreground">
+								{row.total}
+							</span>
+						</div>
+					{/each}
 				</div>
 			</div>
 		</div>

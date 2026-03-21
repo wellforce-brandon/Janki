@@ -10,6 +10,7 @@ import {
 	getUserLevel,
 	type LevelProgress,
 } from "$lib/db/queries/kanji";
+import { getContentTypeCounts, type ContentTypeCount } from "$lib/db/queries/language";
 import { type DailyStats, getStreak, getTodayStats } from "$lib/db/queries/stats";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
@@ -24,12 +25,15 @@ let streak = $state(0);
 let userLevel = $state(1);
 let levelProgress = $state<LevelProgress | null>(null);
 let todayStats = $state<DailyStats | null>(null);
+let contentCounts = $state<ContentTypeCount[]>([]);
+let langDueTotal = $state(0);
+let langNewTotal = $state(0);
 let refreshing = $state(false);
 
 async function loadDashboard() {
 	error = null;
 	try {
-		const [dueR, kanjiR, lessonR, totalR, streakR, levelR, statsR] = await Promise.all([
+		const [dueR, kanjiR, lessonR, totalR, streakR, levelR, statsR, contentR] = await Promise.all([
 			getTotalDueCount(),
 			getDueKanjiCount(),
 			getAvailableLessonCount(),
@@ -37,6 +41,7 @@ async function loadDashboard() {
 			getStreak(),
 			getUserLevel(),
 			getTodayStats(),
+			getContentTypeCounts(),
 		]);
 
 		if (dueR.ok) dueCount = dueR.data;
@@ -46,8 +51,13 @@ async function loadDashboard() {
 		if (streakR.ok) streak = streakR.data;
 		if (levelR.ok) userLevel = levelR.data;
 		if (statsR.ok) todayStats = statsR.data;
+		if (contentR.ok) {
+			contentCounts = contentR.data;
+			langDueTotal = contentR.data.reduce((s, c) => s + c.due, 0);
+			langNewTotal = contentR.data.reduce((s, c) => s + c.new_count, 0);
+		}
 
-		const anyFailed = [dueR, kanjiR, lessonR, totalR, streakR, levelR, statsR].some((r) => !r.ok);
+		const anyFailed = [dueR, kanjiR, lessonR, totalR, streakR, levelR, statsR, contentR].some((r) => !r.ok);
 		if (anyFailed) {
 			error = "Some stats failed to load.";
 		}
@@ -192,12 +202,38 @@ $effect(() => {
 		<!-- Language Section -->
 		<div class="space-y-3">
 			<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Language</h3>
+			<div class="grid gap-4 sm:grid-cols-3">
+				<div class="rounded-lg border bg-card p-4" aria-label="Language due: {langDueTotal}">
+					<div class="text-sm text-muted-foreground">Due Reviews</div>
+					<div class="mt-1 text-3xl font-bold text-violet-500">{langDueTotal}</div>
+				</div>
+				<div class="rounded-lg border bg-card p-4" aria-label="New items: {langNewTotal}">
+					<div class="text-sm text-muted-foreground">New Items</div>
+					<div class="mt-1 text-3xl font-bold text-blue-500">{langNewTotal}</div>
+				</div>
+				<div class="rounded-lg border bg-card p-4" aria-label="Content types: {contentCounts.length}">
+					<div class="text-sm text-muted-foreground">Content Types</div>
+					<div class="mt-1 text-3xl font-bold">{contentCounts.length}</div>
+				</div>
+			</div>
+			{#if contentCounts.length > 0}
+				<div class="flex flex-wrap gap-2 text-xs">
+					{#each contentCounts as ct}
+						<span class="rounded-full border bg-muted px-2.5 py-1 capitalize">
+							{ct.type}: {ct.total}
+							{#if ct.due > 0}
+								<span class="text-violet-500">({ct.due} due)</span>
+							{/if}
+						</span>
+					{/each}
+				</div>
+			{/if}
 			<div class="flex gap-2">
-				<Button size="sm" variant="outline" onclick={() => navigate("grammar")}>
-					Grammar
+				<Button size="sm" onclick={() => navigate("lang-review")} disabled={langDueTotal === 0 && langNewTotal === 0}>
+					Start Review {#if langDueTotal > 0}({langDueTotal}){/if}
 				</Button>
-				<Button size="sm" variant="outline" onclick={() => navigate("reading")}>
-					Reading Practice
+				<Button size="sm" variant="outline" onclick={() => navigate("lang-overview")}>
+					Language Overview
 				</Button>
 			</div>
 		</div>

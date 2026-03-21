@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.15.0.0] - 2026-03-21
+
+### Added
+
+- Stats page: builtin item state distribution card (New/Learning/Review/Relearning) alongside existing card states
+- Stats page: reviews by content type breakdown showing per-type review count and accuracy percentage
+- Stats queries: getBuiltinStateDistribution() and getStatsByContentType() merging review_log and builtin_review_log data
+- Search: content type dropdown filter (vocabulary, grammar, sentence, kana, kanji, radical, conjugation)
+- Search: new "Builtin" tab showing results from builtin_items (grammar points, sentences)
+- Search: content type badge on card results when classified
+- Search queries: searchBuiltinItems() and searchCardsWithContentType() in language query layer
+- Dashboard: Language summary section with due reviews, new items, and content type count cards
+- Dashboard: content type badges with per-type due counts
+- Dashboard: quick-launch "Start Review" button for Language Review
+- Keyboard shortcut Ctrl+7 for Vocabulary view
+
+### Changed
+
+- Dashboard Language section replaced static Grammar/Reading buttons with full summary cards and quick-launch review
+- Stats shortcut changed from Ctrl+7 to Ctrl+8 to accommodate Vocabulary shortcut
+
+### Removed
+
+- Grammar.svelte (superseded by LanguageGrammar from Phase 2)
+- Reading.svelte (superseded by LanguageSentences from Phase 2)
+
 ## [0.14.0.0] - 2026-03-21
 
 ### Added

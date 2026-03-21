@@ -7,9 +7,12 @@ import { type DeckWithCounts, getAllDecks } from "$lib/db/queries/decks";
 import { getUserLevel } from "$lib/db/queries/kanji";
 import { getKanjiReviewStats, type KanjiReviewDayStats } from "$lib/db/queries/kanji-reviews";
 import {
+	type ContentTypeStats,
 	type DailyStats,
+	getBuiltinStateDistribution,
 	getCardStateDistribution,
 	getKanjiStageDistribution,
+	getStatsByContentType,
 	getStatsByDeck,
 	getStatsRange,
 	getStreak,
@@ -22,6 +25,8 @@ let totalCorrect = $state(0);
 let avgTimeMs = $state(0);
 let cardStates = $state<{ label: string; value: number; color: string }[]>([]);
 let kanjiStages = $state<{ label: string; value: number; color: string }[]>([]);
+let builtinStates = $state<{ label: string; value: number; color: string }[]>([]);
+let contentTypeStats = $state<ContentTypeStats[]>([]);
 let kanjiStats = $state<KanjiReviewDayStats[]>([]);
 let kanjiLevel = $state(1);
 let loading = $state(true);
@@ -73,6 +78,8 @@ async function loadStats() {
 		decksResult,
 		kanjiStatsR,
 		kanjiLevelR,
+		builtinStateResult,
+		contentTypeResult,
 	] = await Promise.all([
 		selectedDeckId ? getStatsByDeck(selectedDeckId, dateRange) : getStatsRange(dateRange),
 		getStreak(),
@@ -81,6 +88,8 @@ async function loadStats() {
 		getAllDecks(),
 		getKanjiReviewStats(dateRange),
 		getUserLevel(),
+		getBuiltinStateDistribution(),
+		getStatsByContentType(dateRange),
 	]);
 
 	if (rangeResult.ok) stats = rangeResult.data;
@@ -109,6 +118,18 @@ async function loadStats() {
 			value: r.count,
 			color: stageColors[r.srs_stage] ?? "#888",
 		}));
+	}
+
+	if (builtinStateResult.ok) {
+		builtinStates = builtinStateResult.data.map((r) => ({
+			label: stateLabels[r.state] ?? "Unknown",
+			value: r.count,
+			color: stateColors[r.state] ?? "#888",
+		}));
+	}
+
+	if (contentTypeResult.ok) {
+		contentTypeStats = contentTypeResult.data;
 	}
 
 	loading = false;
@@ -252,6 +273,39 @@ $effect(() => {
 								<!-- Dynamic hex colors require inline style -->
 							<div class="h-3 w-3 rounded-full" style="background: {ks.color}"></div>
 								<span class="text-sm">{ks.label}: {ks.value}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Builtin Items & Content Type Breakdown -->
+		<div class="grid gap-6 lg:grid-cols-2">
+			{#if builtinStates.length > 0}
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Builtin Item States</h3>
+					<div class="flex gap-4">
+						{#each builtinStates as bs}
+							<div class="flex items-center gap-2">
+								<div class="h-3 w-3 rounded-full" style="background: {bs.color}"></div>
+								<span class="text-sm">{bs.label}: {bs.value}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+			{#if contentTypeStats.length > 0}
+				<div class="rounded-lg border bg-card p-4">
+					<h3 class="mb-3 font-medium">Reviews by Content Type ({dateRange < 3650 ? `${dateRange}d` : 'all'})</h3>
+					<div class="space-y-2">
+						{#each contentTypeStats as ct}
+							{@const accuracy = ct.reviews_count > 0 ? Math.round((ct.correct_count / ct.reviews_count) * 100) : 0}
+							<div class="flex items-center justify-between text-sm">
+								<span class="capitalize">{ct.content_type}</span>
+								<span class="text-muted-foreground">
+									{ct.reviews_count} reviews, {accuracy}% accuracy
+								</span>
 							</div>
 						{/each}
 					</div>

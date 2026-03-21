@@ -151,6 +151,74 @@ export async function getStatsByDeck(
 	});
 }
 
+export async function getBuiltinStateDistribution(): Promise<QueryResult<CardStateCount[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<CardStateCount[]>(
+			"SELECT state, COUNT(*) as count FROM builtin_items GROUP BY state",
+		);
+	});
+}
+
+export interface ContentTypeStats {
+	content_type: string;
+	reviews_count: number;
+	correct_count: number;
+	incorrect_count: number;
+	time_spent_ms: number;
+}
+
+export async function getStatsByContentType(days: number): Promise<QueryResult<ContentTypeStats[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+
+		const cardStats = await db.select<ContentTypeStats[]>(
+			`SELECT ct.content_type,
+				COUNT(*) as reviews_count,
+				SUM(CASE WHEN rl.rating >= 3 THEN 1 ELSE 0 END) as correct_count,
+				SUM(CASE WHEN rl.rating < 3 THEN 1 ELSE 0 END) as incorrect_count,
+				SUM(rl.duration_ms) as time_spent_ms
+			FROM review_log rl
+			JOIN cards c ON c.id = rl.card_id
+			JOIN content_tags ct ON ct.note_id = c.note_id
+			WHERE date(rl.reviewed_at) >= date('now', ? || ' days')
+			GROUP BY ct.content_type`,
+			[`-${days}`],
+		);
+
+		const builtinStats = await db.select<ContentTypeStats[]>(
+			`SELECT bi.content_type,
+				COUNT(*) as reviews_count,
+				SUM(CASE WHEN brl.rating >= 3 THEN 1 ELSE 0 END) as correct_count,
+				SUM(CASE WHEN brl.rating < 3 THEN 1 ELSE 0 END) as incorrect_count,
+				SUM(brl.duration_ms) as time_spent_ms
+			FROM builtin_review_log brl
+			JOIN builtin_items bi ON bi.id = brl.builtin_item_id
+			WHERE date(brl.reviewed_at) >= date('now', ? || ' days')
+			GROUP BY bi.content_type`,
+			[`-${days}`],
+		);
+
+		const merged = new Map<string, ContentTypeStats>();
+		for (const row of cardStats) {
+			merged.set(row.content_type, { ...row });
+		}
+		for (const row of builtinStats) {
+			const existing = merged.get(row.content_type);
+			if (existing) {
+				existing.reviews_count += row.reviews_count;
+				existing.correct_count += row.correct_count;
+				existing.incorrect_count += row.incorrect_count;
+				existing.time_spent_ms += row.time_spent_ms;
+			} else {
+				merged.set(row.content_type, { ...row });
+			}
+		}
+
+		return Array.from(merged.values());
+	});
+}
+
 export async function restoreDailyStats(
 	date: string,
 	reviewsCount: number,

@@ -467,6 +467,76 @@ export interface DueCardWithType {
 	content_type: string;
 }
 
+export interface BuiltinSearchResult {
+	id: number;
+	content_type: string;
+	item_key: string;
+	data: string;
+	state: number;
+}
+
+export async function searchBuiltinItems(
+	query: string,
+	limit = 50,
+): Promise<QueryResult<BuiltinSearchResult[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const like = `%${query.trim()}%`;
+		return db.select<BuiltinSearchResult[]>(
+			`SELECT id, content_type, item_key, data, state
+			FROM builtin_items
+			WHERE data LIKE ? OR item_key LIKE ?
+			ORDER BY id ASC
+			LIMIT ?`,
+			[like, like, limit],
+		);
+	});
+}
+
+export interface CardSearchWithType {
+	id: number;
+	deck_id: number;
+	fields: string;
+	state: number;
+	due: string;
+	deck_name: string;
+	content_type: string | null;
+}
+
+export async function searchCardsWithContentType(
+	query: string,
+	contentType?: string,
+	limit = 50,
+): Promise<QueryResult<CardSearchWithType[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const like = `%${query.trim()}%`;
+		const params: (string | number)[] = [like];
+		let typeJoin = "LEFT JOIN content_tags ct ON ct.note_id = n.id";
+		let typeWhere = "";
+
+		if (contentType) {
+			typeJoin = "JOIN content_tags ct ON ct.note_id = n.id";
+			typeWhere = " AND ct.content_type = ?";
+			params.push(contentType);
+		}
+
+		params.push(limit);
+		return db.select<CardSearchWithType[]>(
+			`SELECT c.id, c.deck_id, n.fields, c.state, c.due, d.name as deck_name, ct.content_type
+			FROM cards c
+			JOIN notes n ON n.id = c.note_id
+			JOIN decks d ON d.id = c.deck_id
+			${typeJoin}
+			WHERE n.fields LIKE ?${typeWhere}
+			GROUP BY c.id
+			ORDER BY c.due ASC
+			LIMIT ?`,
+			params,
+		);
+	});
+}
+
 /** Batch lookup WK cross-references for multiple characters */
 export async function findWkCrossReferences(
 	characters: string[],

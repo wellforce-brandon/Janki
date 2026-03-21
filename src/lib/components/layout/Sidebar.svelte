@@ -54,7 +54,7 @@ let sections = $derived<NavSection[]>([
 		items: [
 			{ id: "lang-overview", label: "Overview", shortcut: "Ctrl+2" },
 			{ id: "lang-kana", label: "Kana" },
-			{ id: "lang-vocabulary", label: "Vocabulary" },
+			{ id: "lang-vocabulary", label: "Vocabulary", shortcut: "Ctrl+7" },
 			{ id: "lang-grammar", label: "Grammar", shortcut: "Ctrl+5" },
 			{ id: "lang-sentences", label: "Sentences", shortcut: "Ctrl+6" },
 			{ id: "lang-conjugation", label: "Conjugation", hidden: !hasConjugation },
@@ -94,7 +94,7 @@ let sections = $derived<NavSection[]>([
 	},
 	{
 		items: [
-			{ id: "stats", label: "Stats", shortcut: "Ctrl+7" },
+			{ id: "stats", label: "Stats", shortcut: "Ctrl+8" },
 			{ id: "search", label: "Search", shortcut: "Ctrl+F" },
 			{ id: "settings", label: "Settings" },
 		],

@@ -56,7 +56,8 @@ function handleKeydown(e: KeyboardEvent) {
 		"4": "kanji-dashboard",
 		"5": "lang-grammar",
 		"6": "lang-sentences",
-		"7": "stats",
+		"7": "lang-vocabulary",
+		"8": "stats",
 	};
 	const view = shortcuts[e.key];
 	if (view) {

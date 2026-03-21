@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.17.0.0] - 2026-03-21
+
+### Added
+
+- Language SRS engine with WK-style stage progression, intervals, and drop formula (single review dimension)
+- Unlock system: kana auto-unlock, vocabulary gates on kanji Guru+, grammar gates on JLPT level progression, sentences/conjugations gate on prerequisites
+- Lesson system with batch support (5 items) and first-review scheduling at Apprentice 1 interval
+- Language review session UI with type-aware prompts, answer validation, progress bar, and summary screen
+- Query layer additions: available lessons, lesson counts, SRS summary, due counts, bulk unlock, JLPT progress, kanji cross-reference queries
+- Language unlock check runs on dashboard load and after kanji reviews (catches vocabulary unlocks from kanji progress)
+
+### Changed
+
+- Language Review view replaced stub with working review session (start, answer, summary, continue flow)
+- Due item queries now require lesson_completed_at and exclude burned items
+- Content type counts show available lessons (unlocked, not yet studied) instead of raw locked count
+
 ## [0.16.0.0] - 2026-03-21
 
 ### Added

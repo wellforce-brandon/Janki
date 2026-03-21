@@ -66,8 +66,8 @@ export async function getContentTypeCounts(): Promise<QueryResult<ContentTypeCou
 			SELECT
 				content_type as type,
 				COUNT(*) as total,
-				COUNT(CASE WHEN srs_stage > 0 AND next_review IS NOT NULL AND next_review <= datetime('now') THEN 1 END) as due,
-				COUNT(CASE WHEN srs_stage = 0 THEN 1 END) as new_count
+				COUNT(CASE WHEN srs_stage > 0 AND srs_stage < 9 AND lesson_completed_at IS NOT NULL AND next_review IS NOT NULL AND next_review <= datetime('now') THEN 1 END) as due,
+				COUNT(CASE WHEN srs_stage >= 1 AND lesson_completed_at IS NULL THEN 1 END) as new_count
 			FROM language_items
 			GROUP BY content_type
 		`);
@@ -233,7 +233,7 @@ export async function getDueLanguageItems(
 	return safeQuery(async () => {
 		const db = await getDb();
 		const params: (string | number)[] = [];
-		let where = "srs_stage > 0 AND next_review IS NOT NULL AND next_review <= datetime('now')";
+		let where = "srs_stage > 0 AND srs_stage < 9 AND lesson_completed_at IS NOT NULL AND next_review IS NOT NULL AND next_review <= datetime('now')";
 
 		if (contentType) {
 			where += " AND content_type = ?";
@@ -276,5 +276,217 @@ export async function getLanguageSrsDistribution(): Promise<QueryResult<{ srs_st
 		return db.select<{ srs_stage: number; count: number }[]>(
 			"SELECT srs_stage, COUNT(*) as count FROM language_items WHERE srs_stage > 0 GROUP BY srs_stage ORDER BY srs_stage",
 		);
+	});
+}
+
+/** Items unlocked (srs_stage >= 1) but lesson not yet completed */
+export async function getAvailableLessons(
+	contentType?: ContentType,
+	limit = 5,
+): Promise<QueryResult<LanguageItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const params: (string | number)[] = [];
+		let where = "srs_stage >= 1 AND lesson_completed_at IS NULL";
+
+		if (contentType) {
+			where += " AND content_type = ?";
+			params.push(contentType);
+		}
+
+		params.push(limit);
+		return db.select<LanguageItem[]>(
+			`SELECT * FROM language_items WHERE ${where}
+			ORDER BY
+				CASE content_type WHEN 'kana' THEN 0 WHEN 'vocabulary' THEN 1 WHEN 'grammar' THEN 2 WHEN 'conjugation' THEN 3 WHEN 'sentence' THEN 4 ELSE 5 END,
+				COALESCE(frequency_rank, 999999) ASC,
+				id ASC
+			LIMIT ?`,
+			params,
+		);
+	});
+}
+
+export async function getAvailableLessonCount(
+	contentType?: ContentType,
+): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const params: (string | number)[] = [];
+		let where = "srs_stage >= 1 AND lesson_completed_at IS NULL";
+
+		if (contentType) {
+			where += " AND content_type = ?";
+			params.push(contentType);
+		}
+
+		const rows = await db.select<{ count: number }[]>(
+			`SELECT COUNT(*) as count FROM language_items WHERE ${where}`,
+			params,
+		);
+		return rows[0].count;
+	});
+}
+
+export interface LanguageSrsSummary {
+	content_type: string;
+	srs_stage: number;
+	count: number;
+}
+
+/** Counts by content_type and srs_stage (for overview displays) */
+export async function getLanguageSrsSummary(): Promise<QueryResult<LanguageSrsSummary[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LanguageSrsSummary[]>(
+			`SELECT content_type, srs_stage, COUNT(*) as count
+			FROM language_items
+			GROUP BY content_type, srs_stage
+			ORDER BY content_type, srs_stage`,
+		);
+	});
+}
+
+/** Mark a lesson batch as completed and schedule first review */
+export async function markLessonCompleted(
+	id: number,
+	nextReview: string,
+): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute(
+			`UPDATE language_items
+			SET lesson_completed_at = datetime('now'), next_review = ?
+			WHERE id = ?`,
+			[nextReview, id],
+		);
+	});
+}
+
+/** Find vocabulary items containing a specific kanji character */
+export async function getLanguageItemsByKanji(
+	character: string,
+): Promise<QueryResult<LanguageItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LanguageItem[]>(
+			`SELECT * FROM language_items
+			WHERE content_type = 'vocabulary' AND primary_text LIKE ?
+			ORDER BY COALESCE(frequency_rank, 999999) ASC`,
+			[`%${character}%`],
+		);
+	});
+}
+
+/** Get due language items count */
+export async function getDueLanguageCount(
+	contentType?: ContentType,
+): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const params: (string | number)[] = [];
+		let where = "srs_stage > 0 AND srs_stage < 9 AND lesson_completed_at IS NOT NULL AND next_review IS NOT NULL AND next_review <= datetime('now')";
+
+		if (contentType) {
+			where += " AND content_type = ?";
+			params.push(contentType);
+		}
+
+		const rows = await db.select<{ count: number }[]>(
+			`SELECT COUNT(*) as count FROM language_items WHERE ${where}`,
+			params,
+		);
+		return rows[0].count;
+	});
+}
+
+/** Bulk unlock items by setting srs_stage = 1 and unlocked_at */
+export async function unlockLanguageItems(ids: number[]): Promise<QueryResult<void>> {
+	if (ids.length === 0) return { ok: true, data: undefined };
+	return safeQuery(async () => {
+		const db = await getDb();
+		const placeholders = ids.map(() => "?").join(",");
+		await db.execute(
+			`UPDATE language_items SET srs_stage = 1, unlocked_at = datetime('now')
+			WHERE id IN (${placeholders}) AND srs_stage = 0`,
+			ids,
+		);
+	});
+}
+
+/** Get all kana items that are still locked */
+export async function getLockedKanaItems(): Promise<QueryResult<{ id: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number }[]>(
+			"SELECT id FROM language_items WHERE content_type = 'kana' AND srs_stage = 0",
+		);
+	});
+}
+
+/** Get locked vocabulary items with their primary_text for kanji checking */
+export async function getLockedVocabularyItems(): Promise<QueryResult<{ id: number; primary_text: string }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number; primary_text: string }[]>(
+			"SELECT id, primary_text FROM language_items WHERE content_type = 'vocabulary' AND srs_stage = 0",
+		);
+	});
+}
+
+/** Get locked grammar items for unlock checking */
+export async function getLockedGrammarItems(): Promise<QueryResult<{ id: number; jlpt_level: string | null; frequency_rank: number | null }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number; jlpt_level: string | null; frequency_rank: number | null }[]>(
+			"SELECT id, jlpt_level, frequency_rank FROM language_items WHERE content_type = 'grammar' AND srs_stage = 0 ORDER BY COALESCE(frequency_rank, 999999) ASC",
+		);
+	});
+}
+
+/** Get locked sentence items with their prerequisite_keys */
+export async function getLockedSentenceItems(): Promise<QueryResult<{ id: number; prerequisite_keys: string | null }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number; prerequisite_keys: string | null }[]>(
+			"SELECT id, prerequisite_keys FROM language_items WHERE content_type = 'sentence' AND srs_stage = 0",
+		);
+	});
+}
+
+/** Get locked conjugation items with their prerequisite_keys */
+export async function getLockedConjugationItems(): Promise<QueryResult<{ id: number; prerequisite_keys: string | null }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number; prerequisite_keys: string | null }[]>(
+			"SELECT id, prerequisite_keys FROM language_items WHERE content_type = 'conjugation' AND srs_stage = 0",
+		);
+	});
+}
+
+/** Check if items with given item_keys have reached a minimum SRS stage */
+export async function getItemKeyStages(itemKeys: string[]): Promise<QueryResult<{ item_key: string; srs_stage: number }[]>> {
+	if (itemKeys.length === 0) return { ok: true, data: [] };
+	return safeQuery(async () => {
+		const db = await getDb();
+		const placeholders = itemKeys.map(() => "?").join(",");
+		return db.select<{ item_key: string; srs_stage: number }[]>(
+			`SELECT item_key, srs_stage FROM language_items WHERE item_key IN (${placeholders})`,
+			itemKeys,
+		);
+	});
+}
+
+/** Count items at Guru+ (srs_stage >= 5) for a given JLPT level */
+export async function getJlptLevelProgress(jlptLevel: string): Promise<QueryResult<{ total: number; guru_plus: number }>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ total: number; guru_plus: number }[]>(
+			`SELECT COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
+			FROM language_items WHERE jlpt_level = ?`,
+			[jlptLevel],
+		);
+		return rows[0];
 	});
 }

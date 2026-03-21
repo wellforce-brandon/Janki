@@ -11,6 +11,7 @@ import {
 } from "$lib/db/queries/kanji";
 import { getContentTypeCounts, type ContentTypeCount } from "$lib/db/queries/language";
 import { type DailyStats, getStreak, getTodayStats } from "$lib/db/queries/stats";
+import { checkAndUnlockItems } from "$lib/srs/language-unlock";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -54,6 +55,9 @@ async function loadDashboard() {
 		if (anyFailed) {
 			error = "Some stats failed to load.";
 		}
+
+		// Run language item unlock check on dashboard load (catches up on kanji progress)
+		await checkAndUnlockItems();
 
 		const lpResult = await getLevelProgress(userLevel);
 		if (lpResult.ok) levelProgress = lpResult.data;

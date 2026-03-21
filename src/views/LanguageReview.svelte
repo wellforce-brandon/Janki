@@ -1,73 +1,155 @@
 <script lang="ts">
 import ContentTypeFilter from "$lib/components/language/ContentTypeFilter.svelte";
+import LanguageReviewSession from "$lib/components/language/LanguageReviewSession.svelte";
+import type { ReviewSummary } from "$lib/components/language/LanguageReviewSession.svelte";
+import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import { getContentTypeCounts, type ContentTypeCount } from "$lib/db/queries/language";
+import {
+	getDueLanguageItems,
+	getDueLanguageCount,
+	getAvailableLessonCount,
+	type ContentType,
+	type LanguageItem,
+} from "$lib/db/queries/language";
+import { checkAndUnlockItems } from "$lib/srs/language-unlock";
 import { navigate } from "$lib/stores/navigation.svelte";
+import { addToast } from "$lib/stores/toast.svelte";
 
-let contentTypes = $state<ContentTypeCount[]>([]);
+let loading = $state(true);
+let dueItems = $state<LanguageItem[]>([]);
+let dueCount = $state(0);
+let lessonCount = $state(0);
+let sessionActive = $state(false);
+let summary = $state<ReviewSummary | null>(null);
 let selectedType = $state<string>("all");
-let loadingCounts = $state(true);
 
-let availableTypes = $derived(contentTypes.filter((ct) => ct.due > 0 || ct.new_count > 0).map((ct) => ct.type));
-let totalDue = $derived(contentTypes.reduce((sum, ct) => sum + ct.due, 0));
-let totalNew = $derived(contentTypes.reduce((sum, ct) => sum + ct.new_count, 0));
-let selectedDue = $derived(
-	selectedType === "all"
-		? totalDue
-		: (contentTypes.find((ct) => ct.type === selectedType)?.due ?? 0),
-);
-let selectedNew = $derived(
-	selectedType === "all"
-		? totalNew
-		: (contentTypes.find((ct) => ct.type === selectedType)?.new_count ?? 0),
-);
+function formatTime(ms: number): string {
+	const seconds = Math.floor(ms / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const secs = seconds % 60;
+	return `${minutes}:${String(secs).padStart(2, "0")}`;
+}
 
-async function loadCounts() {
-	loadingCounts = true;
-	const result = await getContentTypeCounts();
-	if (result.ok) {
-		contentTypes = result.data;
+async function loadDueItems() {
+	loading = true;
+	const typeFilter = selectedType === "all" ? undefined : (selectedType as ContentType);
+	const [dueResult, countResult, lessonResult] = await Promise.all([
+		getDueLanguageItems(typeFilter),
+		getDueLanguageCount(typeFilter),
+		getAvailableLessonCount(typeFilter),
+	]);
+	if (dueResult.ok) dueItems = dueResult.data;
+	if (countResult.ok) dueCount = countResult.data;
+	if (lessonResult.ok) lessonCount = lessonResult.data;
+	loading = false;
+}
+
+function startSession() {
+	if (dueItems.length === 0) return;
+	summary = null;
+	sessionActive = true;
+}
+
+async function handleComplete(result: ReviewSummary) {
+	summary = result;
+	sessionActive = false;
+	const accuracy = result.reviewed > 0 ? Math.round((result.correct / result.reviewed) * 100) : 0;
+	addToast(
+		`Review complete! ${result.correct}/${result.reviewed} correct (${accuracy}%)`,
+		"success",
+	);
+
+	// Run unlock check after review session
+	const unlockResult = await checkAndUnlockItems();
+	if (unlockResult.ok && unlockResult.data > 0) {
+		addToast(`${unlockResult.data} new item${unlockResult.data > 1 ? "s" : ""} unlocked!`, "success");
 	}
-	loadingCounts = false;
+
+	await loadDueItems();
 }
 
 $effect(() => {
-	loadCounts();
+	loadDueItems();
 });
 </script>
 
-<div class="mx-auto max-w-md space-y-6">
-	<h2 class="text-2xl font-bold" tabindex="-1">Language Review</h2>
+<div class="space-y-6">
+	{#if sessionActive}
+		<LanguageReviewSession items={dueItems} oncomplete={handleComplete} />
+	{:else if loading}
+		<h2 class="text-2xl font-bold" tabindex="-1">Language Review</h2>
+		<LoadingState message="Loading reviews..." />
+	{:else if summary}
+		<!-- Review Summary -->
+		<h2 class="text-2xl font-bold" tabindex="-1">Review Complete</h2>
+		<div class="mx-auto max-w-md rounded-lg border bg-card p-8">
+			<div class="space-y-4 text-center">
+				<div class="text-5xl font-bold text-primary">
+					{summary.reviewed > 0 ? Math.round((summary.correct / summary.reviewed) * 100) : 0}%
+				</div>
+				<p class="text-muted-foreground">Accuracy</p>
 
-	{#if loadingCounts}
-		<LoadingState message="Loading review counts..." />
-	{:else if totalDue === 0 && totalNew === 0}
+				<div class="grid grid-cols-3 gap-4 pt-4">
+					<div>
+						<div class="text-2xl font-bold">{summary.reviewed}</div>
+						<div class="text-xs text-muted-foreground">Reviewed</div>
+					</div>
+					<div>
+						<div class="text-2xl font-bold text-green-500">{summary.correct}</div>
+						<div class="text-xs text-muted-foreground">Correct</div>
+					</div>
+					<div>
+						<div class="text-2xl font-bold">{formatTime(summary.totalTimeMs)}</div>
+						<div class="text-xs text-muted-foreground">Time</div>
+					</div>
+				</div>
+
+				<div class="flex justify-center gap-2 pt-4">
+					{#if dueCount > 0}
+						<Button onclick={startSession}>Continue Reviews ({dueCount})</Button>
+					{/if}
+					<Button variant="outline" onclick={() => navigate("lang-overview")}>Back to Overview</Button>
+				</div>
+			</div>
+		</div>
+	{:else if dueCount === 0 && lessonCount === 0}
+		<h2 class="text-2xl font-bold" tabindex="-1">Language Review</h2>
 		<EmptyState
-			title="Nothing to review"
-			description="All items are locked. The SRS review engine is coming in Phase 2."
+			title="All caught up!"
+			description="No reviews due right now. Complete some lessons to get started, or come back later."
 			actionLabel="Back to Overview"
 			onaction={() => navigate("lang-overview")}
 		/>
-	{:else}
-		<div class="space-y-4">
-			<div class="space-y-2">
-				<label class="text-sm font-medium">Content type</label>
-				<ContentTypeFilter
-					options={availableTypes}
-					selected={selectedType}
-					onselect={(v) => { selectedType = v; }}
-				/>
-			</div>
-
-			<div class="flex gap-4 text-sm text-muted-foreground">
-				<span>{selectedDue} due</span>
-				<span>{selectedNew} new</span>
+	{:else if dueCount === 0}
+		<h2 class="text-2xl font-bold" tabindex="-1">Language Review</h2>
+		<div class="mx-auto max-w-md rounded-lg border bg-card p-8 text-center">
+			<div class="text-5xl font-bold text-muted-foreground">0</div>
+			<p class="mt-2 text-muted-foreground">reviews due</p>
+			{#if lessonCount > 0}
+				<p class="mt-4 text-sm text-muted-foreground">
+					You have {lessonCount} lesson{lessonCount > 1 ? "s" : ""} available.
+				</p>
+			{/if}
+			<div class="mt-6">
+				<Button variant="outline" onclick={() => navigate("lang-overview")}>Back to Overview</Button>
 			</div>
 		</div>
+	{:else}
+		<h2 class="text-2xl font-bold" tabindex="-1">Language Review</h2>
+		<div class="mx-auto max-w-md rounded-lg border bg-card p-8 text-center">
+			<div class="text-5xl font-bold text-primary">{dueCount}</div>
+			<p class="mt-2 text-muted-foreground">review{dueCount > 1 ? "s" : ""} available</p>
 
-		<div class="rounded-lg border bg-card/50 p-6 text-center text-sm text-muted-foreground">
-			SRS review engine coming in Phase 2. Items are seeded and ready.
+			{#if lessonCount > 0}
+				<p class="mt-1 text-sm text-muted-foreground">
+					{lessonCount} lesson{lessonCount > 1 ? "s" : ""} available
+				</p>
+			{/if}
+
+			<div class="mt-6">
+				<Button onclick={startSession}>Start Reviews</Button>
+			</div>
 		</div>
 	{/if}
 </div>

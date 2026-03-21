@@ -3,7 +3,6 @@ import BarChart from "$lib/components/stats/BarChart.svelte";
 import LineChart from "$lib/components/stats/LineChart.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import { type DeckWithCounts, getAllDecks } from "$lib/db/queries/decks";
 import { getUserLevel } from "$lib/db/queries/kanji";
 import { getKanjiReviewStats, type KanjiReviewDayStats } from "$lib/db/queries/kanji-reviews";
 import {
@@ -32,7 +31,6 @@ let kanjiLevel = $state(1);
 let loading = $state(true);
 
 let dateRange = $state(30);
-let decks = $state<DeckWithCounts[]>([]);
 let selectedDeckId = $state<number | null>(null);
 
 const DATE_RANGES = [
@@ -75,7 +73,6 @@ async function loadStats() {
 		streakResult,
 		stateResult,
 		kanjiResult,
-		decksResult,
 		kanjiStatsR,
 		kanjiLevelR,
 		builtinStateResult,
@@ -85,7 +82,6 @@ async function loadStats() {
 		getStreak(),
 		getCardStateDistribution(),
 		getKanjiStageDistribution(),
-		getAllDecks(),
 		getKanjiReviewStats(dateRange),
 		getUserLevel(),
 		getBuiltinStateDistribution(),
@@ -94,7 +90,6 @@ async function loadStats() {
 
 	if (rangeResult.ok) stats = rangeResult.data;
 	if (streakResult.ok) streak = streakResult.data;
-	if (decksResult.ok) decks = decksResult.data;
 
 	totalReviews = stats.reduce((s, d) => s + d.reviews_count, 0);
 	totalCorrect = stats.reduce((s, d) => s + d.correct_count, 0);
@@ -176,17 +171,6 @@ $effect(() => {
 	<div class="flex items-center justify-between">
 		<h2 class="text-2xl font-bold">Statistics</h2>
 		<div class="flex items-center gap-3">
-			<!-- Per-deck filter -->
-			<select
-				class="rounded border bg-background px-2 py-1 text-sm"
-				onchange={changeDeckFilter}
-			>
-				<option value="">All Decks</option>
-				{#each decks as deck}
-					<option value={deck.id}>{deck.name}</option>
-				{/each}
-			</select>
-
 			<!-- Date range selector -->
 			<div class="flex gap-1 rounded-lg border bg-muted/50 p-0.5">
 				{#each DATE_RANGES as range}

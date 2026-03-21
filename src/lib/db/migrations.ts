@@ -338,4 +338,108 @@ export const migrations: Migration[] = [
 			DROP TABLE IF EXISTS content_tags;
 		`,
 	},
+	{
+		version: 10,
+		description:
+			"Replace legacy deck/card/note tables and v9 builtin tables with unified language_items schema",
+		up: `
+			CREATE TABLE IF NOT EXISTS language_items (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				content_type TEXT NOT NULL,
+				item_key TEXT NOT NULL UNIQUE,
+
+				-- Universal fields
+				primary_text TEXT NOT NULL,
+				reading TEXT,
+				meaning TEXT,
+
+				-- Vocabulary
+				part_of_speech TEXT,
+				pitch_accent TEXT,
+				frequency_rank INTEGER,
+				audio_file TEXT,
+
+				-- Grammar
+				formation TEXT,
+				explanation TEXT,
+
+				-- Sentence
+				sentence_ja TEXT,
+				sentence_en TEXT,
+				sentence_reading TEXT,
+				sentence_audio TEXT,
+
+				-- Kana
+				romaji TEXT,
+				stroke_order TEXT,
+
+				-- Conjugation
+				conjugation_forms TEXT,
+				verb_group TEXT,
+
+				-- Enrichment (from multi-source merge)
+				example_sentences TEXT,
+				related_items TEXT,
+				images TEXT,
+				context_notes TEXT,
+				source_decks TEXT,
+
+				-- Classification
+				jlpt_level TEXT,
+				wk_level INTEGER,
+				tags TEXT,
+
+				-- SRS (WK-style stages)
+				srs_stage INTEGER NOT NULL DEFAULT 0,
+				unlocked_at TEXT,
+				next_review TEXT,
+				correct_count INTEGER NOT NULL DEFAULT 0,
+				incorrect_count INTEGER NOT NULL DEFAULT 0,
+				lesson_completed_at TEXT,
+
+				-- Prerequisites
+				prerequisite_keys TEXT,
+
+				created_at TEXT NOT NULL DEFAULT (datetime('now')),
+				updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+			);
+
+			CREATE TABLE IF NOT EXISTS language_review_log (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				item_id INTEGER NOT NULL REFERENCES language_items(id) ON DELETE CASCADE,
+				srs_stage_before INTEGER NOT NULL,
+				srs_stage_after INTEGER NOT NULL,
+				correct INTEGER NOT NULL,
+				duration_ms INTEGER,
+				created_at TEXT NOT NULL DEFAULT (datetime('now'))
+			);
+
+			CREATE INDEX idx_language_items_content_type ON language_items(content_type);
+			CREATE INDEX idx_language_items_item_key ON language_items(item_key);
+			CREATE INDEX idx_language_items_srs_stage ON language_items(srs_stage);
+			CREATE INDEX idx_language_items_jlpt ON language_items(jlpt_level);
+			CREATE INDEX idx_language_items_next_review ON language_items(next_review);
+			CREATE INDEX idx_language_items_type_srs ON language_items(content_type, srs_stage);
+			CREATE INDEX idx_language_review_log_item ON language_review_log(item_id);
+			CREATE INDEX idx_language_review_log_date ON language_review_log(created_at);
+
+			-- Drop v9 builtin tables
+			DROP TABLE IF EXISTS builtin_review_log;
+			DROP TABLE IF EXISTS builtin_items;
+			DROP TABLE IF EXISTS content_type_fields;
+			DROP TABLE IF EXISTS content_tags;
+
+			-- Drop legacy deck/card/note tables
+			DROP TABLE IF EXISTS review_log;
+			DROP TABLE IF EXISTS cards;
+			DROP TABLE IF EXISTS notes;
+			DROP TABLE IF EXISTS note_types;
+			DROP TABLE IF EXISTS decks;
+			DROP TABLE IF EXISTS media;
+		`,
+		down: `
+			DROP TABLE IF EXISTS language_review_log;
+			DROP TABLE IF EXISTS language_items;
+		`,
+	},
 ];

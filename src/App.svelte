@@ -18,14 +18,12 @@ import KanjiRadicals from "./views/KanjiRadicals.svelte";
 import KanjiReview from "./views/KanjiReview.svelte";
 import KanjiVocabulary from "./views/KanjiVocabulary.svelte";
 import LanguageConjugation from "./views/LanguageConjugation.svelte";
-import LanguageDecks from "./views/LanguageDecks.svelte";
 import LanguageGrammar from "./views/LanguageGrammar.svelte";
 import LanguageKana from "./views/LanguageKana.svelte";
 import LanguageOverview from "./views/LanguageOverview.svelte";
 import LanguageReview from "./views/LanguageReview.svelte";
 import LanguageSentences from "./views/LanguageSentences.svelte";
 import LanguageVocabulary from "./views/LanguageVocabulary.svelte";
-import Review from "./views/Review.svelte";
 import Search from "./views/Search.svelte";
 import Settings from "./views/Settings.svelte";
 import Stats from "./views/Stats.svelte";
@@ -95,9 +93,7 @@ function handleKeydown(e: KeyboardEvent) {
 			{:else if currentView() === "lang-review"}
 				<LanguageReview />
 			{:else if currentView() === "lang-decks" || currentView() === "deck-browse"}
-				<LanguageDecks />
-			{:else if currentView() === "deck-review"}
-				<Review />
+				<LanguageOverview />
 			{:else if currentView() === "kanji-dashboard"}
 				<KanjiDashboard />
 			{:else if currentView() === "kanji-detail"}

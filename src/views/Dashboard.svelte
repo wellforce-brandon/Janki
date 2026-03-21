@@ -2,7 +2,6 @@
 import { RefreshCw } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import { getTotalCardCount, getTotalDueCount } from "$lib/db/queries/cards";
 import {
 	getAvailableLessonCount,
 	getDueKanjiCount,
@@ -17,10 +16,8 @@ import { addToast } from "$lib/stores/toast.svelte";
 
 let loading = $state(true);
 let error = $state<string | null>(null);
-let dueCount = $state(0);
 let kanjiDueCount = $state(0);
 let kanjiLessonCount = $state(0);
-let totalCards = $state(0);
 let streak = $state(0);
 let userLevel = $state(1);
 let levelProgress = $state<LevelProgress | null>(null);
@@ -33,21 +30,17 @@ let refreshing = $state(false);
 async function loadDashboard() {
 	error = null;
 	try {
-		const [dueR, kanjiR, lessonR, totalR, streakR, levelR, statsR, contentR] = await Promise.all([
-			getTotalDueCount(),
+		const [kanjiR, lessonR, streakR, levelR, statsR, contentR] = await Promise.all([
 			getDueKanjiCount(),
 			getAvailableLessonCount(),
-			getTotalCardCount(),
 			getStreak(),
 			getUserLevel(),
 			getTodayStats(),
 			getContentTypeCounts(),
 		]);
 
-		if (dueR.ok) dueCount = dueR.data;
 		if (kanjiR.ok) kanjiDueCount = kanjiR.data;
 		if (lessonR.ok) kanjiLessonCount = lessonR.data;
-		if (totalR.ok) totalCards = totalR.data;
 		if (streakR.ok) streak = streakR.data;
 		if (levelR.ok) userLevel = levelR.data;
 		if (statsR.ok) todayStats = statsR.data;
@@ -57,7 +50,7 @@ async function loadDashboard() {
 			langNewTotal = contentR.data.reduce((s, c) => s + c.new_count, 0);
 		}
 
-		const anyFailed = [dueR, kanjiR, lessonR, totalR, streakR, levelR, statsR, contentR].some((r) => !r.ok);
+		const anyFailed = [kanjiR, lessonR, streakR, levelR, statsR, contentR].some((r) => !r.ok);
 		if (anyFailed) {
 			error = "Some stats failed to load.";
 		}
@@ -112,43 +105,16 @@ $effect(() => {
 			<p class="text-sm text-destructive">{error}</p>
 			<Button variant="outline" class="mt-3" onclick={handleRefresh}>Retry</Button>
 		</div>
-	{:else if totalCards === 0 && kanjiDueCount === 0 && kanjiLessonCount === 0}
+	{:else if kanjiDueCount === 0 && kanjiLessonCount === 0 && langDueTotal === 0 && langNewTotal === 0}
 		<EmptyState
 			title="Welcome to Janki!"
-			description="Import a deck to start reviewing flashcards and learning kanji."
-			actionLabel="Import your first deck"
-			onaction={() => navigate("decks")}
-			secondaryLabel="Start Kanji"
-			onsecondary={() => navigate("kanji-dashboard")}
+			description="Start with Kanji lessons or explore the Language section."
+			actionLabel="Start Kanji"
+			onaction={() => navigate("kanji-dashboard")}
+			secondaryLabel="Language Overview"
+			onsecondary={() => navigate("lang-overview")}
 		/>
 	{:else}
-		<!-- Decks Section -->
-		<div class="space-y-3">
-			<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Decks</h3>
-			<div class="grid gap-4 sm:grid-cols-3">
-				<div class="rounded-lg border bg-card p-4" aria-label="Cards due: {dueCount}">
-					<div class="text-sm text-muted-foreground">Cards Due</div>
-					<div class="mt-1 text-3xl font-bold">{dueCount}</div>
-				</div>
-				<div class="rounded-lg border bg-card p-4" aria-label="Total cards: {totalCards}">
-					<div class="text-sm text-muted-foreground">Total Cards</div>
-					<div class="mt-1 text-3xl font-bold">{totalCards}</div>
-				</div>
-				<div class="rounded-lg border bg-card p-4" aria-label="Streak: {streak} days">
-					<div class="text-sm text-muted-foreground">Streak</div>
-					<div class="mt-1 text-3xl font-bold">{streak} days</div>
-				</div>
-			</div>
-			<div class="flex gap-2">
-				<Button size="sm" onclick={() => navigate("deck-review")} disabled={dueCount === 0}>
-					Start Review {#if dueCount > 0}({dueCount}){/if}
-				</Button>
-				<Button size="sm" variant="outline" onclick={() => navigate("decks")}>
-					Manage Decks
-				</Button>
-			</div>
-		</div>
-
 		<!-- Kanji Section -->
 		<div class="space-y-3">
 			<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Kanji</h3>

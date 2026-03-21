@@ -29,9 +29,12 @@ export type View =
 
 /** Legacy view aliases -- redirect to new equivalents */
 const LEGACY_REDIRECTS: Record<string, View> = {
-	decks: "lang-decks",
+	decks: "lang-overview",
 	grammar: "lang-grammar",
 	reading: "lang-sentences",
+	"lang-decks": "lang-overview",
+	"deck-browse": "lang-overview",
+	"deck-review": "lang-overview",
 };
 
 /** Maps each sidebar section to its root view for navigateBack() */

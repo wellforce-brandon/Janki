@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.16.0.0] - 2026-03-21
+
+### Added
+
+- Migration v10: unified `language_items` table (30+ columns) and `language_review_log` table with indexes
+- Runtime seeder `language-data.ts` that loads vocabulary (23k), grammar (1.1k), sentences (8k), kana (372), and conjugation (95) from pre-built JSON on first launch
+- Language query layer rewritten for `language_items` table with search, filtering, pagination, and SRS state queries
+- Stats: content type review stats now query `language_review_log`
+
+### Changed
+
+- All Language views (Vocabulary, Grammar, Sentences, Kana, Conjugation) rewritten to query `language_items` directly
+- Search unified into Kanji + Language + Grammar tabs (replaced Cards/Builtin tabs)
+- Dashboard removed Decks section, updated empty state to point to Kanji and Language
+- Language Review stubbed for Phase 2 SRS engine rebuild
+- Sidebar removed "Manage Decks" nav item
+- Legacy view routes (deck-review, lang-decks, deck-browse) redirect to lang-overview
+
+### Removed
+
+- Dropped tables: `decks`, `notes`, `note_types`, `cards`, `review_log`, `media`, `builtin_items`, `builtin_review_log`, `content_tags`, `content_type_fields`
+- Deleted `src/lib/import/` (apkg parser, deck mapper, media extractor, content classifier)
+- Deleted old SRS: `fsrs.ts`, `scheduler.ts`, `builtin-scheduler.ts`, `language-scheduler.ts`, `undo.ts`
+- Deleted old query modules: `cards.ts`, `notes.ts`, `decks.ts`, `reviews.ts`, `seed-builtin-items.ts`
+- Deleted old views: `Review.svelte`, `Decks.svelte`, `DeckBrowse.svelte`, `LanguageDecks.svelte`
+- Deleted old components: `deck/` folder, `ReviewSession`, `FlashCard`, `RatingButtons`, `LanguageReviewSession`, `UnifiedFlashCard`
+
 ## [0.15.0.0] - 2026-03-21
 
 ### Added

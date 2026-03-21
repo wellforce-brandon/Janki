@@ -6,7 +6,7 @@ import { Badge } from "$lib/components/ui/badge";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import { getBuiltinItems, getNotesByContentType, findWkCrossReferences, type BuiltinItem, type NoteWithContentInfo, type WkCrossReference } from "$lib/db/queries/language";
+import { getLanguageItems, findWkCrossReferences, type LanguageItem, type WkCrossReference } from "$lib/db/queries/language";
 import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
 import n5Data from "../../data/grammar/n5.json";
@@ -34,6 +34,19 @@ let expandedId = $state<string | null>(null);
 let grammarPoints = $state<GrammarPoint[]>([]);
 let wkRefs = $state<Map<string, WkCrossReference>>(new Map());
 
+function parseExamples(item: LanguageItem): { ja: string; en: string; reading: string }[] {
+	if (!item.example_sentences) return [];
+	try {
+		return (JSON.parse(item.example_sentences) as { ja: string; en: string; reading?: string }[]).map((ex) => ({
+			ja: ex.ja ?? "",
+			en: ex.en ?? "",
+			reading: ex.reading ?? "",
+		}));
+	} catch {
+		return [];
+	}
+}
+
 async function loadGrammar() {
 	loading = true;
 
@@ -43,35 +56,29 @@ async function loadGrammar() {
 		source: "builtin" as const,
 	}));
 
-	// Merge with imported grammar notes
-	const importedResult = await getNotesByContentType("grammar", { limit: 200 });
-	const importedPoints: GrammarPoint[] = [];
-	if (importedResult.ok) {
-		for (const note of importedResult.data) {
-			const fields = JSON.parse(note.fields);
-			// Try to extract grammar-like fields from imported notes
-			const pattern = fields["Point"] || fields["Grammar Point"] || fields["Grammar"] || fields["Expression"] || Object.values(fields)[0] || "";
-			const meaning = fields["Meaning"] || fields["English"] || fields["Translation"] || Object.values(fields)[1] || "";
-			const formation = fields["Formation"] || fields["Structure"] || fields["Usage"] || "";
-			const explanation = fields["Explanation"] || fields["Notes"] || fields["Detail"] || "";
-
-			importedPoints.push({
-				id: `imported-${note.note_id}`,
-				pattern: String(pattern),
-				meaning: String(meaning),
-				formation: String(formation),
-				explanation: String(explanation),
-				examples: [],
+	// Load grammar items from language_items
+	const result = await getLanguageItems("grammar", { limit: 500 });
+	const dbPoints: GrammarPoint[] = [];
+	if (result.ok) {
+		for (const item of result.data) {
+			const sourceDecks = item.source_decks ? JSON.parse(item.source_decks) as string[] : [];
+			dbPoints.push({
+				id: `lang-${item.id}`,
+				pattern: item.primary_text,
+				meaning: item.meaning ?? "",
+				formation: item.formation ?? "",
+				explanation: item.explanation ?? "",
+				examples: parseExamples(item),
 				related_grammar: [],
 				related_kanji: [],
-				tags: [],
+				tags: item.jlpt_level ? [item.jlpt_level.toLowerCase()] : [],
 				source: "imported",
-				deck_name: note.deck_name,
+				deck_name: sourceDecks[0],
 			});
 		}
 	}
 
-	grammarPoints = [...staticPoints, ...importedPoints];
+	grammarPoints = [...staticPoints, ...dbPoints];
 
 	// Batch-lookup WK cross-references for kanji in grammar patterns
 	const allKanji = new Set<string>();

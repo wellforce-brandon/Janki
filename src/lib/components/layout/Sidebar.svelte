@@ -59,7 +59,6 @@ let sections = $derived<NavSection[]>([
 			{ id: "lang-sentences", label: "Sentences", shortcut: "Ctrl+6" },
 			{ id: "lang-conjugation", label: "Conjugation", hidden: !hasConjugation },
 			{ id: "lang-review", label: "Review", shortcut: "Ctrl+3" },
-			{ id: "lang-decks", label: "Manage Decks", subViews: ["deck-browse"] },
 		],
 	},
 	{

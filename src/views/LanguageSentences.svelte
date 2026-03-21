@@ -5,7 +5,7 @@ import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
 import { Progress } from "$lib/components/ui/progress";
-import { getNotesByContentType, type NoteWithContentInfo } from "$lib/db/queries/language";
+import { getLanguageItems, type LanguageItem } from "$lib/db/queries/language";
 import { getSettings } from "$lib/stores/app-settings.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
@@ -59,21 +59,15 @@ let importedSentences = $state<SentenceItem[]>([]);
 
 async function loadImported() {
 	loading = true;
-	const result = await getNotesByContentType("sentence", { limit: 200 });
+	const result = await getLanguageItems("sentence", { limit: 200 });
 	if (result.ok) {
-		importedSentences = result.data.map((note) => {
-			const fields = JSON.parse(note.fields);
-			const ja = fields["Sentence"] || fields["Japanese"] || fields["Expression"] || Object.values(fields)[0] || "";
-			const en = fields["Translation"] || fields["English"] || fields["Meaning"] || Object.values(fields)[1] || "";
-			const reading = fields["Reading"] || fields["Kana"] || "";
-			return {
-				ja: String(ja),
-				en: String(en),
-				reading: String(reading),
-				source: "imported" as const,
-				deck_name: note.deck_name,
-			};
-		});
+		importedSentences = result.data.map((item) => ({
+			ja: item.primary_text,
+			en: item.meaning ?? "",
+			reading: item.reading ?? "",
+			source: "imported" as const,
+			deck_name: item.source_decks ? (JSON.parse(item.source_decks) as string[])[0] : undefined,
+		}));
 	}
 	loading = false;
 }

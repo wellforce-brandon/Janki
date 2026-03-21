@@ -3,10 +3,8 @@ import EmptyState from "$lib/components/ui/empty-state.svelte";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "$lib/components/ui/tabs";
 import { getDb } from "$lib/db/database";
 import {
-	type BuiltinSearchResult,
-	type CardSearchWithType,
-	searchBuiltinItems,
-	searchCardsWithContentType,
+	type LanguageItem,
+	searchLanguageItems,
 } from "$lib/db/queries/language";
 import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 import { navigate } from "$lib/stores/navigation.svelte";
@@ -37,11 +35,10 @@ const CONTENT_TYPES = [
 ] as const;
 
 let query = $state("");
-let activeTab = $state("kanji");
+let activeTab = $state("language");
 let contentTypeFilter = $state("");
 let kanjiResults = $state<KanjiLevelItem[]>([]);
-let cardResults = $state<CardSearchWithType[]>([]);
-let builtinResults = $state<BuiltinSearchResult[]>([]);
+let langResults = $state<LanguageItem[]>([]);
 let searching = $state(false);
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let searchInput: HTMLInputElement | undefined = $state();
@@ -60,35 +57,17 @@ let grammarResults = $derived.by(() => {
 		.slice(0, 50);
 });
 
-function parseCardFields(fields: string): string {
-	try {
-		const parsed = JSON.parse(fields) as string[][];
-		return parsed
-			.map(([, val]) => val)
-			.filter(Boolean)
-			.join(" | ");
-	} catch {
-		return fields;
-	}
+function formatLangItem(item: LanguageItem): string {
+	return [item.primary_text, item.reading, item.meaning].filter(Boolean).join(" | ");
 }
 
-function parseBuiltinData(data: string): string {
-	try {
-		const parsed = JSON.parse(data) as Record<string, string>;
-		return Object.values(parsed).filter(Boolean).join(" | ");
-	} catch {
-		return data;
-	}
-}
-
-const stateLabel = (s: number) =>
-	s === 0 ? "New" : s === 1 ? "Learning" : s === 2 ? "Review" : "Relearning";
+const srsLabel = (s: number) =>
+	s === 0 ? "New" : s <= 4 ? "Apprentice" : s <= 6 ? "Guru" : s === 7 ? "Master" : s === 8 ? "Enlightened" : "Burned";
 
 async function search(q: string) {
 	if (q.trim().length === 0) {
 		kanjiResults = [];
-		cardResults = [];
-		builtinResults = [];
+		langResults = [];
 		return;
 	}
 
@@ -117,21 +96,12 @@ async function search(q: string) {
 		);
 	}
 
-	// Card search with content type filter
-	const cardResult = await searchCardsWithContentType(
+	// Language items search
+	const langResult = await searchLanguageItems(
 		q.trim(),
 		contentTypeFilter || undefined,
 	);
-	cardResults = cardResult.ok ? cardResult.data : [];
-
-	// Builtin items search
-	const builtinResult = await searchBuiltinItems(q.trim());
-	builtinResults = builtinResult.ok ? builtinResult.data : [];
-
-	// Filter builtins by content type if set
-	if (contentTypeFilter) {
-		builtinResults = builtinResults.filter((b) => b.content_type === contentTypeFilter);
-	}
+	langResults = langResult.ok ? langResult.data : [];
 
 	searching = false;
 }
@@ -194,11 +164,8 @@ $effect(() => {
 				<TabsTrigger value="kanji" class="flex-1">
 					Kanji ({kanjiResults.length})
 				</TabsTrigger>
-				<TabsTrigger value="cards" class="flex-1">
-					Cards ({cardResults.length})
-				</TabsTrigger>
-				<TabsTrigger value="builtin" class="flex-1">
-					Builtin ({builtinResults.length})
+				<TabsTrigger value="language" class="flex-1">
+					Language ({langResults.length})
 				</TabsTrigger>
 				<TabsTrigger value="grammar" class="flex-1">
 					Grammar ({grammarResults.length})
@@ -239,19 +206,19 @@ $effect(() => {
 				{/if}
 			</TabsContent>
 
-			<TabsContent value="cards">
-				{#if cardResults.length > 0}
+			<TabsContent value="language">
+				{#if langResults.length > 0}
 					<div class="space-y-1">
-						{#each cardResults as card}
+						{#each langResults as item}
 							<div class="rounded-lg border bg-card p-3 hover:bg-accent">
-								<div class="text-sm">{@html highlightMatch(parseCardFields(card.fields), query)}</div>
+								<div class="text-sm">{@html highlightMatch(formatLangItem(item), query)}</div>
 								<div class="flex items-center gap-2 text-xs text-muted-foreground">
-									<span>{card.deck_name}</span>
+									<span class="rounded bg-muted px-1.5 py-0.5 capitalize">{item.content_type}</span>
 									<span>&middot;</span>
-									<span>{stateLabel(card.state)}</span>
-									{#if card.content_type}
+									<span>{srsLabel(item.srs_stage)}</span>
+									{#if item.jlpt_level}
 										<span>&middot;</span>
-										<span class="rounded bg-muted px-1.5 py-0.5 capitalize">{card.content_type}</span>
+										<span>{item.jlpt_level}</span>
 									{/if}
 								</div>
 							</div>
@@ -259,30 +226,8 @@ $effect(() => {
 					</div>
 				{:else if !searching}
 					<EmptyState
-						title="No cards found"
-						description="No imported cards match your search. Try importing a deck first."
-					/>
-				{/if}
-			</TabsContent>
-
-			<TabsContent value="builtin">
-				{#if builtinResults.length > 0}
-					<div class="space-y-1">
-						{#each builtinResults as item}
-							<div class="rounded-lg border bg-card p-3 hover:bg-accent">
-								<div class="text-sm">{@html highlightMatch(parseBuiltinData(item.data), query)}</div>
-								<div class="flex items-center gap-2 text-xs text-muted-foreground">
-									<span class="rounded bg-muted px-1.5 py-0.5 capitalize">{item.content_type}</span>
-									<span>&middot;</span>
-									<span>{stateLabel(item.state)}</span>
-								</div>
-							</div>
-						{/each}
-					</div>
-				{:else if !searching}
-					<EmptyState
-						title="No builtin items found"
-						description="No grammar points or sentences match your search."
+						title="No language items found"
+						description="No vocabulary, grammar, or sentences match your search."
 					/>
 				{/if}
 			</TabsContent>

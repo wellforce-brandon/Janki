@@ -93,10 +93,8 @@ export interface CardStateCount {
 }
 
 export async function getCardStateDistribution(): Promise<QueryResult<CardStateCount[]>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		return db.select<CardStateCount[]>("SELECT state, COUNT(*) as count FROM cards GROUP BY state");
-	});
+	// Cards table dropped in v10 -- return empty until Phase 2 replaces this
+	return { ok: true, data: [] };
 }
 
 export interface KanjiStageCount {
@@ -128,36 +126,16 @@ export async function getAverageTimePerCard(days = 30): Promise<QueryResult<numb
 }
 
 export async function getStatsByDeck(
-	deckId: number,
-	days: number,
+	_deckId: number,
+	_days: number,
 ): Promise<QueryResult<DailyStats[]>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		return db.select<DailyStats[]>(
-			`SELECT date(rl.reviewed_at) as date,
-				COUNT(*) as reviews_count,
-				0 as new_cards_count,
-				SUM(CASE WHEN rl.rating >= 3 THEN 1 ELSE 0 END) as correct_count,
-				SUM(CASE WHEN rl.rating < 3 THEN 1 ELSE 0 END) as incorrect_count,
-				SUM(rl.duration_ms) as time_spent_ms,
-				0 as kanji_learned
-			FROM review_log rl
-			JOIN cards c ON c.id = rl.card_id
-			WHERE c.deck_id = ? AND date(rl.reviewed_at) >= date('now', ? || ' days')
-			GROUP BY date(rl.reviewed_at)
-			ORDER BY date ASC`,
-			[deckId, `-${days}`],
-		);
-	});
+	// Decks/review_log dropped in v10 -- return empty until Phase 2 replaces this
+	return { ok: true, data: [] };
 }
 
 export async function getBuiltinStateDistribution(): Promise<QueryResult<CardStateCount[]>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		return db.select<CardStateCount[]>(
-			"SELECT state, COUNT(*) as count FROM builtin_items GROUP BY state",
-		);
-	});
+	// builtin_items dropped in v10 -- return empty until Phase 2 replaces this
+	return { ok: true, data: [] };
 }
 
 export interface ContentTypeStats {
@@ -171,51 +149,19 @@ export interface ContentTypeStats {
 export async function getStatsByContentType(days: number): Promise<QueryResult<ContentTypeStats[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-
-		const cardStats = await db.select<ContentTypeStats[]>(
-			`SELECT ct.content_type,
+		return db.select<ContentTypeStats[]>(
+			`SELECT
+				li.content_type,
 				COUNT(*) as reviews_count,
-				SUM(CASE WHEN rl.rating >= 3 THEN 1 ELSE 0 END) as correct_count,
-				SUM(CASE WHEN rl.rating < 3 THEN 1 ELSE 0 END) as incorrect_count,
-				SUM(rl.duration_ms) as time_spent_ms
-			FROM review_log rl
-			JOIN cards c ON c.id = rl.card_id
-			JOIN content_tags ct ON ct.note_id = c.note_id
-			WHERE date(rl.reviewed_at) >= date('now', ? || ' days')
-			GROUP BY ct.content_type`,
+				SUM(CASE WHEN lr.correct THEN 1 ELSE 0 END) as correct_count,
+				SUM(CASE WHEN NOT lr.correct THEN 1 ELSE 0 END) as incorrect_count,
+				SUM(lr.duration_ms) as time_spent_ms
+			FROM language_review_log lr
+			JOIN language_items li ON li.id = lr.item_id
+			WHERE date(lr.created_at) >= date('now', ? || ' days')
+			GROUP BY li.content_type`,
 			[`-${days}`],
 		);
-
-		const builtinStats = await db.select<ContentTypeStats[]>(
-			`SELECT bi.content_type,
-				COUNT(*) as reviews_count,
-				SUM(CASE WHEN brl.rating >= 3 THEN 1 ELSE 0 END) as correct_count,
-				SUM(CASE WHEN brl.rating < 3 THEN 1 ELSE 0 END) as incorrect_count,
-				SUM(brl.duration_ms) as time_spent_ms
-			FROM builtin_review_log brl
-			JOIN builtin_items bi ON bi.id = brl.builtin_item_id
-			WHERE date(brl.reviewed_at) >= date('now', ? || ' days')
-			GROUP BY bi.content_type`,
-			[`-${days}`],
-		);
-
-		const merged = new Map<string, ContentTypeStats>();
-		for (const row of cardStats) {
-			merged.set(row.content_type, { ...row });
-		}
-		for (const row of builtinStats) {
-			const existing = merged.get(row.content_type);
-			if (existing) {
-				existing.reviews_count += row.reviews_count;
-				existing.correct_count += row.correct_count;
-				existing.incorrect_count += row.incorrect_count;
-				existing.time_spent_ms += row.time_spent_ms;
-			} else {
-				merged.set(row.content_type, { ...row });
-			}
-		}
-
-		return Array.from(merged.values());
 	});
 }
 

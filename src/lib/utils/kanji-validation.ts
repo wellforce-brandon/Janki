@@ -10,13 +10,22 @@ function parseJsonArray(json: string | null): string[] {
 	}
 }
 
+// Normalize answer text: strip punctuation, collapse whitespace, lowercase
+export function normalizeAnswer(text: string): string {
+	return text
+		.toLowerCase()
+		.replace(/[^\w\s]/g, "")
+		.replace(/\s+/g, " ")
+		.trim();
+}
+
 // Meanings accepted in reviews: all meanings + user synonyms
 export function getAcceptedMeanings(item: KanjiLevelItem): string[] {
 	const meanings = parseJsonArray(item.meanings);
 	if (item.user_synonyms) {
 		meanings.push(...parseJsonArray(item.user_synonyms));
 	}
-	return meanings.map((m) => m.toLowerCase().trim());
+	return meanings.map((m) => normalizeAnswer(m));
 }
 
 // Readings accepted in reviews (filters out ! prefix, kanji = on'yomi only)

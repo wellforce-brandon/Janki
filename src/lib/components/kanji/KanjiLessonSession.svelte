@@ -11,6 +11,7 @@ import {
 	getAcceptedReadings,
 	getCorrectDisplay,
 	isKunReadingForKanji,
+	normalizeAnswer,
 } from "$lib/utils/kanji-validation";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
@@ -178,7 +179,7 @@ function checkQuizAnswer(): "correct" | "incorrect" | "wrong-reading-type" {
 	if (!currentQuiz) return "incorrect";
 	if (currentQuiz.type === "meaning") {
 		const accepted = getAcceptedMeanings(currentQuiz.item);
-		return accepted.includes(inputValue.toLowerCase().trim()) ? "correct" : "incorrect";
+		return accepted.includes(normalizeAnswer(inputValue)) ? "correct" : "incorrect";
 	}
 	if (isKunReadingForKanji(currentQuiz.item, inputValue)) {
 		return "wrong-reading-type";

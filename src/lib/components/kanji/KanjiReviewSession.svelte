@@ -9,6 +9,7 @@ import {
 	getAcceptedReadings,
 	getCorrectDisplay,
 	isKunReadingForKanji,
+	normalizeAnswer,
 } from "$lib/utils/kanji-validation";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
@@ -125,7 +126,7 @@ function checkAnswer(): "correct" | "incorrect" | "wrong-reading-type" {
 
 	if (current.type === "meaning") {
 		const accepted = getAcceptedMeanings(current.item);
-		return accepted.includes(inputValue.toLowerCase().trim()) ? "correct" : "incorrect";
+		return accepted.includes(normalizeAnswer(inputValue)) ? "correct" : "incorrect";
 	}
 
 	// Reading: check for kun'yomi on kanji (shake, not wrong)

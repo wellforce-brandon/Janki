@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.10.1.0] - 2026-03-20
+
+### Fixed
+
+- Quiz answer checking now strips punctuation, extra whitespace, and is case-insensitive (e.g., "water." and "Water" both accepted)
+- Applied lenient matching to both review and lesson quiz sessions
+
 ## [0.10.0.0] - 2026-03-20
 
 ### Added

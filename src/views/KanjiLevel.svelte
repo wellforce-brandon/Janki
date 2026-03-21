@@ -9,38 +9,13 @@ import {
 } from "$lib/db/queries/kanji";
 import { navigate, viewParams } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
+import { getTileClasses } from "$lib/utils/kanji";
 
 let loading = $state(true);
 let items = $state<LevelItemsByType>({ radicals: [], kanji: [], vocab: [] });
 let progress = $state<LevelProgress>({ level: 1, total: 0, guru_plus: 0, unlocked: 0, percentage: 0 });
 
 let level = $derived(Number(viewParams().level) || 1);
-
-const ITEM_COLORS: Record<string, { locked: string; lesson: string; review: string }> = {
-	radical: {
-		locked: "border-2 border-dashed border-blue-500 dark:border-blue-400 bg-transparent text-muted-foreground",
-		lesson: "bg-blue-500/30 dark:bg-blue-400/30 text-blue-600 dark:text-blue-400 border border-blue-500/50 dark:border-blue-400/50",
-		review: "bg-blue-500 dark:bg-blue-600 text-white border border-transparent",
-	},
-	kanji: {
-		locked: "border-2 border-dashed border-pink-500 dark:border-pink-400 bg-transparent text-muted-foreground",
-		lesson: "bg-pink-500/30 dark:bg-pink-400/30 text-pink-600 dark:text-pink-400 border border-pink-500/50 dark:border-pink-400/50",
-		review: "bg-pink-500 dark:bg-pink-600 text-white border border-transparent",
-	},
-	vocab: {
-		locked: "border-2 border-dashed border-purple-500 dark:border-purple-400 bg-transparent text-muted-foreground",
-		lesson: "bg-purple-500/30 dark:bg-purple-400/30 text-purple-600 dark:text-purple-400 border border-purple-500/50 dark:border-purple-400/50",
-		review: "bg-purple-500 dark:bg-purple-600 text-white border border-transparent",
-	},
-};
-
-function getTileClasses(item: KanjiLevelItem): string {
-	const colorSet = ITEM_COLORS[item.item_type] ?? ITEM_COLORS.kanji;
-	if (item.srs_stage === 0) return colorSet.locked;
-	if (item.srs_stage === 9) return "bg-zinc-700 dark:bg-zinc-600 text-zinc-300 border border-transparent";
-	if (!item.lesson_completed_at) return colorSet.lesson;
-	return colorSet.review;
-}
 
 function getMeaningDisplay(item: KanjiLevelItem): string {
 	try {

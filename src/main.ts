@@ -1,7 +1,7 @@
 import { mount } from "svelte";
 import { autoBackup } from "$lib/backup/backup";
 import { getDb } from "$lib/db/database";
-import { seedKanjiData } from "$lib/db/seed/kanji-data";
+import { seedKanjiData, backfillEnrichedData } from "$lib/db/seed/kanji-data";
 import { loadSettings } from "$lib/stores/app-settings.svelte";
 import { checkForUpdates } from "$lib/updater/check-update";
 import App from "./App.svelte";
@@ -10,6 +10,7 @@ async function init() {
 	await getDb();
 	try {
 		await seedKanjiData();
+		await backfillEnrichedData();
 	} catch (e) {
 		console.error("[SEED FAILED]", e);
 	}

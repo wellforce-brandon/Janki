@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.10.0.0] - 2026-03-20
+
+### Added
+
+- "Found in Kanji" now populates for all radicals on both detail and lesson pages
+- Mnemonic tag styling: radical (blue), kanji (pink), vocabulary (purple) references render as colored highlighted text in mnemonics
+- Mnemonic tags in lesson view now render as styled HTML instead of raw tag text
+- SRS-aware tile styling on detail pages: Found in Kanji, Radical Combination, and header icon reflect locked/lesson/review/burned state
+- Shared `getTileClasses()` utility for consistent SRS-aware styling across all views
+- Streak tracking: meaning and reading current/longest streaks tracked per item during reviews
+- WaniKani-style progression section with streaks, accuracy bar, next review, and unlocked date
+- Quiz auto-focus: cursor automatically placed in input field when advancing questions
+- Alphabetical prev/next navigation on detail pages (sorted by first meaning within same level and type)
+- Migration v8: streak tracking columns (meaning_current_streak, meaning_max_streak, reading_current_streak, reading_max_streak)
+
+### Changed
+
+- Back button on detail pages navigates to parent page (radicals/kanji/vocabulary) instead of dashboard
+- Hints in mnemonic sections always visible instead of hidden behind a toggle
+- SRS stage indicator badge moved to top-right of progression section
+
+### Fixed
+
+- "Found in Kanji" was always empty because component_ids was never stored for kanji rows during seeding
+- Mnemonic custom tags (radical, kanji, vocabulary, reading, ja) were stripped by DOMPurify 3.x; converted to styled spans before sanitization
+- SRS review countdown showed inflated hours (e.g., 5h instead of 2h) due to UTC datetime strings parsed as local time
+- Backfill version bumped to v2 so existing databases get component_ids populated for kanji
+
 ## [0.9.0.0] - 2026-03-19
 
 ### Added

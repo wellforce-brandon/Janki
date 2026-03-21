@@ -11,7 +11,7 @@ let { stage, nextReview = null }: Props = $props();
 
 function formatNextReview(review: string | null): string {
 	if (!review) return "";
-	const d = new Date(review);
+	const d = new Date(review.endsWith("Z") ? review : review + "Z");
 	const now = new Date();
 	const diff = d.getTime() - now.getTime();
 	if (diff <= 0) return "Now";

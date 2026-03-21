@@ -23,7 +23,17 @@
       "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri\"\" } | Stop-Process -Force 2>$null; Remove-Item \"\"C:\\\\Users\\\\B_StL\\\\AppData\\\\Roaming\\\\com.janki.desktop\\\\janki.db\"\" -Force -ErrorAction SilentlyContinue; \"\"Ready\"\"')",
       "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri\"\" } | Stop-Process -Force 2>$null; Start-Sleep -Seconds 1; Remove-Item \"\"C:\\\\Users\\\\B_StL\\\\AppData\\\\Roaming\\\\com.janki.desktop\\\\janki.db\"\" -Force -ErrorAction SilentlyContinue; \"\"Done\"\"')",
       "Bash(powershell.exe -NoProfile -Command 'Get-Process | Where-Object { $_.Name -match \"\"janki|tauri\"\" } | Stop-Process -Force 2>$null; Start-Sleep -Seconds 1; Remove-Item \"\"C:\\\\Users\\\\B_StL\\\\AppData\\\\Roaming\\\\com.janki.desktop\\\\janki.db\"\" -Force -ErrorAction SilentlyContinue; \"\"Ready\"\"')",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Read(//c/Github/tech-assistant/site-crawl/wanikani/**)",
+      "Bash(wc -l /c/Github/Janki/public/data/wk-*.json)",
+      "Bash(xargs grep:*)",
+      "Bash(git -C /c/Github/Janki log --oneline -15)",
+      "Bash(WK_API_TOKEN=70c365ce-aeb1-43de-a3b8-18881bc9b60c node scripts/wk-api-export.mjs)",
+      "Bash(node -e \":*)",
+      "Bash(taskkill //F //IM \"janki-desktop.exe\")",
+      "Bash(rm -f \"$APPDATA/com.janki.desktop/janki.db\")",
+      "Read(//c/Github/Janki/$APPDATA/com.janki.desktop/**)",
+      "Bash(sqlite3 \"$APPDATA/com.janki.desktop/janki.db\" \"SELECT item_type, COUNT\\(*\\) FROM kanji_levels GROUP BY item_type; SELECT COUNT\\(*\\) as unlocked FROM kanji_levels WHERE srs_stage > 0; SELECT COUNT\\(*\\) as with_lesson FROM kanji_levels WHERE lesson_completed_at IS NOT NULL;\")"
     ],
     "deny": [
       "Read(~/.ssh/**)",
@@ -53,6 +63,9 @@
       "Edit(**/*.pem)",
       "Edit(**/*.key)",
       "Edit(**/*.cert)"
+    ],
+    "additionalDirectories": [
+      "C:\\Github\\Janki\\$APPDATA\\com.janki.desktop"
     ]
   },
   "hooks": {

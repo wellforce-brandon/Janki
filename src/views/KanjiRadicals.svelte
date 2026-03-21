@@ -1,7 +1,6 @@
 <script lang="ts">
 import ItemTypeBrowser from "$lib/components/kanji/ItemTypeBrowser.svelte";
-import { currentView, viewParams } from "$lib/stores/navigation.svelte";
-import KanjiDetail from "./KanjiDetail.svelte";
+import { viewParams } from "$lib/stores/navigation.svelte";
 
 const colors = {
 	locked:
@@ -16,8 +15,4 @@ const colors = {
 let initialTier = $derived(Number(viewParams().tier) || 0);
 </script>
 
-{#if currentView() === "kanji-detail" && viewParams().id}
-	<KanjiDetail itemId={Number(viewParams().id)} />
-{:else}
-	<ItemTypeBrowser itemType="radical" title="Radicals" {colors} {initialTier} />
-{/if}
+<ItemTypeBrowser itemType="radical" title="Radicals" {colors} {initialTier} />

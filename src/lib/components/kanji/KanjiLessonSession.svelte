@@ -1,7 +1,8 @@
 <script lang="ts">
 import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
-import { type KanjiLevelItem, markLessonCompleted } from "$lib/db/queries/kanji";
+import { type KanjiLevelItem, markLessonCompleted, getItemsContainingComponent } from "$lib/db/queries/kanji";
+import { sanitizeMnemonicHtml } from "$lib/utils/sanitize";
 import { updateUserNotes, updateUserSynonyms } from "$lib/db/queries/kanji-reviews";
 import { addToast } from "$lib/stores/toast.svelte";
 import { fisherYatesShuffle, getTypeColor } from "$lib/utils/kanji";
@@ -28,6 +29,23 @@ let activeTab = $state<"meaning" | "examples" | "reading">("meaning");
 
 // Teaching phase state
 let current = $derived(phase === "teaching" ? (items[currentIndex] ?? null) : null);
+let foundInKanji = $state<KanjiLevelItem[]>([]);
+let loadingFoundInKanji = $state(false);
+
+$effect(() => {
+	const item = current;
+	if (item?.item_type === "radical" && item.wk_id) {
+		loadingFoundInKanji = true;
+		foundInKanji = [];
+		getItemsContainingComponent(item.wk_id, "kanji").then((result) => {
+			if (result.ok) foundInKanji = result.data;
+			loadingFoundInKanji = false;
+		});
+	} else {
+		foundInKanji = [];
+	}
+});
+
 let editingNotes = $state(false);
 let notesInput = $state("");
 let synonymInput = $state("");
@@ -48,6 +66,17 @@ let inputValue = $state("");
 let feedbackState = $state<"none" | "correct" | "incorrect" | "shake">("none");
 let correctAnswer = $state("");
 let isCompleting = $state(false);
+let quizInputEl = $state<HTMLInputElement | null>(null);
+
+$effect(() => {
+	// Auto-focus the quiz input whenever the question changes
+	void quizIndex;
+	void feedbackState;
+	if (phase === "quiz" && feedbackState === "none") {
+		// Use tick to wait for DOM update
+		setTimeout(() => quizInputEl?.focus(), 0);
+	}
+});
 
 let currentQuiz = $derived(quizIndex < quizQueue.length ? quizQueue[quizIndex] : null);
 let quizRemaining = $derived(quizQueue.length - quizQueue.filter((q) => q.answered).length);
@@ -321,7 +350,7 @@ function handleKeydown(e: KeyboardEvent) {
 					{#if current.mnemonic_meaning}
 						<div>
 							<h4 class="text-sm font-medium text-muted-foreground">Mnemonic</h4>
-							<p class="mt-1 text-sm leading-relaxed">{current.mnemonic_meaning}</p>
+							<p class="mt-1 text-sm leading-relaxed">{@html sanitizeMnemonicHtml(current.mnemonic_meaning)}</p>
 						</div>
 					{/if}
 
@@ -378,8 +407,17 @@ function handleKeydown(e: KeyboardEvent) {
 			{:else if activeTab === "examples"}
 				<div class="space-y-3">
 					<h4 class="text-sm font-medium text-muted-foreground">Kanji Using This Radical</h4>
-					{#if current.radicals}
-						<p class="text-sm text-muted-foreground">{current.radicals}</p>
+					{#if loadingFoundInKanji}
+						<p class="text-sm text-muted-foreground">Loading...</p>
+					{:else if foundInKanji.length > 0}
+						<div class="flex flex-wrap gap-3">
+							{#each foundInKanji as kanji}
+								<div class="flex flex-col items-center gap-1 rounded-lg border-2 border-dashed border-pink-500 bg-pink-500 px-3 py-2 text-white">
+									<span class="text-2xl font-bold">{kanji.character}</span>
+									<span class="text-xs">{getMeanings(kanji)[0]}</span>
+								</div>
+							{/each}
+						</div>
 					{:else}
 						<p class="text-sm text-muted-foreground">No example kanji data available yet.</p>
 					{/if}
@@ -390,7 +428,7 @@ function handleKeydown(e: KeyboardEvent) {
 					{#if current.mnemonic_reading}
 						<div>
 							<h4 class="text-sm font-medium text-muted-foreground">Reading Mnemonic</h4>
-							<p class="mt-1 text-sm leading-relaxed">{current.mnemonic_reading}</p>
+							<p class="mt-1 text-sm leading-relaxed">{@html sanitizeMnemonicHtml(current.mnemonic_reading)}</p>
 						</div>
 					{/if}
 					{#if readings.on.length > 0}
@@ -508,6 +546,7 @@ function handleKeydown(e: KeyboardEvent) {
 							class:dark:text-green-400={feedbackState === "correct"}
 							placeholder="Type reading in romaji..."
 							bind:value={inputValue}
+							bind:this={quizInputEl}
 							disabled={feedbackState === "correct"}
 							aria-label="Type reading in romaji"
 						/>
@@ -522,6 +561,7 @@ function handleKeydown(e: KeyboardEvent) {
 							class:dark:text-green-400={feedbackState === "correct"}
 							placeholder="Type the {currentQuiz.item.item_type === 'radical' ? 'name' : 'meaning'}..."
 							bind:value={inputValue}
+							bind:this={quizInputEl}
 							disabled={feedbackState === "correct"}
 							aria-label="Type the meaning"
 						/>

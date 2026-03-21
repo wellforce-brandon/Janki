@@ -36,6 +36,17 @@ export interface KanjiLevelItem {
 	image_url: string | null;
 	wk_id: number | null;
 	component_ids: string | null;
+	parts_of_speech: string | null;
+	context_sentences: string | null;
+	pronunciation_audios: string | null;
+	visually_similar_ids: string | null;
+	character_images: string | null;
+	meaning_hint: string | null;
+	reading_hint: string | null;
+	meaning_current_streak: number;
+	meaning_max_streak: number;
+	reading_current_streak: number;
+	reading_max_streak: number;
 }
 
 export interface LevelProgress {
@@ -164,6 +175,8 @@ export async function updateKanjiSrsState(
 	nextReview: string | null,
 	correctDelta: number,
 	incorrectDelta: number,
+	meaningIncorrect = 0,
+	readingIncorrect = 0,
 ): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
@@ -172,9 +185,16 @@ export async function updateKanjiSrsState(
 				srs_stage = ?,
 				next_review = ?,
 				correct_count = correct_count + ?,
-				incorrect_count = incorrect_count + ?
+				incorrect_count = incorrect_count + ?,
+				meaning_current_streak = CASE WHEN ? = 0 THEN meaning_current_streak + 1 ELSE 0 END,
+				meaning_max_streak = CASE WHEN ? = 0 THEN MAX(meaning_max_streak, meaning_current_streak + 1) ELSE meaning_max_streak END,
+				reading_current_streak = CASE WHEN ? = 0 THEN reading_current_streak + 1 ELSE 0 END,
+				reading_max_streak = CASE WHEN ? = 0 THEN MAX(reading_max_streak, reading_current_streak + 1) ELSE reading_max_streak END
 			WHERE id = ?`,
-			[srsStage, nextReview, correctDelta, incorrectDelta, id],
+			[srsStage, nextReview, correctDelta, incorrectDelta,
+				meaningIncorrect, meaningIncorrect,
+				readingIncorrect, readingIncorrect,
+				id],
 		);
 	});
 }
@@ -310,20 +330,32 @@ export async function getAllLevelProgress(): Promise<QueryResult<LevelProgress[]
 export async function getAdjacentKanji(
 	level: number,
 	currentId: number,
+	itemType: string,
 ): Promise<QueryResult<{ prev: KanjiLevelItem | null; next: KanjiLevelItem | null }>> {
 	return safeQuery(async () => {
 		const db = await getDb();
+		// Get current item's sort key for alphabetical navigation
+		const currentRows = await db.select<{ sort_key: string }[]>(
+			"SELECT json_extract(meanings, '$[0]') as sort_key FROM kanji_levels WHERE id = ?",
+			[currentId],
+		);
+		const currentKey = currentRows[0]?.sort_key ?? "";
+
+		// Previous: same level + type, alphabetically before current
 		const prevRows = await db.select<KanjiLevelItem[]>(
 			`SELECT * FROM kanji_levels
-			WHERE level = ? AND id < ?
-			ORDER BY id DESC LIMIT 1`,
-			[level, currentId],
+			WHERE level = ? AND item_type = ?
+			AND (json_extract(meanings, '$[0]') < ? OR (json_extract(meanings, '$[0]') = ? AND id < ?))
+			ORDER BY json_extract(meanings, '$[0]') DESC, id DESC LIMIT 1`,
+			[level, itemType, currentKey, currentKey, currentId],
 		);
+		// Next: same level + type, alphabetically after current
 		const nextRows = await db.select<KanjiLevelItem[]>(
 			`SELECT * FROM kanji_levels
-			WHERE level = ? AND id > ?
-			ORDER BY id ASC LIMIT 1`,
-			[level, currentId],
+			WHERE level = ? AND item_type = ?
+			AND (json_extract(meanings, '$[0]') > ? OR (json_extract(meanings, '$[0]') = ? AND id > ?))
+			ORDER BY json_extract(meanings, '$[0]') ASC, id ASC LIMIT 1`,
+			[level, itemType, currentKey, currentKey, currentId],
 		);
 		return {
 			prev: prevRows[0] ?? null,
@@ -622,5 +654,60 @@ export async function markKanjiSeeded(): Promise<QueryResult<void>> {
 		await db.execute(
 			"INSERT OR REPLACE INTO settings (key, value) VALUES ('kanji_seeded', 'true')",
 		);
+	});
+}
+
+export async function getItemsByWkIds(
+	wkIds: number[],
+): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		if (wkIds.length === 0) return [];
+		const db = await getDb();
+		const placeholders = wkIds.map(() => "?").join(",");
+		return db.select<KanjiLevelItem[]>(
+			`SELECT * FROM kanji_levels WHERE wk_id IN (${placeholders})`,
+			wkIds,
+		);
+	});
+}
+
+export async function getItemsContainingComponent(
+	wkId: number,
+	targetType: string,
+): Promise<QueryResult<KanjiLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<KanjiLevelItem[]>(
+			`SELECT kl.* FROM kanji_levels kl
+			WHERE kl.item_type = ? AND kl.component_ids IS NOT NULL
+			AND EXISTS (SELECT 1 FROM json_each(kl.component_ids) je WHERE je.value = ?)`,
+			[targetType, wkId],
+		);
+	});
+}
+
+export async function updateUserSynonyms(
+	id: number,
+	synonyms: string[],
+): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute("UPDATE kanji_levels SET user_synonyms = ? WHERE id = ?", [
+			synonyms.length > 0 ? JSON.stringify(synonyms) : null,
+			id,
+		]);
+	});
+}
+
+export async function updateUserNotes(
+	id: number,
+	notes: string,
+): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute("UPDATE kanji_levels SET user_notes = ? WHERE id = ?", [
+			notes.trim() || null,
+			id,
+		]);
 	});
 }

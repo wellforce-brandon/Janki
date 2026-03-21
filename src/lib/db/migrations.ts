@@ -225,4 +225,47 @@ export const migrations: Migration[] = [
 			SELECT 1;
 		`,
 	},
+	{
+		version: 6,
+		description: "Add enriched WK fields: parts of speech, context sentences, audio, similar kanji, radical images",
+		up: `
+			ALTER TABLE kanji_levels ADD COLUMN parts_of_speech TEXT;
+
+			ALTER TABLE kanji_levels ADD COLUMN context_sentences TEXT;
+
+			ALTER TABLE kanji_levels ADD COLUMN pronunciation_audios TEXT;
+
+			ALTER TABLE kanji_levels ADD COLUMN visually_similar_ids TEXT;
+
+			ALTER TABLE kanji_levels ADD COLUMN character_images TEXT;
+		`,
+		down: `
+			SELECT 1;
+		`,
+	},
+	{
+		version: 7,
+		description: "Add meaning_hint and reading_hint columns for kanji",
+		up: `
+			ALTER TABLE kanji_levels ADD COLUMN meaning_hint TEXT;
+
+			ALTER TABLE kanji_levels ADD COLUMN reading_hint TEXT;
+		`,
+		down: `
+			SELECT 1;
+		`,
+	},
+	{
+		version: 8,
+		description: "Add streak tracking columns for meaning and reading",
+		up: `
+			ALTER TABLE kanji_levels ADD COLUMN meaning_current_streak INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE kanji_levels ADD COLUMN meaning_max_streak INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE kanji_levels ADD COLUMN reading_current_streak INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE kanji_levels ADD COLUMN reading_max_streak INTEGER NOT NULL DEFAULT 0;
+		`,
+		down: `
+			SELECT 1;
+		`,
+	},
 ];

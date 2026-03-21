@@ -103,7 +103,7 @@ export async function reviewKanjiItem(
 
 	const nextReview = calculateNextReview(newStage, level);
 
-	await updateKanjiSrsState(id, newStage, nextReview, correct ? 1 : 0, correct ? 0 : 1);
+	await updateKanjiSrsState(id, newStage, nextReview, correct ? 1 : 0, correct ? 0 : 1, meaningIncorrect, readingIncorrect);
 
 	await logKanjiReview(
 		id,

@@ -2,7 +2,7 @@
 import Header from "$lib/components/layout/Header.svelte";
 import Sidebar from "$lib/components/layout/Sidebar.svelte";
 import ToastContainer from "$lib/components/layout/ToastContainer.svelte";
-import { currentView, navigate } from "$lib/stores/navigation.svelte";
+import { currentView, navigate, viewParams } from "$lib/stores/navigation.svelte";
 import { dismissLatest } from "$lib/stores/toast.svelte";
 
 import Dashboard from "./views/Dashboard.svelte";
@@ -15,6 +15,7 @@ import KanjiLessonPicker from "./views/KanjiLessonPicker.svelte";
 import KanjiLessons from "./views/KanjiLessons.svelte";
 import KanjiLevel from "./views/KanjiLevel.svelte";
 import KanjiLevels from "./views/KanjiLevels.svelte";
+import KanjiDetail from "./views/KanjiDetail.svelte";
 import KanjiRadicals from "./views/KanjiRadicals.svelte";
 import KanjiReview from "./views/KanjiReview.svelte";
 import KanjiVocabulary from "./views/KanjiVocabulary.svelte";
@@ -77,7 +78,9 @@ function handleKeydown(e: KeyboardEvent) {
 				<Review />
 			{:else if currentView() === "kanji-dashboard"}
 				<KanjiDashboard />
-			{:else if currentView() === "kanji-radicals" || currentView() === "kanji-detail"}
+			{:else if currentView() === "kanji-detail"}
+				<KanjiDetail itemId={Number(viewParams().id)} />
+			{:else if currentView() === "kanji-radicals"}
 				<KanjiRadicals />
 			{:else if currentView() === "kanji-kanji"}
 				<KanjiKanji />

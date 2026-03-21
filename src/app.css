@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+/* WaniKani mnemonic tag styles */
+.wk-radical {
+	border-radius: 0.25rem;
+	background-color: rgb(59 130 246 / 0.2);
+	padding: 0.125rem 0.25rem;
+	font-weight: 500;
+	color: rgb(37 99 235);
+}
+.wk-kanji {
+	border-radius: 0.25rem;
+	background-color: rgb(236 72 153 / 0.2);
+	padding: 0.125rem 0.25rem;
+	font-weight: 500;
+	color: rgb(219 39 119);
+}
+.wk-vocabulary {
+	border-radius: 0.25rem;
+	background-color: rgb(168 85 247 / 0.2);
+	padding: 0.125rem 0.25rem;
+	font-weight: 500;
+	color: rgb(147 51 234);
+}
+.wk-reading {
+	font-weight: 700;
+}
+.wk-ja {
+	font-weight: 700;
+}
+
+@media (prefers-color-scheme: dark) {
+	.wk-radical {
+		background-color: rgb(59 130 246 / 0.25);
+		color: rgb(96 165 250);
+	}
+	.wk-kanji {
+		background-color: rgb(236 72 153 / 0.25);
+		color: rgb(244 114 182);
+	}
+	.wk-vocabulary {
+		background-color: rgb(168 85 247 / 0.25);
+		color: rgb(192 132 252);
+	}
+}

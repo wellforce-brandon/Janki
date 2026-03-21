@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.14.0.0] - 2026-03-21
+
+### Added
+
+- Unified review queue pulling due items from both imported deck cards and builtin items, sorted by due date with content type filtering
+- Builtin scheduler mirroring FSRS-6 scheduling for builtin_items table (grammar, sentences, kana promoted to SRS)
+- Language Review view with content type filter buttons, due/new counts, and session launch
+- LanguageReviewSession component with full undo support, keyboard shortcuts, TTS, and content type badges per card
+- UnifiedFlashCard component supporting both Anki template rendering and pre-rendered HTML for builtin items
+- Default review templates for builtin grammar (pattern/formation front, meaning/explanation/examples back) and sentences (Japanese front, reading/translation back)
+- WaniKani cross-reference badges on Vocabulary and Grammar views showing SRS stage color, clickable to navigate to kanji detail
+- Batch WK cross-reference lookup query for efficient kanji character matching
+- PitchAccentDisplay component rendering sanitized OJAD pitch accent HTML from Core 2k/6k decks
+- Pitch accent display in Vocabulary view when pitch_accent semantic role is mapped
+- Kana study mode toggle: mark individual or all kana for SRS review by promoting to builtin_items
+- 8 new language query functions: updateBuiltinItemState, logBuiltinReview, getBuiltinItemById, deleteBuiltinReviewLogEntry, getNewBuiltinItems, getDueCardsByContentType, getNewCardsByContentType, findWkCrossReferences
+
 ## [0.13.0.0] - 2026-03-21
 
 ### Added

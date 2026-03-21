@@ -1,11 +1,12 @@
 <script lang="ts">
 import { Volume2 } from "@lucide/svelte";
 import DeckSourceBadge from "$lib/components/language/DeckSourceBadge.svelte";
+import WkBadge from "$lib/components/language/WkBadge.svelte";
 import { Badge } from "$lib/components/ui/badge";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import { getBuiltinItems, getNotesByContentType, type BuiltinItem, type NoteWithContentInfo } from "$lib/db/queries/language";
+import { getBuiltinItems, getNotesByContentType, findWkCrossReferences, type BuiltinItem, type NoteWithContentInfo, type WkCrossReference } from "$lib/db/queries/language";
 import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
 import n5Data from "../../data/grammar/n5.json";
@@ -31,6 +32,7 @@ let selectedLevel = $state("N5");
 let searchQuery = $state("");
 let expandedId = $state<string | null>(null);
 let grammarPoints = $state<GrammarPoint[]>([]);
+let wkRefs = $state<Map<string, WkCrossReference>>(new Map());
 
 async function loadGrammar() {
 	loading = true;
@@ -70,6 +72,24 @@ async function loadGrammar() {
 	}
 
 	grammarPoints = [...staticPoints, ...importedPoints];
+
+	// Batch-lookup WK cross-references for kanji in grammar patterns
+	const allKanji = new Set<string>();
+	for (const p of grammarPoints) {
+		for (const char of p.pattern) {
+			const code = char.codePointAt(0) ?? 0;
+			if (code >= 0x4E00 && code <= 0x9FFF) allKanji.add(char);
+		}
+	}
+	if (allKanji.size > 0) {
+		const wkResult = await findWkCrossReferences([...allKanji]);
+		if (wkResult.ok) {
+			const map = new Map<string, WkCrossReference>();
+			for (const ref of wkResult.data) map.set(ref.character, ref);
+			wkRefs = map;
+		}
+	}
+
 	loading = false;
 }
 
@@ -95,6 +115,18 @@ let filteredPoints = $derived.by(() => {
 
 	return points;
 });
+
+function getWkRefsForText(text: string): WkCrossReference[] {
+	const refs: WkCrossReference[] = [];
+	const seen = new Set<string>();
+	for (const char of text) {
+		if (!seen.has(char) && wkRefs.has(char)) {
+			refs.push(wkRefs.get(char)!);
+			seen.add(char);
+		}
+	}
+	return refs;
+}
 
 function toggleExpand(id: string) {
 	expandedId = expandedId === id ? null : id;
@@ -167,6 +199,9 @@ $effect(() => {
 								<div class="flex items-center gap-3">
 									<span class="text-lg font-bold text-primary">{point.pattern}</span>
 									<span class="text-sm text-muted-foreground">{point.meaning}</span>
+									{#each getWkRefsForText(point.pattern) as ref (ref.character)}
+										<WkBadge srsStage={ref.srs_stage} character={ref.character} kanjiId={ref.id} />
+									{/each}
 									{#if point.source === "imported" && point.deck_name}
 										<DeckSourceBadge deckName={point.deck_name} />
 									{/if}

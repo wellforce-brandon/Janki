@@ -295,3 +295,191 @@ export async function getDeckContentTypes(
 		);
 	});
 }
+
+export async function updateBuiltinItemState(
+	id: number,
+	state: number,
+	stability: number,
+	difficulty: number,
+	due: string,
+	lastReview: string,
+	reps: number,
+	lapses: number,
+	scheduledDays: number,
+	elapsedDays: number,
+): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute(
+			`UPDATE builtin_items SET
+				state = ?, stability = ?, difficulty = ?, due = ?,
+				last_review = ?, reps = ?, lapses = ?, scheduled_days = ?,
+				elapsed_days = ?, updated_at = datetime('now')
+			WHERE id = ?`,
+			[state, stability, difficulty, due, lastReview, reps, lapses, scheduledDays, elapsedDays, id],
+		);
+	});
+}
+
+export async function logBuiltinReview(
+	builtinItemId: number,
+	rating: number,
+	state: number,
+	scheduledDays: number,
+	elapsedDays: number,
+	stability: number,
+	difficulty: number,
+	durationMs?: number,
+): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const result = await db.execute(
+			`INSERT INTO builtin_review_log (builtin_item_id, rating, state, scheduled_days, elapsed_days, stability, difficulty, duration_ms)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			[builtinItemId, rating, state, scheduledDays, elapsedDays, stability, difficulty, durationMs ?? null],
+		);
+		return result.lastInsertId;
+	});
+}
+
+export async function getBuiltinItemById(id: number): Promise<QueryResult<BuiltinItem | null>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<BuiltinItem[]>(
+			"SELECT * FROM builtin_items WHERE id = ?",
+			[id],
+		);
+		return rows[0] ?? null;
+	});
+}
+
+export async function deleteBuiltinReviewLogEntry(id: number): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute("DELETE FROM builtin_review_log WHERE id = ?", [id]);
+	});
+}
+
+export async function getNewBuiltinItems(
+	contentType?: ContentType,
+	limit = 20,
+): Promise<QueryResult<BuiltinItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const params: (string | number)[] = [];
+		let where = "state = 0";
+
+		if (contentType) {
+			where += " AND content_type = ?";
+			params.push(contentType);
+		}
+
+		params.push(limit);
+		return db.select<BuiltinItem[]>(
+			`SELECT * FROM builtin_items WHERE ${where} ORDER BY id ASC LIMIT ?`,
+			params,
+		);
+	});
+}
+
+/** Get due cards from the cards table filtered by content type */
+export async function getDueCardsByContentType(
+	contentType?: ContentType,
+	limit = 200,
+): Promise<QueryResult<DueCardWithType[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const params: (string | number)[] = [];
+		let typeFilter = "";
+
+		if (contentType) {
+			typeFilter = " AND ct.content_type = ?";
+			params.push(contentType);
+		}
+
+		params.push(limit);
+		return db.select<DueCardWithType[]>(
+			`SELECT c.*, n.fields, n.tags, nt.card_templates, nt.css, ct.content_type
+			FROM cards c
+			JOIN notes n ON n.id = c.note_id
+			JOIN note_types nt ON nt.id = n.note_type_id
+			JOIN content_tags ct ON ct.note_id = n.id
+			WHERE c.state != 0 AND c.due <= datetime('now')${typeFilter}
+			GROUP BY c.id
+			ORDER BY c.due ASC
+			LIMIT ?`,
+			params,
+		);
+	});
+}
+
+/** Get new cards from the cards table filtered by content type */
+export async function getNewCardsByContentType(
+	contentType?: ContentType,
+	limit = 20,
+): Promise<QueryResult<DueCardWithType[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const params: (string | number)[] = [];
+		let typeFilter = "";
+
+		if (contentType) {
+			typeFilter = " AND ct.content_type = ?";
+			params.push(contentType);
+		}
+
+		params.push(limit);
+		return db.select<DueCardWithType[]>(
+			`SELECT c.*, n.fields, n.tags, nt.card_templates, nt.css, ct.content_type
+			FROM cards c
+			JOIN notes n ON n.id = c.note_id
+			JOIN note_types nt ON nt.id = n.note_type_id
+			JOIN content_tags ct ON ct.note_id = n.id
+			WHERE c.state = 0${typeFilter}
+			GROUP BY c.id
+			ORDER BY c.created_at ASC
+			LIMIT ?`,
+			params,
+		);
+	});
+}
+
+export interface DueCardWithType {
+	id: number;
+	note_id: number;
+	deck_id: number;
+	template_index: number;
+	stability: number;
+	difficulty: number;
+	due: string;
+	last_review: string | null;
+	reps: number;
+	lapses: number;
+	state: number;
+	scheduled_days: number;
+	elapsed_days: number;
+	created_at: string;
+	updated_at: string;
+	fields: string;
+	card_templates: string;
+	css: string | null;
+	tags: string | null;
+	content_type: string;
+}
+
+/** Batch lookup WK cross-references for multiple characters */
+export async function findWkCrossReferences(
+	characters: string[],
+): Promise<QueryResult<WkCrossReference[]>> {
+	if (characters.length === 0) return { ok: true, data: [] };
+	return safeQuery(async () => {
+		const db = await getDb();
+		const placeholders = characters.map(() => "?").join(",");
+		return db.select<WkCrossReference[]>(
+			`SELECT id, character, item_type, srs_stage, level, meanings
+			 FROM kanji_levels
+			 WHERE character IN (${placeholders})`,
+			characters,
+		);
+	});
+}

@@ -1,10 +1,12 @@
 <script lang="ts">
 import ContentTypeBadge from "$lib/components/language/ContentTypeBadge.svelte";
 import DeckSourceBadge from "$lib/components/language/DeckSourceBadge.svelte";
+import PitchAccentDisplay from "$lib/components/language/PitchAccentDisplay.svelte";
+import WkBadge from "$lib/components/language/WkBadge.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import { getNotesByContentType, getSemanticFields, type NoteWithContentInfo, type SemanticFieldMapping } from "$lib/db/queries/language";
+import { getNotesByContentType, getSemanticFields, findWkCrossReferences, type NoteWithContentInfo, type SemanticFieldMapping, type WkCrossReference } from "$lib/db/queries/language";
 import { getAllDecks, type DeckWithCounts } from "$lib/db/queries/decks";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -12,6 +14,7 @@ let loading = $state(true);
 let notes = $state<NoteWithContentInfo[]>([]);
 let decks = $state<DeckWithCounts[]>([]);
 let fieldMappings = $state<Map<number, SemanticFieldMapping[]>>(new Map());
+let wkRefs = $state<Map<string, WkCrossReference>>(new Map());
 
 // Filters
 let searchQuery = $state("");
@@ -44,10 +47,50 @@ async function loadNotes() {
 				}
 			}
 		}
+		// Batch-lookup WK cross-references for kanji in displayed words
+		await loadWkRefs(result.data);
 	} else {
 		addToast("Failed to load vocabulary", "error");
 	}
 	loading = false;
+}
+
+function extractKanji(text: string): string[] {
+	const kanji: string[] = [];
+	for (const char of text) {
+		const code = char.codePointAt(0) ?? 0;
+		if (code >= 0x4E00 && code <= 0x9FFF) kanji.push(char);
+	}
+	return kanji;
+}
+
+async function loadWkRefs(noteList: NoteWithContentInfo[]) {
+	const allKanji = new Set<string>();
+	for (const note of noteList) {
+		const fields = JSON.parse(note.fields);
+		for (const val of Object.values(fields)) {
+			for (const k of extractKanji(String(val))) allKanji.add(k);
+		}
+	}
+	if (allKanji.size === 0) return;
+	const result = await findWkCrossReferences([...allKanji]);
+	if (result.ok) {
+		const map = new Map<string, WkCrossReference>();
+		for (const ref of result.data) map.set(ref.character, ref);
+		wkRefs = map;
+	}
+}
+
+function getWkRefsForText(text: string): WkCrossReference[] {
+	const refs: WkCrossReference[] = [];
+	const seen = new Set<string>();
+	for (const char of text) {
+		if (!seen.has(char) && wkRefs.has(char)) {
+			refs.push(wkRefs.get(char)!);
+			seen.add(char);
+		}
+	}
+	return refs;
 }
 
 async function loadDecks() {
@@ -148,6 +191,7 @@ $effect(() => {
 				{@const word = getFieldByRole(note, "primary_text")}
 				{@const reading = getFieldByRole(note, "reading")}
 				{@const meaning = getFieldByRole(note, "meaning")}
+				{@const pitchAccent = getFieldByRole(note, "pitch_accent")}
 				<div class="flex items-center gap-4 rounded-lg border bg-card p-4">
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center gap-3">
@@ -155,12 +199,18 @@ $effect(() => {
 							{#if reading}
 								<span class="text-sm text-muted-foreground">{reading}</span>
 							{/if}
+							{#if pitchAccent}
+								<PitchAccentDisplay html={pitchAccent} />
+							{/if}
 						</div>
 						{#if meaning}
 							<p class="mt-0.5 text-sm text-muted-foreground">{meaning}</p>
 						{/if}
 					</div>
 					<div class="flex items-center gap-2">
+						{#each getWkRefsForText(word) as ref (ref.character)}
+							<WkBadge srsStage={ref.srs_stage} character={ref.character} kanjiId={ref.id} />
+						{/each}
 						<DeckSourceBadge deckName={note.deck_name} />
 						{#if note.state === 0}
 							<span class="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300">New</span>

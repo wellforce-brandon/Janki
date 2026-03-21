@@ -21,6 +21,8 @@ import LanguageConjugation from "./views/LanguageConjugation.svelte";
 import LanguageGrammar from "./views/LanguageGrammar.svelte";
 import LanguageKana from "./views/LanguageKana.svelte";
 import LanguageOverview from "./views/LanguageOverview.svelte";
+import LanguageLessonPicker from "./views/LanguageLessonPicker.svelte";
+import LanguageLessons from "./views/LanguageLessons.svelte";
 import LanguageReview from "./views/LanguageReview.svelte";
 import LanguageSentences from "./views/LanguageSentences.svelte";
 import LanguageVocabulary from "./views/LanguageVocabulary.svelte";
@@ -92,6 +94,10 @@ function handleKeydown(e: KeyboardEvent) {
 				<LanguageConjugation />
 			{:else if currentView() === "lang-review"}
 				<LanguageReview />
+			{:else if currentView() === "lang-lessons"}
+				<LanguageLessons />
+			{:else if currentView() === "lang-lesson-picker"}
+				<LanguageLessonPicker />
 			{:else if currentView() === "lang-decks" || currentView() === "deck-browse"}
 				<LanguageOverview />
 			{:else if currentView() === "kanji-dashboard"}

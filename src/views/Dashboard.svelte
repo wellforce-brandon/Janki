@@ -9,7 +9,13 @@ import {
 	getUserLevel,
 	type LevelProgress,
 } from "$lib/db/queries/kanji";
-import { getContentTypeCounts, type ContentTypeCount } from "$lib/db/queries/language";
+import {
+	getContentTypeCounts,
+	getAvailableLessonCount as getLangLessonCount,
+	getLanguageSrsDistribution,
+	type ContentTypeCount,
+} from "$lib/db/queries/language";
+import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { type DailyStats, getStreak, getTodayStats } from "$lib/db/queries/stats";
 import { checkAndUnlockItems } from "$lib/srs/language-unlock";
 import { navigate } from "$lib/stores/navigation.svelte";
@@ -26,18 +32,22 @@ let todayStats = $state<DailyStats | null>(null);
 let contentCounts = $state<ContentTypeCount[]>([]);
 let langDueTotal = $state(0);
 let langNewTotal = $state(0);
+let langLessonCount = $state(0);
+let langSrsDistribution = $state<{ srs_stage: number; count: number }[]>([]);
 let refreshing = $state(false);
 
 async function loadDashboard() {
 	error = null;
 	try {
-		const [kanjiR, lessonR, streakR, levelR, statsR, contentR] = await Promise.all([
+		const [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR] = await Promise.all([
 			getDueKanjiCount(),
 			getAvailableLessonCount(),
 			getStreak(),
 			getUserLevel(),
 			getTodayStats(),
 			getContentTypeCounts(),
+			getLangLessonCount(),
+			getLanguageSrsDistribution(),
 		]);
 
 		if (kanjiR.ok) kanjiDueCount = kanjiR.data;
@@ -50,8 +60,10 @@ async function loadDashboard() {
 			langDueTotal = contentR.data.reduce((s, c) => s + c.due, 0);
 			langNewTotal = contentR.data.reduce((s, c) => s + c.new_count, 0);
 		}
+		if (langLessonR.ok) langLessonCount = langLessonR.data;
+		if (langSrsR.ok) langSrsDistribution = langSrsR.data;
 
-		const anyFailed = [kanjiR, lessonR, streakR, levelR, statsR, contentR].some((r) => !r.ok);
+		const anyFailed = [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR].some((r) => !r.ok);
 		if (anyFailed) {
 			error = "Some stats failed to load.";
 		}
@@ -109,7 +121,7 @@ $effect(() => {
 			<p class="text-sm text-destructive">{error}</p>
 			<Button variant="outline" class="mt-3" onclick={handleRefresh}>Retry</Button>
 		</div>
-	{:else if kanjiDueCount === 0 && kanjiLessonCount === 0 && langDueTotal === 0 && langNewTotal === 0}
+	{:else if kanjiDueCount === 0 && kanjiLessonCount === 0 && langDueTotal === 0 && langNewTotal === 0 && langLessonCount === 0}
 		<EmptyState
 			title="Welcome to Janki!"
 			description="Start with Kanji lessons or explore the Language section."
@@ -173,20 +185,28 @@ $effect(() => {
 		<div class="space-y-3">
 			<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Language</h3>
 			<div class="grid gap-4 sm:grid-cols-3">
-				<div class="rounded-lg border bg-card p-4" aria-label="Language due: {langDueTotal}">
-					<div class="text-sm text-muted-foreground">Due Reviews</div>
-					<div class="mt-1 text-3xl font-bold text-violet-500">{langDueTotal}</div>
+				<div class="rounded-lg border bg-card p-4" aria-label="Language lessons: {langLessonCount}">
+					<div class="text-sm text-muted-foreground">Lessons</div>
+					<div class="mt-1 text-3xl font-bold text-violet-500">{langLessonCount}</div>
 				</div>
-				<div class="rounded-lg border bg-card p-4" aria-label="New items: {langNewTotal}">
-					<div class="text-sm text-muted-foreground">New Items</div>
-					<div class="mt-1 text-3xl font-bold text-blue-500">{langNewTotal}</div>
+				<div class="rounded-lg border bg-card p-4" aria-label="Language due: {langDueTotal}">
+					<div class="text-sm text-muted-foreground">Reviews Due</div>
+					<div class="mt-1 text-3xl font-bold text-blue-500">{langDueTotal}</div>
 				</div>
 				<div class="rounded-lg border bg-card p-4" aria-label="Content types: {contentCounts.length}">
 					<div class="text-sm text-muted-foreground">Content Types</div>
 					<div class="mt-1 text-3xl font-bold">{contentCounts.length}</div>
 				</div>
 			</div>
-			{#if contentCounts.length > 0}
+			{#if langSrsDistribution.length > 0}
+				<div class="flex flex-wrap gap-2 text-xs">
+					{#each langSrsDistribution as entry}
+						<span class="rounded-full border bg-muted px-2.5 py-1">
+							{STAGE_NAMES[entry.srs_stage] ?? `Stage ${entry.srs_stage}`}: {entry.count}
+						</span>
+					{/each}
+				</div>
+			{:else if contentCounts.length > 0}
 				<div class="flex flex-wrap gap-2 text-xs">
 					{#each contentCounts as ct}
 						<span class="rounded-full border bg-muted px-2.5 py-1 capitalize">
@@ -199,9 +219,16 @@ $effect(() => {
 				</div>
 			{/if}
 			<div class="flex gap-2">
-				<Button size="sm" onclick={() => navigate("lang-review")} disabled={langDueTotal === 0 && langNewTotal === 0}>
-					Start Review {#if langDueTotal > 0}({langDueTotal}){/if}
-				</Button>
+				{#if langLessonCount > 0}
+					<Button size="sm" onclick={() => navigate("lang-lessons")}>
+						Start Lessons ({Math.min(langLessonCount, 5)})
+					</Button>
+				{/if}
+				{#if langDueTotal > 0}
+					<Button size="sm" variant={langLessonCount > 0 ? "outline" : "default"} onclick={() => navigate("lang-review")}>
+						Start Reviews ({langDueTotal})
+					</Button>
+				{/if}
 				<Button size="sm" variant="outline" onclick={() => navigate("lang-overview")}>
 					Language Overview
 				</Button>

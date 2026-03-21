@@ -1,9 +1,10 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
 import type { LanguageItem } from "$lib/db/queries/language";
-import { reviewLanguageItem } from "$lib/srs/language-srs";
+import { reviewLanguageItem, type LanguageReviewResult } from "$lib/srs/language-srs";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
+import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
 interface Props {
 	items: LanguageItem[];
@@ -37,6 +38,12 @@ let isProcessing = $state(false);
 let sessionStartTime = $state(Date.now());
 let itemStartTime = $state(Date.now());
 
+// SRS stage change display
+let stageTransition = $state<{ from: string; to: string; direction: "up" | "down" } | null>(null);
+
+// Item info peek after answering
+let showInfoPeek = $state(false);
+
 let totalReviewed = $state(0);
 let totalCorrect = $state(0);
 
@@ -44,15 +51,11 @@ let current = $derived(currentIndex < queue.length ? queue[currentIndex] : null)
 let remaining = $derived(queue.length - currentIndex);
 let progressPercent = $derived(Math.round((currentIndex / queue.length) * 100));
 
-/** Get the prompt text to display for a language item */
-function getPromptText(item: LanguageItem): string {
-	return item.primary_text;
-}
-
-/** Get the expected answer for the item */
-function getExpectedAnswer(item: LanguageItem): string {
-	return item.meaning ?? "";
-}
+// Vocabulary reading uses romaji-to-hiragana conversion
+let isReadingInput = $derived(
+	current?.content_type === "vocabulary" && false, // vocabulary is meaning-only for now
+);
+let displayValue = $derived(isReadingInput ? romajiToHiragana(inputValue) : inputValue);
 
 /** Get display label for the content type */
 function getTypeLabel(type: string): string {
@@ -87,6 +90,22 @@ function normalizeAnswer(answer: string): string {
 		.replace(/[.,!?;:'"()\[\]{}]/g, "");
 }
 
+/** Fuzzy match: checks if strings share enough words for longer answers */
+function fuzzyMatch(userAnswer: string, expected: string): boolean {
+	// Exact match first
+	if (userAnswer === expected) return true;
+	// Contains match
+	if (userAnswer.includes(expected) || expected.includes(userAnswer)) return true;
+	// For longer meanings (3+ words), accept if 60%+ of words match
+	const userWords = userAnswer.split(" ").filter(Boolean);
+	const expectedWords = expected.split(" ").filter(Boolean);
+	if (expectedWords.length >= 3) {
+		const matching = userWords.filter((w) => expectedWords.includes(w));
+		return matching.length >= Math.ceil(expectedWords.length * 0.6);
+	}
+	return false;
+}
+
 /** Check if user's answer is correct */
 function checkAnswer(): boolean {
 	if (!current) return false;
@@ -103,22 +122,21 @@ function checkAnswer(): boolean {
 		return accepted.some((a) => a === userAnswer);
 	}
 
-	// For grammar, check meaning/explanation
+	// For grammar, check meaning/explanation with fuzzy matching
 	if (current.content_type === "grammar") {
 		const accepted: string[] = [];
 		if (current.meaning) {
-			// Split by comma/semicolon for multiple meanings
 			for (const m of current.meaning.split(/[;,]/)) {
 				accepted.push(normalizeAnswer(m));
 			}
 		}
-		return accepted.some((a) => a === userAnswer || userAnswer.includes(a) || a.includes(userAnswer));
+		return accepted.some((a) => fuzzyMatch(userAnswer, a));
 	}
 
-	// For sentences, check English translation
+	// For sentences, check English translation with fuzzy matching
 	if (current.content_type === "sentence") {
 		const expected = normalizeAnswer(current.sentence_en ?? current.meaning ?? "");
-		return expected === userAnswer || userAnswer.includes(expected) || expected.includes(userAnswer);
+		return fuzzyMatch(userAnswer, expected);
 	}
 
 	// For conjugation, check the meaning or reading
@@ -129,14 +147,14 @@ function checkAnswer(): boolean {
 		return accepted.some((a) => a === userAnswer);
 	}
 
-	// Default: vocabulary -- check meaning
+	// Default: vocabulary -- check meaning with fuzzy matching for longer meanings
 	const accepted: string[] = [];
 	if (current.meaning) {
 		for (const m of current.meaning.split(/[;,]/)) {
 			accepted.push(normalizeAnswer(m));
 		}
 	}
-	return accepted.some((a) => a === userAnswer);
+	return accepted.some((a) => fuzzyMatch(userAnswer, a));
 }
 
 /** Get the correct answer text for display */
@@ -166,28 +184,45 @@ async function submitAnswer() {
 
 	const isCorrect = checkAnswer();
 	const durationMs = Date.now() - itemStartTime;
+	const oldStage = current.srs_stage;
 
 	if (isCorrect) {
 		feedbackState = "correct";
 		totalReviewed++;
 		totalCorrect++;
 
-		await reviewLanguageItem(current.id, true, durationMs);
+		const result = await reviewLanguageItem(current.id, true, durationMs);
+		showStageTransition(oldStage, result);
+		showInfoPeek = true;
 
-		setTimeout(() => advanceToNext(), 600);
+		setTimeout(() => advanceToNext(), 1200);
 	} else {
 		feedbackState = "incorrect";
 		correctAnswer = getCorrectAnswerDisplay(current);
 		totalReviewed++;
 
-		await reviewLanguageItem(current.id, false, durationMs);
+		const result = await reviewLanguageItem(current.id, false, durationMs);
+		showStageTransition(oldStage, result);
+		showInfoPeek = true;
 	}
+}
+
+function showStageTransition(oldStage: number, result: LanguageReviewResult) {
+	const fromName = STAGE_NAMES[oldStage] ?? `Stage ${oldStage}`;
+	const toName = STAGE_NAMES[result.newStage] ?? `Stage ${result.newStage}`;
+	stageTransition = {
+		from: fromName,
+		to: toName,
+		direction: result.newStage > oldStage ? "up" : "down",
+	};
 }
 
 function advanceToNext() {
 	feedbackState = "none";
 	inputValue = "";
 	correctAnswer = "";
+	stageTransition = null;
+	showInfoPeek = false;
 	currentIndex++;
 	itemStartTime = Date.now();
 
@@ -285,13 +320,66 @@ function handleKeydown(e: KeyboardEvent) {
 			{/if}
 		</div>
 
-		<!-- Item info -->
-		<div class="mt-4 flex justify-center gap-2 text-xs text-muted-foreground">
-			<span>{STAGE_NAMES[current.srs_stage]}</span>
-			{#if current.jlpt_level}
-				<span>-</span>
-				<span>{current.jlpt_level}</span>
-			{/if}
-		</div>
+		<!-- SRS stage transition animation -->
+		{#if stageTransition}
+			<div class="mt-3 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300">
+				<span class="text-muted-foreground">{stageTransition.from}</span>
+				<span class={stageTransition.direction === "up" ? "text-green-500" : "text-red-500"}>
+					{stageTransition.direction === "up" ? "\u2192" : "\u2193"}
+				</span>
+				<span class={stageTransition.direction === "up" ? "text-green-500 font-bold" : "text-red-500 font-bold"}>
+					{stageTransition.to}
+				</span>
+			</div>
+		{/if}
+
+		<!-- Item info peek (shown after answering) -->
+		{#if showInfoPeek && current}
+			<div class="mt-3 rounded-lg border bg-card p-4 text-sm">
+				<div class="flex flex-wrap gap-x-6 gap-y-2">
+					{#if current.reading}
+						<div>
+							<span class="text-muted-foreground">Reading: </span>
+							<span class="font-medium">{current.reading}</span>
+						</div>
+					{/if}
+					{#if current.meaning}
+						<div>
+							<span class="text-muted-foreground">Meaning: </span>
+							<span class="font-medium">{current.meaning}</span>
+						</div>
+					{/if}
+					{#if current.sentence_ja && current.content_type !== "sentence"}
+						<div>
+							<span class="text-muted-foreground">Example: </span>
+							<span>{current.sentence_ja}</span>
+						</div>
+					{/if}
+					{#if current.sentence_en}
+						<div>
+							<span class="text-muted-foreground">Translation: </span>
+							<span>{current.sentence_en}</span>
+						</div>
+					{/if}
+					{#if current.formation}
+						<div>
+							<span class="text-muted-foreground">Formation: </span>
+							<span>{current.formation}</span>
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Item info (when no peek) -->
+		{#if !showInfoPeek}
+			<div class="mt-4 flex justify-center gap-2 text-xs text-muted-foreground">
+				<span>{STAGE_NAMES[current.srs_stage]}</span>
+				{#if current.jlpt_level}
+					<span>-</span>
+					<span>{current.jlpt_level}</span>
+				{/if}
+			</div>
+		{/if}
 	</div>
 {/if}

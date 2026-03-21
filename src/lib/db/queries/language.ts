@@ -477,6 +477,20 @@ export async function getItemKeyStages(itemKeys: string[]): Promise<QueryResult<
 	});
 }
 
+/** Recently unlocked items (last 7 days) */
+export async function getRecentlyUnlockedItems(limit = 10): Promise<QueryResult<LanguageItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LanguageItem[]>(
+			`SELECT * FROM language_items
+			WHERE unlocked_at IS NOT NULL AND unlocked_at >= datetime('now', '-7 days')
+			ORDER BY unlocked_at DESC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
 /** Count items at Guru+ (srs_stage >= 5) for a given JLPT level */
 export async function getJlptLevelProgress(jlptLevel: string): Promise<QueryResult<{ total: number; guru_plus: number }>> {
 	return safeQuery(async () => {

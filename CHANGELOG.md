@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.18.0.0] - 2026-03-21
+
+### Added
+
+- Language lesson picker view with per-type selection, auto-batch, and interleave support
+- Language lesson session with teaching phase (Info/Examples/Reading tabs) and quiz phase with reshuffled failed questions
+- Language lessons view with auto-batch and picker-selected item support
+- SRS stage transition animation in language review session (shows stage change after each answer)
+- Item info peek after answering in language review (reading, meaning, example sentence, formation)
+- Fuzzy matching for longer meanings in language review (60%+ word overlap for 3+ word answers)
+- SRS stage distribution bar chart on Language Overview
+- Recently unlocked items section on Language Overview (last 7 days)
+- Language lesson count and quick-start buttons on Dashboard
+- SRS distribution summary badges on Dashboard language section
+- Sidebar "Lessons" entry under Language section
+- `getRecentlyUnlockedItems` query for recently unlocked language items
+
+### Changed
+
+- Dashboard language section shows Lessons count instead of New Items, with dedicated Start Lessons button
+- Language Overview header now shows Start Lessons button alongside Review button
+- Review session correct answer display extended to 1.2s to allow info peek viewing
+
 ## [0.17.0.1] - 2026-03-21
 
 ### Changed

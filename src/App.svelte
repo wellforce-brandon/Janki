@@ -6,8 +6,6 @@ import { currentView, navigate, viewParams } from "$lib/stores/navigation.svelte
 import { dismissLatest } from "$lib/stores/toast.svelte";
 
 import Dashboard from "./views/Dashboard.svelte";
-import Decks from "./views/Decks.svelte";
-import Grammar from "./views/Grammar.svelte";
 import KanjiDashboard from "./views/KanjiDashboard.svelte";
 import KanjiExtraStudy from "./views/KanjiExtraStudy.svelte";
 import KanjiKanji from "./views/KanjiKanji.svelte";
@@ -19,7 +17,14 @@ import KanjiDetail from "./views/KanjiDetail.svelte";
 import KanjiRadicals from "./views/KanjiRadicals.svelte";
 import KanjiReview from "./views/KanjiReview.svelte";
 import KanjiVocabulary from "./views/KanjiVocabulary.svelte";
-import Reading from "./views/Reading.svelte";
+import LanguageConjugation from "./views/LanguageConjugation.svelte";
+import LanguageDecks from "./views/LanguageDecks.svelte";
+import LanguageGrammar from "./views/LanguageGrammar.svelte";
+import LanguageKana from "./views/LanguageKana.svelte";
+import LanguageOverview from "./views/LanguageOverview.svelte";
+import LanguageReview from "./views/LanguageReview.svelte";
+import LanguageSentences from "./views/LanguageSentences.svelte";
+import LanguageVocabulary from "./views/LanguageVocabulary.svelte";
 import Review from "./views/Review.svelte";
 import Search from "./views/Search.svelte";
 import Settings from "./views/Settings.svelte";
@@ -46,11 +51,11 @@ function handleKeydown(e: KeyboardEvent) {
 	if (!e.ctrlKey) return;
 	const shortcuts: Record<string, Parameters<typeof navigate>[0]> = {
 		"1": "dashboard",
-		"2": "decks",
-		"3": "deck-review",
+		"2": "lang-overview",
+		"3": "lang-review",
 		"4": "kanji-dashboard",
-		"5": "grammar",
-		"6": "reading",
+		"5": "lang-grammar",
+		"6": "lang-sentences",
 		"7": "stats",
 	};
 	const view = shortcuts[e.key];
@@ -74,6 +79,22 @@ function handleKeydown(e: KeyboardEvent) {
 		<main class="flex-1 overflow-y-auto p-6">
 			{#if currentView() === "dashboard"}
 				<Dashboard />
+			{:else if currentView() === "lang-overview"}
+				<LanguageOverview />
+			{:else if currentView() === "lang-vocabulary"}
+				<LanguageVocabulary />
+			{:else if currentView() === "lang-grammar"}
+				<LanguageGrammar />
+			{:else if currentView() === "lang-sentences"}
+				<LanguageSentences />
+			{:else if currentView() === "lang-kana"}
+				<LanguageKana />
+			{:else if currentView() === "lang-conjugation"}
+				<LanguageConjugation />
+			{:else if currentView() === "lang-review"}
+				<LanguageReview />
+			{:else if currentView() === "lang-decks" || currentView() === "deck-browse"}
+				<LanguageDecks />
 			{:else if currentView() === "deck-review"}
 				<Review />
 			{:else if currentView() === "kanji-dashboard"}
@@ -98,12 +119,6 @@ function handleKeydown(e: KeyboardEvent) {
 				<KanjiLevels />
 			{:else if currentView() === "kanji-level"}
 				<KanjiLevel />
-			{:else if currentView() === "decks" || currentView() === "deck-browse"}
-				<Decks />
-			{:else if currentView() === "grammar"}
-				<Grammar />
-			{:else if currentView() === "reading"}
-				<Reading />
 			{:else if currentView() === "stats"}
 				<Stats />
 			{:else if currentView() === "search"}

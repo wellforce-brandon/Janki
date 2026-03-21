@@ -13,20 +13,41 @@ export type View =
 	| "kanji-extra-study"
 	| "kanji-levels"
 	| "kanji-level"
-	| "decks"
+	| "lang-overview"
+	| "lang-kana"
+	| "lang-vocabulary"
+	| "lang-grammar"
+	| "lang-sentences"
+	| "lang-conjugation"
+	| "lang-review"
+	| "lang-decks"
+	| "lang-browse"
 	| "deck-browse"
 	| "search"
 	| "stats"
-	| "grammar"
-	| "reading"
 	| "settings";
+
+/** Legacy view aliases -- redirect to new equivalents */
+const LEGACY_REDIRECTS: Record<string, View> = {
+	decks: "lang-decks",
+	grammar: "lang-grammar",
+	reading: "lang-sentences",
+};
 
 /** Maps each sidebar section to its root view for navigateBack() */
 const SECTION_ROOTS: Record<string, View> = {
-	decks: "decks",
-	"deck-browse": "decks",
-	"deck-review": "decks",
-	"deck-stats": "decks",
+	"lang-overview": "lang-overview",
+	"lang-kana": "lang-overview",
+	"lang-vocabulary": "lang-overview",
+	"lang-grammar": "lang-overview",
+	"lang-sentences": "lang-overview",
+	"lang-conjugation": "lang-overview",
+	"lang-review": "lang-overview",
+	"lang-decks": "lang-overview",
+	"lang-browse": "lang-overview",
+	"deck-browse": "lang-decks",
+	"deck-review": "lang-overview",
+	"deck-stats": "lang-decks",
 	"kanji-dashboard": "kanji-dashboard",
 	"kanji-radicals": "kanji-dashboard",
 	"kanji-kanji": "kanji-dashboard",
@@ -38,8 +59,6 @@ const SECTION_ROOTS: Record<string, View> = {
 	"kanji-extra-study": "kanji-dashboard",
 	"kanji-levels": "kanji-dashboard",
 	"kanji-level": "kanji-levels",
-	grammar: "grammar",
-	reading: "reading",
 	search: "search",
 	stats: "stats",
 	settings: "settings",
@@ -56,8 +75,9 @@ let state = $state<NavigationState>({
 	params: {},
 });
 
-export function navigate(view: View, params: Record<string, string> = {}) {
-	state = { current: view, params };
+export function navigate(view: View | string, params: Record<string, string> = {}) {
+	const resolved = LEGACY_REDIRECTS[view] ?? view;
+	state = { current: resolved as View, params };
 }
 
 /** Navigate back to the section root for the current view */

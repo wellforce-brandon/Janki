@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.13.0.0] - 2026-03-21
+
+### Added
+
+- Unified Language section replacing separate Decks and Language sidebar sections
+- Language Overview dashboard with content type summary cards, due counts, and import shortcut
+- Cross-deck Vocabulary browser with search, deck/SRS state filters, semantic field display, and pagination
+- Grammar view merging builtin N5 grammar points with imported grammar notes, JLPT level tabs
+- Sentences view with Reading mode (furigana, shuffle, TTS) and Browse mode for imported sentences
+- Manage Decks view with content type badges per deck and per-deck reclassify button
+- Kana grid view showing imported kana or builtin hiragana/katakana reference
+- Conjugation view for imported verb conjugation tables (conditionally shown in sidebar)
+- Language Review placeholder view for Phase 3
+- Shared language components: ContentTypeBadge, DeckSourceBadge, LanguageOverviewCard, ContentTypeFilter
+- Legacy route redirects (decks -> lang-decks, grammar -> lang-grammar, reading -> lang-sentences)
+
+### Changed
+
+- Sidebar restructured: "Decks" and "Language" sections merged into single "Language" section
+- Keyboard shortcuts updated: Ctrl+2 = Language Overview, Ctrl+3 = Language Review, Ctrl+5 = Grammar, Ctrl+6 = Sentences
+- Navigation store updated with lang-* view types and section root mappings
+
 ## [0.12.0.0] - 2026-03-21
 
 ### Added

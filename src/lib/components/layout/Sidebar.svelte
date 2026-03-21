@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { View } from "$lib/stores/navigation.svelte";
 import { currentView, navigate } from "$lib/stores/navigation.svelte";
+import { getContentTypeCounts, type ContentTypeCount } from "$lib/db/queries/language";
 
 interface TierFlyout {
 	kind: "levels" | "items";
@@ -14,6 +15,7 @@ interface NavItem {
 	shortcut?: string;
 	subViews?: View[];
 	flyout?: TierFlyout;
+	hidden?: boolean;
 }
 
 interface NavSection {
@@ -30,15 +32,34 @@ const TIERS = [
 	{ kanji: "現実", en: "Reality", label: "51-60", start: 51, end: 60, index: 5 },
 ];
 
-const sections: NavSection[] = [
+let hasConjugation = $state(false);
+
+async function checkConjugation() {
+	const result = await getContentTypeCounts();
+	if (result.ok) {
+		hasConjugation = result.data.some((c: ContentTypeCount) => c.type === "conjugation" && c.total > 0);
+	}
+}
+
+$effect(() => {
+	checkConjugation();
+});
+
+let sections = $derived<NavSection[]>([
 	{
 		items: [{ id: "dashboard", label: "Dashboard", shortcut: "Ctrl+1" }],
 	},
 	{
-		label: "Decks",
+		label: "Language",
 		items: [
-			{ id: "decks", label: "All Decks", shortcut: "Ctrl+2", subViews: ["deck-browse"] },
-			{ id: "deck-review", label: "Review", shortcut: "Ctrl+3" },
+			{ id: "lang-overview", label: "Overview", shortcut: "Ctrl+2" },
+			{ id: "lang-kana", label: "Kana" },
+			{ id: "lang-vocabulary", label: "Vocabulary" },
+			{ id: "lang-grammar", label: "Grammar", shortcut: "Ctrl+5" },
+			{ id: "lang-sentences", label: "Sentences", shortcut: "Ctrl+6" },
+			{ id: "lang-conjugation", label: "Conjugation", hidden: !hasConjugation },
+			{ id: "lang-review", label: "Review", shortcut: "Ctrl+3" },
+			{ id: "lang-decks", label: "Manage Decks", subViews: ["deck-browse"] },
 		],
 	},
 	{
@@ -72,20 +93,13 @@ const sections: NavSection[] = [
 		],
 	},
 	{
-		label: "Language",
-		items: [
-			{ id: "grammar", label: "Grammar", shortcut: "Ctrl+5" },
-			{ id: "reading", label: "Reading", shortcut: "Ctrl+6" },
-		],
-	},
-	{
 		items: [
 			{ id: "stats", label: "Stats", shortcut: "Ctrl+7" },
 			{ id: "search", label: "Search", shortcut: "Ctrl+F" },
 			{ id: "settings", label: "Settings" },
 		],
 	},
-];
+]);
 
 let openFlyout = $state<string | null>(null);
 let hoverTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
@@ -142,87 +156,89 @@ function handleTierClick(item: NavItem, tierIndex: number) {
 				{/if}
 				<ul class="flex flex-col gap-0.5">
 					{#each section.items as item}
-						<li
-							class="relative"
-							onmouseenter={() => item.flyout ? showFlyout(item.id) : null}
-							onmouseleave={scheduleFlyoutClose}
-						>
-							<button
-								onclick={() => navigate(item.id)}
-								class="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors
-									{isActive(item)
-										? 'bg-primary text-primary-foreground'
-										: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}"
+						{#if !item.hidden}
+							<li
+								class="relative"
+								onmouseenter={() => item.flyout ? showFlyout(item.id) : null}
+								onmouseleave={scheduleFlyoutClose}
 							>
-								<span>{item.label}</span>
-								{#if item.flyout}
-									<span class="text-xs opacity-40">&rsaquo;</span>
-								{:else if item.shortcut}
-									<span class="text-xs opacity-50">{item.shortcut}</span>
-								{/if}
-							</button>
-
-							<!-- Tier flyout -->
-							{#if item.flyout && openFlyout === item.id}
-								<div
-									class="absolute left-full top-0 z-50 ml-1 w-56 rounded-lg border bg-card p-2 shadow-lg"
-									onmouseenter={keepFlyoutOpen}
-									onmouseleave={scheduleFlyoutClose}
-									role="menu"
-									tabindex="-1"
+								<button
+									onclick={() => navigate(item.id)}
+									class="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors
+										{isActive(item)
+											? 'bg-primary text-primary-foreground'
+											: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}"
 								>
-									{#if item.flyout.kind === "levels"}
-										<!-- Levels flyout: tiers with expandable level buttons -->
-										{#each TIERS as tier}
-											<div>
+									<span>{item.label}</span>
+									{#if item.flyout}
+										<span class="text-xs opacity-40">&rsaquo;</span>
+									{:else if item.shortcut}
+										<span class="text-xs opacity-50">{item.shortcut}</span>
+									{/if}
+								</button>
+
+								<!-- Tier flyout -->
+								{#if item.flyout && openFlyout === item.id}
+									<div
+										class="absolute left-full top-0 z-50 ml-1 w-56 rounded-lg border bg-card p-2 shadow-lg"
+										onmouseenter={keepFlyoutOpen}
+										onmouseleave={scheduleFlyoutClose}
+										role="menu"
+										tabindex="-1"
+									>
+										{#if item.flyout.kind === "levels"}
+											<!-- Levels flyout: tiers with expandable level buttons -->
+											{#each TIERS as tier}
+												<div>
+													<button
+														type="button"
+														class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+														onclick={() => expandedTier = expandedTier === tier.index ? null : tier.index}
+														role="menuitem"
+													>
+														<span class="text-base font-bold">{tier.kanji}</span>
+														<span class="flex-1 text-left">{tier.en}</span>
+														<span class="text-xs text-muted-foreground">{tier.label}</span>
+														<span class="text-xs text-muted-foreground transition-transform {expandedTier === tier.index ? 'rotate-90' : ''}">
+															&rsaquo;
+														</span>
+													</button>
+													{#if expandedTier === tier.index}
+														<div class="grid grid-cols-5 gap-1 px-2 pb-2">
+															{#each { length: tier.end - tier.start + 1 } as _, i}
+																{@const level = tier.start + i}
+																<button
+																	type="button"
+																	class="rounded px-1.5 py-1 text-xs font-medium transition-colors hover:bg-primary hover:text-primary-foreground text-muted-foreground"
+																	onclick={() => handleLevelClick(level)}
+																	role="menuitem"
+																>
+																	{String(level).padStart(2, "0")}
+																</button>
+															{/each}
+														</div>
+													{/if}
+												</div>
+											{/each}
+										{:else}
+											<!-- Items flyout: tiers with colored backgrounds -->
+											{#each TIERS as tier}
 												<button
 													type="button"
-													class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
-													onclick={() => expandedTier = expandedTier === tier.index ? null : tier.index}
+													class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-white transition-all hover:brightness-110 {item.flyout.color}"
+													onclick={() => handleTierClick(item, tier.index)}
 													role="menuitem"
 												>
-													<span class="text-base font-bold">{tier.kanji}</span>
+													<span class="font-bold">{tier.kanji}</span>
 													<span class="flex-1 text-left">{tier.en}</span>
-													<span class="text-xs text-muted-foreground">{tier.label}</span>
-													<span class="text-xs text-muted-foreground transition-transform {expandedTier === tier.index ? 'rotate-90' : ''}">
-														&rsaquo;
-													</span>
+													<span class="text-xs opacity-80">{tier.label}</span>
 												</button>
-												{#if expandedTier === tier.index}
-													<div class="grid grid-cols-5 gap-1 px-2 pb-2">
-														{#each { length: tier.end - tier.start + 1 } as _, i}
-															{@const level = tier.start + i}
-															<button
-																type="button"
-																class="rounded px-1.5 py-1 text-xs font-medium transition-colors hover:bg-primary hover:text-primary-foreground text-muted-foreground"
-																onclick={() => handleLevelClick(level)}
-																role="menuitem"
-															>
-																{String(level).padStart(2, "0")}
-															</button>
-														{/each}
-													</div>
-												{/if}
-											</div>
-										{/each}
-									{:else}
-										<!-- Items flyout: tiers with colored backgrounds -->
-										{#each TIERS as tier}
-											<button
-												type="button"
-												class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-white transition-all hover:brightness-110 {item.flyout.color}"
-												onclick={() => handleTierClick(item, tier.index)}
-												role="menuitem"
-											>
-												<span class="font-bold">{tier.kanji}</span>
-												<span class="flex-1 text-left">{tier.en}</span>
-												<span class="text-xs opacity-80">{tier.label}</span>
-											</button>
-										{/each}
-									{/if}
-								</div>
-							{/if}
-						</li>
+											{/each}
+										{/if}
+									</div>
+								{/if}
+							</li>
+						{/if}
 					{/each}
 				</ul>
 			</div>

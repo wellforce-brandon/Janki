@@ -442,4 +442,25 @@ export const migrations: Migration[] = [
 			DROP TABLE IF EXISTS language_items;
 		`,
 	},
+	{
+		version: 11,
+		description: "Add FTS5 full-text search for language_items",
+		up: `
+			CREATE VIRTUAL TABLE IF NOT EXISTS language_fts USING fts5(
+				primary_text,
+				reading,
+				meaning,
+				explanation,
+				content=language_items,
+				content_rowid=id
+			);
+
+			INSERT INTO language_fts(rowid, primary_text, reading, meaning, explanation)
+			SELECT id, primary_text, COALESCE(reading, ''), COALESCE(meaning, ''), COALESCE(explanation, '')
+			FROM language_items;
+		`,
+		down: `
+			DROP TABLE IF EXISTS language_fts;
+		`,
+	},
 ];

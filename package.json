@@ -1,6 +1,6 @@
 {
 	"name": "janki",
-	"version": "0.18.0.0",
+	"version": "0.19.0.0",
 	"description": "Personal Japanese learning desktop app with FSRS-6 SRS and WaniKani-style kanji progression",
 	"private": true,
 	"type": "module",

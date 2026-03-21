@@ -1,6 +1,6 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
+import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import { getLanguageItems, type LanguageItem } from "$lib/db/queries/language";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -55,7 +55,7 @@ $effect(() => {
 	</div>
 
 	{#if loading}
-		<LoadingState message="Loading kana..." />
+		<SkeletonCards count={6} columns={3} />
 	{:else}
 		<div class="grid grid-cols-5 gap-2 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12">
 			{#each displayItems as item (item.id)}

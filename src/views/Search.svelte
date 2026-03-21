@@ -96,7 +96,7 @@ async function search(q: string) {
 		);
 	}
 
-	// Language items search
+	// Language items search (FTS5 with LIKE fallback)
 	const langResult = await searchLanguageItems(
 		q.trim(),
 		contentTypeFilter || undefined,
@@ -211,8 +211,19 @@ $effect(() => {
 					<div class="space-y-1">
 						{#each langResults as item}
 							<div class="rounded-lg border bg-card p-3 hover:bg-accent">
-								<div class="text-sm">{@html highlightMatch(formatLangItem(item), query)}</div>
-								<div class="flex items-center gap-2 text-xs text-muted-foreground">
+								<div class="flex items-baseline gap-2">
+									<span class="text-lg font-bold">{@html highlightMatch(item.primary_text, query)}</span>
+									{#if item.reading}
+										<span class="text-sm text-muted-foreground">{@html highlightMatch(item.reading, query)}</span>
+									{/if}
+								</div>
+								{#if item.meaning}
+									<div class="mt-0.5 text-sm">{@html highlightMatch(item.meaning, query)}</div>
+								{/if}
+								{#if item.explanation}
+									<div class="mt-0.5 text-xs text-muted-foreground">{@html highlightMatch(item.explanation, query)}</div>
+								{/if}
+								<div class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
 									<span class="rounded bg-muted px-1.5 py-0.5 capitalize">{item.content_type}</span>
 									<span>&middot;</span>
 									<span>{srsLabel(item.srs_stage)}</span>

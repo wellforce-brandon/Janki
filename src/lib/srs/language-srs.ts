@@ -3,6 +3,7 @@ import {
 	updateLanguageItemSrs,
 	logLanguageReview,
 } from "../db/queries/language";
+import { invalidateCache } from "../db/query-cache";
 import { updateDailyStats } from "../db/queries/stats";
 
 // Reuse WK SRS stages: 0=Locked, 1-4=Apprentice, 5-6=Guru, 7=Master, 8=Enlightened, 9=Burned
@@ -91,6 +92,9 @@ export async function reviewLanguageItem(
 	// Update daily stats
 	const isNew = currentStage <= 1 && item.lesson_completed_at !== null;
 	await updateDailyStats(correct, isNew, durationMs);
+
+	// Invalidate cached counts since SRS state changed
+	invalidateCache("contentTypeCounts");
 
 	return { newStage, nextReview };
 }

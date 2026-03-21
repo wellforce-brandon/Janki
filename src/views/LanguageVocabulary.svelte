@@ -4,7 +4,7 @@ import PitchAccentDisplay from "$lib/components/language/PitchAccentDisplay.svel
 import WkBadge from "$lib/components/language/WkBadge.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
+import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import { getLanguageItems, findWkCrossReferences, type LanguageItem, type WkCrossReference } from "$lib/db/queries/language";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -130,7 +130,7 @@ $effect(() => {
 	</div>
 
 	{#if loading}
-		<LoadingState message="Loading vocabulary..." />
+		<SkeletonCards count={6} columns={3} />
 	{:else if items.length === 0}
 		<EmptyState
 			title="No vocabulary found"

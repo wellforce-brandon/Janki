@@ -165,6 +165,56 @@ export async function getStatsByContentType(days: number): Promise<QueryResult<C
 	});
 }
 
+export interface LanguageDayStats {
+	date: string;
+	total: number;
+	correct: number;
+	incorrect: number;
+}
+
+/** Get language review stats per day from language_review_log */
+export async function getLanguageReviewStats(days: number): Promise<QueryResult<LanguageDayStats[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LanguageDayStats[]>(
+			`SELECT
+				date(created_at) as date,
+				COUNT(*) as total,
+				SUM(CASE WHEN correct THEN 1 ELSE 0 END) as correct,
+				SUM(CASE WHEN NOT correct THEN 1 ELSE 0 END) as incorrect
+			FROM language_review_log
+			WHERE date(created_at) >= date('now', ? || ' days')
+			GROUP BY date(created_at)
+			ORDER BY date ASC`,
+			[`-${days}`],
+		);
+	});
+}
+
+export interface LanguageSrsProgression {
+	date: string;
+	srs_stage: number;
+	count: number;
+}
+
+/** Get SRS stage distribution snapshots over time (based on review log transitions) */
+export async function getLanguageSrsProgression(days: number): Promise<QueryResult<LanguageSrsProgression[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LanguageSrsProgression[]>(
+			`SELECT
+				date(created_at) as date,
+				srs_stage_after as srs_stage,
+				COUNT(*) as count
+			FROM language_review_log
+			WHERE date(created_at) >= date('now', ? || ' days')
+			GROUP BY date(created_at), srs_stage_after
+			ORDER BY date ASC, srs_stage_after ASC`,
+			[`-${days}`],
+		);
+	});
+}
+
 export async function restoreDailyStats(
 	date: string,
 	reviewsCount: number,

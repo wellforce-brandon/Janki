@@ -3,7 +3,7 @@ import { RefreshCw } from "@lucide/svelte";
 import LevelProgressWidget from "$lib/components/kanji/LevelProgressWidget.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
+import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import {
 	getAvailableLessonCount,
 	getCriticalItems,
@@ -160,7 +160,7 @@ $effect(() => {
 	</div>
 
 	{#if loading}
-		<LoadingState message="Loading kanji dashboard..." />
+		<SkeletonCards count={6} columns={3} />
 	{:else if !seeded}
 		<EmptyState
 			title="Kanji data not loaded"

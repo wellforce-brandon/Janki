@@ -121,6 +121,15 @@ $effect(() => {
 			<p class="text-sm text-destructive">{error}</p>
 			<Button variant="outline" class="mt-3" onclick={handleRefresh}>Retry</Button>
 		</div>
+	{:else if kanjiDueCount === 0 && kanjiLessonCount === 0 && langDueTotal === 0 && langNewTotal === 0 && langLessonCount === 0 && contentCounts.length === 0}
+		<EmptyState
+			title="Welcome to Janki!"
+			description="Language data is loading. Refresh in a moment, or start with Kanji lessons."
+			actionLabel="Start Kanji"
+			onaction={() => navigate("kanji-dashboard")}
+			secondaryLabel="Refresh"
+			onsecondary={handleRefresh}
+		/>
 	{:else if kanjiDueCount === 0 && kanjiLessonCount === 0 && langDueTotal === 0 && langNewTotal === 0 && langLessonCount === 0}
 		<EmptyState
 			title="Welcome to Janki!"

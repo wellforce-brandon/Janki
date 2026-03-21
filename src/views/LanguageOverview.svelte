@@ -3,7 +3,7 @@ import { RefreshCw } from "@lucide/svelte";
 import LanguageOverviewCard from "$lib/components/language/LanguageOverviewCard.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
+import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import {
 	getContentTypeCounts,
 	getAvailableLessonCount,
@@ -23,6 +23,7 @@ let counts = $state<ContentTypeCount[]>([]);
 let lessonCount = $state(0);
 let srsSummary = $state<LanguageSrsSummary[]>([]);
 let recentUnlocks = $state<LanguageItem[]>([]);
+let detailsLoaded = $state(false);
 
 /** Map content types to their browsing views */
 const VIEW_MAP: Record<string, Parameters<typeof navigate>[0]> = {
@@ -57,19 +58,27 @@ function getTypeColor(type: string): string {
 
 async function loadData() {
 	try {
-		const [countR, lessonR, srsR, recentR] = await Promise.all([
+		// Load critical data first (counts + lesson count)
+		const [countR, lessonR] = await Promise.all([
 			getContentTypeCounts(),
 			getAvailableLessonCount(),
-			getLanguageSrsSummary(),
-			getRecentlyUnlockedItems(10),
 		]);
 		if (countR.ok) counts = countR.data;
 		if (lessonR.ok) lessonCount = lessonR.data;
+
+		loading = false;
+		refreshing = false;
+
+		// Lazy-load secondary data (SRS distribution + recently unlocked)
+		const [srsR, recentR] = await Promise.all([
+			getLanguageSrsSummary(),
+			getRecentlyUnlockedItems(10),
+		]);
 		if (srsR.ok) srsSummary = srsR.data;
 		if (recentR.ok) recentUnlocks = recentR.data;
+		detailsLoaded = true;
 	} catch {
 		addToast("Failed to load language overview", "error");
-	} finally {
 		loading = false;
 		refreshing = false;
 	}
@@ -135,7 +144,7 @@ $effect(() => {
 	</div>
 
 	{#if loading}
-		<LoadingState message="Loading language data..." />
+		<SkeletonCards count={5} columns={3} />
 	{:else if totalItems === 0}
 		<EmptyState
 			title="No language content yet"

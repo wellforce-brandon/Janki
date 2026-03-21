@@ -1,9 +1,10 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
-import type { LanguageItem } from "$lib/db/queries/language";
+import { type LanguageItem, updateLanguageItemSrs } from "$lib/db/queries/language";
 import { reviewLanguageItem, type LanguageReviewResult } from "$lib/srs/language-srs";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
+import { speakJapanese } from "$lib/tts/speech";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
 interface Props {
@@ -44,8 +45,23 @@ let stageTransition = $state<{ from: string; to: string; direction: "up" | "down
 // Item info peek after answering
 let showInfoPeek = $state(false);
 
+// Keyboard shortcuts overlay
+let showShortcuts = $state(false);
+
 let totalReviewed = $state(0);
 let totalCorrect = $state(0);
+
+// Undo state
+interface UndoEntry {
+	index: number;
+	wasCorrect: boolean;
+	reviewResult: LanguageReviewResult;
+	item: LanguageItem;
+	prevCorrectCount: number;
+	prevIncorrectCount: number;
+	prevSrsStage: number;
+}
+let undoStack = $state<UndoEntry[]>([]);
 
 let current = $derived(currentIndex < queue.length ? queue[currentIndex] : null);
 let remaining = $derived(queue.length - currentIndex);
@@ -92,11 +108,8 @@ function normalizeAnswer(answer: string): string {
 
 /** Fuzzy match: checks if strings share enough words for longer answers */
 function fuzzyMatch(userAnswer: string, expected: string): boolean {
-	// Exact match first
 	if (userAnswer === expected) return true;
-	// Contains match
 	if (userAnswer.includes(expected) || expected.includes(userAnswer)) return true;
-	// For longer meanings (3+ words), accept if 60%+ of words match
 	const userWords = userAnswer.split(" ").filter(Boolean);
 	const expectedWords = expected.split(" ").filter(Boolean);
 	if (expectedWords.length >= 3) {
@@ -113,7 +126,6 @@ function checkAnswer(): boolean {
 	const userAnswer = normalizeAnswer(inputValue);
 	if (userAnswer.length === 0) return false;
 
-	// For kana, accept romaji or meaning
 	if (current.content_type === "kana") {
 		const accepted: string[] = [];
 		if (current.reading) accepted.push(normalizeAnswer(current.reading));
@@ -122,7 +134,6 @@ function checkAnswer(): boolean {
 		return accepted.some((a) => a === userAnswer);
 	}
 
-	// For grammar, check meaning/explanation with fuzzy matching
 	if (current.content_type === "grammar") {
 		const accepted: string[] = [];
 		if (current.meaning) {
@@ -133,13 +144,11 @@ function checkAnswer(): boolean {
 		return accepted.some((a) => fuzzyMatch(userAnswer, a));
 	}
 
-	// For sentences, check English translation with fuzzy matching
 	if (current.content_type === "sentence") {
 		const expected = normalizeAnswer(current.sentence_en ?? current.meaning ?? "");
 		return fuzzyMatch(userAnswer, expected);
 	}
 
-	// For conjugation, check the meaning or reading
 	if (current.content_type === "conjugation") {
 		const accepted: string[] = [];
 		if (current.meaning) accepted.push(normalizeAnswer(current.meaning));
@@ -147,7 +156,7 @@ function checkAnswer(): boolean {
 		return accepted.some((a) => a === userAnswer);
 	}
 
-	// Default: vocabulary -- check meaning with fuzzy matching for longer meanings
+	// Default: vocabulary
 	const accepted: string[] = [];
 	if (current.meaning) {
 		for (const m of current.meaning.split(/[;,]/)) {
@@ -176,6 +185,12 @@ function getPlaceholder(item: LanguageItem): string {
 	return "Type the meaning...";
 }
 
+/** Play audio for current item */
+function playAudio() {
+	if (!current) return;
+	speakJapanese(current.primary_text);
+}
+
 async function submitAnswer() {
 	if (!current || isProcessing || feedbackState !== "none") return;
 
@@ -195,6 +210,17 @@ async function submitAnswer() {
 		showStageTransition(oldStage, result);
 		showInfoPeek = true;
 
+		// Save undo entry
+		undoStack = [...undoStack, {
+			index: currentIndex,
+			wasCorrect: true,
+			reviewResult: result,
+			item: current,
+			prevCorrectCount: current.correct_count,
+			prevIncorrectCount: current.incorrect_count,
+			prevSrsStage: oldStage,
+		}];
+
 		setTimeout(() => advanceToNext(), 1200);
 	} else {
 		feedbackState = "incorrect";
@@ -204,6 +230,17 @@ async function submitAnswer() {
 		const result = await reviewLanguageItem(current.id, false, durationMs);
 		showStageTransition(oldStage, result);
 		showInfoPeek = true;
+
+		// Save undo entry
+		undoStack = [...undoStack, {
+			index: currentIndex,
+			wasCorrect: false,
+			reviewResult: result,
+			item: current,
+			prevCorrectCount: current.correct_count,
+			prevIncorrectCount: current.incorrect_count,
+			prevSrsStage: oldStage,
+		}];
 	}
 }
 
@@ -239,7 +276,53 @@ function dismissIncorrect() {
 	advanceToNext();
 }
 
+/** Undo the last answer -- revert SRS state and go back */
+async function undoLast() {
+	if (undoStack.length === 0) return;
+
+	const entry = undoStack[undoStack.length - 1];
+	undoStack = undoStack.slice(0, -1);
+
+	// Revert SRS state
+	await updateLanguageItemSrs(
+		entry.item.id,
+		entry.prevSrsStage,
+		entry.item.next_review,
+		entry.prevCorrectCount,
+		entry.prevIncorrectCount,
+	);
+
+	// Revert counters
+	totalReviewed--;
+	if (entry.wasCorrect) totalCorrect--;
+
+	// Go back
+	currentIndex = entry.index;
+	feedbackState = "none";
+	inputValue = "";
+	correctAnswer = "";
+	stageTransition = null;
+	showInfoPeek = false;
+	itemStartTime = Date.now();
+
+	addToast("Answer undone", "info", 2000);
+}
+
 function handleKeydown(e: KeyboardEvent) {
+	if (e.key === "?" && !e.ctrlKey && feedbackState === "none") {
+		// Only toggle if not typing in the input
+		const active = document.activeElement;
+		if (active && active.tagName === "INPUT") return;
+		e.preventDefault();
+		showShortcuts = !showShortcuts;
+		return;
+	}
+	if (e.key === "Escape") {
+		if (showShortcuts) {
+			showShortcuts = false;
+			return;
+		}
+	}
 	if (e.key === "Enter") {
 		e.preventDefault();
 		if (feedbackState === "incorrect") {
@@ -248,10 +331,52 @@ function handleKeydown(e: KeyboardEvent) {
 			submitAnswer();
 		}
 	}
+	if (e.ctrlKey && e.key === "z" && undoStack.length > 0) {
+		e.preventDefault();
+		undoLast();
+	}
+	if (e.key === "p" && e.altKey) {
+		e.preventDefault();
+		playAudio();
+	}
 }
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
+
+<!-- Keyboard shortcuts overlay -->
+{#if showShortcuts}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+		<div class="mx-4 w-full max-w-sm rounded-lg border bg-card p-6 shadow-lg">
+			<h3 class="mb-4 text-lg font-semibold">Keyboard Shortcuts</h3>
+			<div class="space-y-2 text-sm">
+				<div class="flex justify-between">
+					<span>Submit answer</span>
+					<kbd class="rounded border bg-muted px-2 py-0.5 text-xs">Enter</kbd>
+				</div>
+				<div class="flex justify-between">
+					<span>Continue (after incorrect)</span>
+					<kbd class="rounded border bg-muted px-2 py-0.5 text-xs">Enter</kbd>
+				</div>
+				<div class="flex justify-between">
+					<span>Undo last answer</span>
+					<kbd class="rounded border bg-muted px-2 py-0.5 text-xs">Ctrl+Z</kbd>
+				</div>
+				<div class="flex justify-between">
+					<span>Play audio</span>
+					<kbd class="rounded border bg-muted px-2 py-0.5 text-xs">Alt+P</kbd>
+				</div>
+				<div class="flex justify-between">
+					<span>Show/hide shortcuts</span>
+					<kbd class="rounded border bg-muted px-2 py-0.5 text-xs">?</kbd>
+				</div>
+			</div>
+			<div class="mt-4 flex justify-end">
+				<Button size="sm" variant="outline" onclick={() => (showShortcuts = false)}>Close</Button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 {#if current}
 	<div class="mx-auto max-w-2xl space-y-0">
@@ -263,10 +388,38 @@ function handleKeydown(e: KeyboardEvent) {
 			></div>
 		</div>
 
-		<!-- Counter -->
+		<!-- Counter + controls -->
 		<div class="flex items-center justify-between py-2 text-sm text-muted-foreground">
 			<span>{getTypeLabel(current.content_type)} Meaning</span>
-			<span class="font-mono">{remaining} remaining</span>
+			<div class="flex items-center gap-3">
+				{#if undoStack.length > 0}
+					<button
+						type="button"
+						class="text-xs hover:text-foreground"
+						onclick={undoLast}
+						title="Undo last answer (Ctrl+Z)"
+					>
+						Undo
+					</button>
+				{/if}
+				<button
+					type="button"
+					class="text-xs hover:text-foreground"
+					onclick={playAudio}
+					title="Play audio (Alt+P)"
+				>
+					&#9654; Audio
+				</button>
+				<button
+					type="button"
+					class="text-xs hover:text-foreground"
+					onclick={() => (showShortcuts = true)}
+					title="Keyboard shortcuts (?)"
+				>
+					?
+				</button>
+				<span class="font-mono">{remaining} remaining</span>
+			</div>
 		</div>
 
 		<!-- Item display -->

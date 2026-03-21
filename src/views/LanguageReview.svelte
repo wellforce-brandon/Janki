@@ -4,7 +4,7 @@ import LanguageReviewSession from "$lib/components/language/LanguageReviewSessio
 import type { ReviewSummary } from "$lib/components/language/LanguageReviewSession.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
+import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import {
 	getDueLanguageItems,
 	getDueLanguageCount,
@@ -79,7 +79,7 @@ $effect(() => {
 		<LanguageReviewSession items={dueItems} oncomplete={handleComplete} />
 	{:else if loading}
 		<h2 class="text-2xl font-bold" tabindex="-1">Language Review</h2>
-		<LoadingState message="Loading reviews..." />
+		<SkeletonCards count={3} columns={3} />
 	{:else if summary}
 		<!-- Review Summary -->
 		<h2 class="text-2xl font-bold" tabindex="-1">Review Complete</h2>

@@ -18,6 +18,9 @@ let phase = $state<LessonPhase>("teaching");
 let currentIndex = $state(0);
 let activeTab = $state<"info" | "examples" | "reading">("info");
 
+// Track which items have been viewed during teaching
+let viewedItems = $state(new Set<number>([0]));
+
 // Teaching phase state
 let current = $derived(phase === "teaching" ? (items[currentIndex] ?? null) : null);
 
@@ -151,12 +154,23 @@ function goToItem(index: number) {
 	if (index >= 0 && index < items.length) {
 		currentIndex = index;
 		activeTab = "info";
+		viewedItems = new Set([...viewedItems, index]);
 	}
 }
 
 function startQuiz() {
 	phase = "quiz";
 	buildQuizQueue();
+}
+
+/** Return to teaching from quiz (keeps viewed state) */
+function backToTeaching() {
+	phase = "teaching";
+	currentIndex = 0;
+	activeTab = "info";
+	feedbackState = "none";
+	inputValue = "";
+	correctAnswer = "";
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -433,7 +447,8 @@ function handleKeydown(e: KeyboardEvent) {
 						class="h-9 min-w-[36px] rounded-md border-2 px-1 text-xs font-bold text-white transition-all {getTypeColor(item.content_type)}"
 						class:ring-2={i === currentIndex}
 						class:ring-primary={i === currentIndex}
-						class:opacity-50={i !== currentIndex}
+						class:opacity-50={i !== currentIndex && !viewedItems.has(i)}
+						class:opacity-80={i !== currentIndex && viewedItems.has(i)}
 						onclick={() => goToItem(i)}
 						aria-label="Item {i + 1}: {item.primary_text}"
 					>
@@ -453,8 +468,9 @@ function handleKeydown(e: KeyboardEvent) {
 			</button>
 		</div>
 
-		<!-- Quiz button -->
-		<div class="mt-4 flex justify-center">
+		<!-- Progress + Quiz button -->
+		<div class="mt-3 flex items-center justify-between">
+			<span class="text-xs text-muted-foreground">{viewedItems.size} / {items.length} viewed</span>
 			<Button onclick={startQuiz}>Quiz &rarr;</Button>
 		</div>
 	</div>
@@ -476,7 +492,17 @@ function handleKeydown(e: KeyboardEvent) {
 		</div>
 
 		<div class="flex items-center justify-between py-2 text-sm text-muted-foreground">
-			<span>{getTypeLabel(currentQuiz.item.content_type)} Meaning</span>
+			<div class="flex items-center gap-3">
+				<span>{getTypeLabel(currentQuiz.item.content_type)} Meaning</span>
+				<button
+					type="button"
+					class="text-xs hover:text-foreground"
+					onclick={backToTeaching}
+					title="Review items again"
+				>
+					&larr; Back to Teaching
+				</button>
+			</div>
 			<span class="font-mono">{quizRemaining} remaining</span>
 		</div>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
+import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import {
 	getAvailableLessons,
 	type LanguageItem,
@@ -148,7 +148,7 @@ $effect(() => {
 <div class="space-y-6">
 	{#if loading}
 		<h2 class="text-2xl font-bold" tabindex="-1">Lesson Picker</h2>
-		<LoadingState message="Loading available lessons..." />
+		<SkeletonCards count={6} columns={3} />
 	{:else if allItems.length === 0}
 		<h2 class="text-2xl font-bold" tabindex="-1">Lesson Picker</h2>
 		<EmptyState

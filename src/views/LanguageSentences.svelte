@@ -3,7 +3,7 @@ import { Shuffle } from "@lucide/svelte";
 import DeckSourceBadge from "$lib/components/language/DeckSourceBadge.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
+import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import { Progress } from "$lib/components/ui/progress";
 import { getLanguageItems, type LanguageItem } from "$lib/db/queries/language";
 import { getSettings } from "$lib/stores/app-settings.svelte";
@@ -286,7 +286,7 @@ $effect(() => {
 	{:else}
 		<!-- Browse mode -->
 		{#if loading}
-			<LoadingState message="Loading sentences..." />
+			<SkeletonCards count={4} columns={2} />
 		{:else if baseSentences.length === 0}
 			<EmptyState
 				title="No sentences found"

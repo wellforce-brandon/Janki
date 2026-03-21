@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.19.0.0] - 2026-03-21
+
+### Added
+
+- Migration v11: FTS5 full-text search index for language_items (primary_text, reading, meaning, explanation)
+- FTS5-powered search with ranked results in Search view, LIKE fallback for compatibility
+- Language review daily stats query from language_review_log for per-day breakdown
+- Language SRS stage distribution on Stats page alongside kanji stages
+- Combined review activity heatmap (GitHub-style) merging kanji + language daily reviews
+- Content type review breakdown with visual bar chart and accuracy percentages
+- Language reviews per day and accuracy trend charts on Stats page
+- Keyboard shortcuts overlay in review session (press ? to show: Enter, Ctrl+Z, Alt+P)
+- Audio playback in review session via TTS (Alt+P shortcut or Audio button)
+- Undo last answer in review session (Ctrl+Z) with full SRS state rollback
+- "Back to Teaching" button during lesson quiz phase to review items again
+- Teaching progress indicator showing viewed/total items with visual thumbnail opacity
+- Query result cache with TTL for content type counts (30s, invalidated on review)
+- Skeleton card loading component with configurable count and column layout
+- Empty database detection on Dashboard with Refresh action for pre-seed state
+
+### Changed
+
+- Search results now display structured layout (primary_text, reading, meaning, explanation) with per-field highlighting
+- LanguageOverview lazy-loads SRS distribution and recently unlocked items after initial render
+- Loading spinners replaced with skeleton card animations across 10 views (Language, Stats, Dashboard)
+- Stats page cleaned up: removed legacy dead-code sections (card states, builtin states, deck filter)
+
 ## [0.18.0.0] - 2026-03-21
 
 ### Added

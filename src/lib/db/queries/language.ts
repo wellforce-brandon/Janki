@@ -1,4 +1,5 @@
 import { getDb, safeQuery, type QueryResult } from "../database";
+import { getCached, setCache } from "../query-cache";
 
 // Content type literal
 export type ContentType = "vocabulary" | "grammar" | "sentence" | "kana" | "conjugation";
@@ -60,9 +61,12 @@ export interface WkCrossReference {
 }
 
 export async function getContentTypeCounts(): Promise<QueryResult<ContentTypeCount[]>> {
+	const cached = getCached<ContentTypeCount[]>("contentTypeCounts");
+	if (cached) return { ok: true, data: cached };
+
 	return safeQuery(async () => {
 		const db = await getDb();
-		return db.select<ContentTypeCount[]>(`
+		const data = await db.select<ContentTypeCount[]>(`
 			SELECT
 				content_type as type,
 				COUNT(*) as total,
@@ -71,6 +75,8 @@ export async function getContentTypeCounts(): Promise<QueryResult<ContentTypeCou
 			FROM language_items
 			GROUP BY content_type
 		`);
+		setCache("contentTypeCounts", data, 30_000);
+		return data;
 	});
 }
 
@@ -169,23 +175,48 @@ export async function searchLanguageItems(
 ): Promise<QueryResult<LanguageItem[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const like = `%${query.trim()}%`;
-		const params: (string | number)[] = [like, like, like];
-		let typeWhere = "";
+		const trimmed = query.trim();
 
-		if (contentType) {
-			typeWhere = " AND content_type = ?";
-			params.push(contentType);
+		// Try FTS5 first, fall back to LIKE
+		try {
+			const ftsQuery = `${trimmed.replace(/['"]/g, "")}*`;
+			const params: (string | number)[] = [ftsQuery];
+			let typeWhere = "";
+
+			if (contentType) {
+				typeWhere = " AND li.content_type = ?";
+				params.push(contentType);
+			}
+
+			params.push(limit);
+			return await db.select<LanguageItem[]>(
+				`SELECT li.* FROM language_items li
+				JOIN language_fts ON language_fts.rowid = li.id
+				WHERE language_fts MATCH ?${typeWhere}
+				ORDER BY rank
+				LIMIT ?`,
+				params,
+			);
+		} catch {
+			// FTS5 table may not exist yet or query syntax issue -- fall back to LIKE
+			const like = `%${trimmed}%`;
+			const params: (string | number)[] = [like, like, like];
+			let typeWhere = "";
+
+			if (contentType) {
+				typeWhere = " AND content_type = ?";
+				params.push(contentType);
+			}
+
+			params.push(limit);
+			return db.select<LanguageItem[]>(
+				`SELECT * FROM language_items
+				WHERE (primary_text LIKE ? OR meaning LIKE ? OR item_key LIKE ?)${typeWhere}
+				ORDER BY id ASC
+				LIMIT ?`,
+				params,
+			);
 		}
-
-		params.push(limit);
-		return db.select<LanguageItem[]>(
-			`SELECT * FROM language_items
-			WHERE (primary_text LIKE ? OR meaning LIKE ? OR item_key LIKE ?)${typeWhere}
-			ORDER BY id ASC
-			LIMIT ?`,
-			params,
-		);
 	});
 }
 

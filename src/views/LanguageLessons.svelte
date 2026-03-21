@@ -2,7 +2,7 @@
 import LanguageLessonSession from "$lib/components/language/LanguageLessonSession.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
-import LoadingState from "$lib/components/ui/loading-state.svelte";
+import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import {
 	getAvailableLessonCount,
 	getAvailableLessons,
@@ -73,7 +73,7 @@ $effect(() => {
 		<LanguageLessonSession items={batchItems} oncomplete={handleComplete} />
 	{:else if loading}
 		<h2 class="text-2xl font-bold" tabindex="-1">Language Lessons</h2>
-		<LoadingState message="Loading lessons..." />
+		<SkeletonCards count={3} columns={3} />
 	{:else if completedCount > 0}
 		<h2 class="text-2xl font-bold" tabindex="-1">Lesson Complete</h2>
 		<div class="mx-auto max-w-md rounded-lg border bg-card p-8 text-center">

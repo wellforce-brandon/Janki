@@ -29,7 +29,10 @@ export async function getDb(): Promise<Database> {
 		await runMigrations(instance);
 		db = instance;
 		return instance;
-	})();
+	})().catch((e) => {
+		dbInitPromise = null;
+		throw e;
+	});
 	return dbInitPromise;
 }
 
@@ -55,9 +58,19 @@ async function runMigrations(database: Database): Promise<void> {
 	);
 	const currentVersion = rows.length > 0 ? Number.parseInt(rows[0].value, 10) : 0;
 
+	// Validate migration versions are strictly ascending
+	for (let i = 1; i < migrations.length; i++) {
+		if (migrations[i].version <= migrations[i - 1].version) {
+			throw new Error(`Migration versions out of order: ${migrations[i - 1].version} -> ${migrations[i].version}`);
+		}
+	}
+
 	for (const migration of migrations) {
 		if (migration.version > currentVersion) {
 			console.log(`Running migration v${migration.version}: ${migration.description}`);
+			if (!Array.isArray(migration.up)) {
+				console.warn(`[Migration] v${migration.version} uses string format -- prefer string[] to avoid semicolon splitting issues`);
+			}
 			const statements = (
 				Array.isArray(migration.up)
 					? migration.up
@@ -65,13 +78,20 @@ async function runMigrations(database: Database): Promise<void> {
 			)
 				.map((s) => s.trim())
 				.filter((s) => s.length > 0);
-			for (const stmt of statements) {
-				await database.execute(stmt);
+			try {
+				await database.execute("BEGIN");
+				for (const stmt of statements) {
+					await database.execute(stmt);
+				}
+				await database.execute(
+					"INSERT OR REPLACE INTO settings (key, value) VALUES ('schema_version', ?)",
+					[String(migration.version)],
+				);
+				await database.execute("COMMIT");
+			} catch (e) {
+				await database.execute("ROLLBACK").catch(() => {});
+				throw e;
 			}
-			await database.execute(
-				"INSERT OR REPLACE INTO settings (key, value) VALUES ('schema_version', ?)",
-				[String(migration.version)],
-			);
 		}
 	}
 }

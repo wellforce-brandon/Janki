@@ -168,8 +168,8 @@ export const migrations: Migration[] = [
 				duration_ms INTEGER,
 				reviewed_at TEXT NOT NULL DEFAULT (datetime('now'))
 			)`,
-			"CREATE INDEX idx_kanji_review_log_item ON kanji_review_log(kanji_level_id)",
-			"CREATE INDEX idx_kanji_review_log_date ON kanji_review_log(reviewed_at)",
+			"CREATE INDEX IF NOT EXISTS idx_kanji_review_log_item ON kanji_review_log(kanji_level_id)",
+			"CREATE INDEX IF NOT EXISTS idx_kanji_review_log_date ON kanji_review_log(reviewed_at)",
 			"ALTER TABLE kanji_levels ADD COLUMN lesson_completed_at TEXT",
 			"ALTER TABLE kanji_levels ADD COLUMN user_notes TEXT",
 			"ALTER TABLE kanji_levels ADD COLUMN user_synonyms TEXT",
@@ -451,6 +451,19 @@ export const migrations: Migration[] = [
 			DROP INDEX IF EXISTS idx_language_items_lesson_order;
 			DROP INDEX IF EXISTS idx_language_items_lesson_group;
 			UPDATE language_items SET lesson_group = NULL, lesson_order = NULL;
+		`,
+	},
+	{
+		version: 13,
+		description: "Fix corrupted sentence frequency_rank values and add composite unlock index",
+		up: [
+			// Fix corrupted frequency_rank values (timestamps mistakenly stored as rank)
+			"UPDATE language_items SET frequency_rank = NULL WHERE content_type = 'sentence' AND frequency_rank > 100000",
+			// Composite index for batch unlock queries (content_type + srs_stage + jlpt_level + frequency_rank)
+			"CREATE INDEX IF NOT EXISTS idx_language_items_unlock_batch ON language_items(content_type, srs_stage, jlpt_level, frequency_rank)",
+		],
+		down: `
+			DROP INDEX IF EXISTS idx_language_items_unlock_batch;
 		`,
 	},
 ];

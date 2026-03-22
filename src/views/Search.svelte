@@ -1,13 +1,12 @@
 <script lang="ts">
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "$lib/components/ui/tabs";
-import { getDb } from "$lib/db/database";
 import {
 	type LanguageItem,
 	searchLanguageItems,
 } from "$lib/db/queries/language";
 import { getKanaScriptLabel } from "$lib/data/kana-groups";
-import type { KanjiLevelItem } from "$lib/db/queries/kanji";
+import { type KanjiLevelItem, searchKanjiItems } from "$lib/db/queries/kanji";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { speakJapanese } from "$lib/tts/speech";
 import { parseMeanings } from "$lib/utils/kanji";
@@ -22,7 +21,9 @@ interface GrammarPoint {
 	examples: { ja: string; en: string; reading: string }[];
 }
 
-const grammarPoints = n5Data.points as GrammarPoint[];
+const grammarPoints = Array.isArray((n5Data as Record<string, unknown>).points)
+	? (n5Data.points as GrammarPoint[])
+	: (console.warn("[Search] n5Data.points is not an array"), [] as GrammarPoint[]);
 
 const CONTENT_TYPES = [
 	{ value: "", label: "All Types" },
@@ -74,28 +75,9 @@ async function search(q: string) {
 
 	searching = true;
 
-	// Kanji search
-	const db = await getDb();
-	try {
-		const ftsQuery = `${q.trim().replace(/['"]/g, "")}*`;
-		kanjiResults = await db.select<KanjiLevelItem[]>(
-			`SELECT kl.* FROM kanji_levels kl
-			JOIN kanji_fts ON kanji_fts.rowid = kl.id
-			WHERE kanji_fts MATCH ?
-			ORDER BY rank
-			LIMIT 50`,
-			[ftsQuery],
-		);
-	} catch {
-		const likeQuery = `%${q.trim()}%`;
-		kanjiResults = await db.select<KanjiLevelItem[]>(
-			`SELECT * FROM kanji_levels
-			WHERE character LIKE ? OR meanings LIKE ? OR readings_on LIKE ? OR readings_kun LIKE ?
-			ORDER BY level, item_type
-			LIMIT 50`,
-			[likeQuery, likeQuery, likeQuery, likeQuery],
-		);
-	}
+	// Kanji search (via query layer)
+	const kanjiResult = await searchKanjiItems(q.trim(), 50);
+	kanjiResults = kanjiResult.ok ? kanjiResult.data : [];
 
 	// Language items search (FTS5 with LIKE fallback)
 	const langResult = await searchLanguageItems(
@@ -124,6 +106,9 @@ function openKanji(item: KanjiLevelItem) {
 
 $effect(() => {
 	searchInput?.focus();
+	return () => {
+		if (debounceTimer) clearTimeout(debounceTimer);
+	};
 });
 </script>
 

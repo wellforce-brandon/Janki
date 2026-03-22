@@ -6,6 +6,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.20.1.0] - 2026-03-22
+
+### Added
+
+- Per-content-type pending lesson caps (vocabulary 10, grammar 5, sentence 5, conjugation 5) with Settings UI
+- JLPT-level gating per content type for vocabulary and grammar progression
+- Milestone prerequisites for sentences (50+ vocab at Apprentice 4+) and conjugation (10+ vocab)
+- Configurable UI zoom slider in Appearance settings (default 150%)
+- Shared SRS calculation module (srs-common.ts) and content type utilities (content-type.ts)
+- Batch query for loading lesson items by ID (replaces fetching 200 items to filter)
+- SRS distribution query caching (30s TTL)
+- Migration version ordering validation
+- Re-entrancy guard for unlock system
+
+### Fixed
+
+- Review session race condition: isProcessing cleared in single location (finally block)
+- Lesson quiz completion now verifies all items answered correctly, not just index position
+- DB init promise cleared on error so app can retry instead of hanging permanently
+- Seed insert counter only increments after successful COMMIT
+- Undo in review session now invalidates all caches (not just contentTypeCounts)
+- Null guards on all rows[0] query patterns across language and kanji queries
+- FTS5 query sanitization uses proper phrase quoting (prevents operator injection)
+- Migrations wrapped in transactions (rollback on partial failure)
+- Backup import now reconnects DB after file replacement
+- Unguarded JSON.parse in sentence view replaced with safeParseJson
+- Furigana HTML sanitized before rendering in sentence view
+- fuzzyMatch tightened to prevent short substring false positives
+- Search debounce timer cleared on component teardown
+- Migration v3 indexes use IF NOT EXISTS
+- Settings loaded in single assignment (reduces re-renders on startup)
+
+### Changed
+
+- Vocabulary unlock fetches capped at 50 items per JLPT level (was unbounded)
+- Kanji computeFirstReviewTime uses shared srs-common module
+- getTypeLabel/getTypeColor extracted to shared content-type.ts
+- Dead getNewLanguageItems function removed
+- hasLockedItemsForJlptLevel uses EXISTS pattern instead of COUNT
+- App mount waits for DB init to complete before rendering
+- prevView in App.svelte no longer unnecessarily reactive
+
 ## [0.20.0.0] - 2026-03-22
 
 ### Added

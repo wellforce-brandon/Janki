@@ -1,5 +1,11 @@
 /** Simple in-memory query cache with TTL for counts that rarely change within a session */
 
+/** Typed cache key constants for discoverability and safety */
+export const CACHE_KEYS = {
+	contentTypeCounts: "contentTypeCounts",
+	srsSummary: "srsSummary",
+} as const;
+
 interface CacheEntry<T> {
 	data: T;
 	expires: number;

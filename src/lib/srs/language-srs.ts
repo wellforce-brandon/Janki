@@ -5,39 +5,9 @@ import {
 } from "../db/queries/language";
 import { invalidateCache } from "../db/query-cache";
 import { updateDailyStats } from "../db/queries/stats";
-import { toSqliteDateTime } from "../utils/common";
+import { calculateNextReview, calculateDrop } from "./srs-common";
 
-// Reuse WK SRS stages: 0=Locked, 1-4=Apprentice, 5-6=Guru, 7=Master, 8=Enlightened, 9=Burned
-const STAGE_INTERVALS_HOURS: Record<number, number> = {
-	1: 4,
-	2: 8,
-	3: 23,
-	4: 47,
-	5: 167,
-	6: 335,
-	7: 719,
-	8: 2879,
-};
-
-export function calculateNextReview(stage: number): string | null {
-	if (stage <= 0 || stage >= 9) return null;
-	const hours = STAGE_INTERVALS_HOURS[stage] ?? 4;
-	const next = new Date();
-	next.setTime(next.getTime() + hours * 60 * 60 * 1000);
-	// Round up to top of next hour (WK behavior)
-	next.setMinutes(0, 0, 0);
-	if (next.getTime() <= Date.now()) {
-		next.setTime(next.getTime() + 3600000);
-	}
-	return toSqliteDateTime(next);
-}
-
-/** WK drop formula: new_stage = current - ceil(incorrectCount/2) * penaltyFactor */
-function calculateDrop(currentStage: number, incorrectCount: number): number {
-	const penaltyFactor = currentStage >= 5 ? 2 : 1;
-	const adjustment = Math.ceil(incorrectCount / 2) * penaltyFactor;
-	return Math.max(1, currentStage - adjustment);
-}
+export { calculateNextReview };
 
 export interface LanguageReviewResult {
 	newStage: number;
@@ -62,6 +32,9 @@ export async function reviewLanguageItem(
 	const item = itemResult.data;
 	const currentStage = item.srs_stage;
 
+	// Compute isNew BEFORE any DB updates -- relies on pre-update counts from the fetched item
+	const isNew = item.correct_count === 0 && item.incorrect_count === 0 && item.lesson_completed_at !== null;
+
 	let newStage: number;
 	if (correct) {
 		newStage = Math.min(9, currentStage + 1);
@@ -71,7 +44,6 @@ export async function reviewLanguageItem(
 
 	const nextReview = calculateNextReview(newStage);
 
-	// Update item SRS state
 	await updateLanguageItemSrs(
 		itemId,
 		newStage,
@@ -80,11 +52,8 @@ export async function reviewLanguageItem(
 		item.incorrect_count + (correct ? 0 : 1),
 	);
 
-	// Log the review
 	await logLanguageReview(itemId, currentStage, newStage, correct, durationMs);
 
-	// Update daily stats
-	const isNew = item.correct_count === 0 && item.incorrect_count === 0 && item.lesson_completed_at !== null;
 	await updateDailyStats(correct, isNew, durationMs);
 
 	// Invalidate cached counts since SRS state changed

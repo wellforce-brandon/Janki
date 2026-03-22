@@ -1,146 +1,187 @@
-# Structured Kana Lesson Progression
+# Code Review Round 2 -- Fix All Findings
 
 ## Context
 
-The kana lesson system currently treats all 372 kana items as a flat, unordered pool. All kana unlock at once, and the lesson picker shows them mixed together without distinguishing Hiragana from Katakana or basic from advanced. This makes the learning experience chaotic -- a beginner could encounter obscure combination kana (yi, nyo) before mastering basic vowels. The goal is to implement a pedagogically sound, progressive lesson structure that follows the standard Japanese learning order.
+Second code review after fixing 27 findings from round 1. This round found 4 critical, 11 warning, and 9 suggestion-level issues. This plan addresses all of them.
 
-## Approach
+## Critical Fixes (4)
 
-Add `lesson_group` and `lesson_order` columns to `language_items`, define a kana lesson group mapping in a shared constant, backfill existing data via migration, and gate kana unlocking so groups unlock progressively.
+### C1. ReviewSession isProcessing race condition
+**File:** `src/lib/components/language/LanguageReviewSession.svelte:139-213`
+**Problem:** `isProcessing` is set false in both the `finally` block (line 198) AND in `advanceToNext()` (line 213). On the correct path, `submitAnswer` completes, `finally` sets `isProcessing = false`, then 1200ms later `advanceToNext` sets it false again (harmless double-set). But on the incorrect path, user presses Enter to dismiss, `dismissIncorrect` -> `advanceToNext` sets `isProcessing = false` while the `finally` from the original `submitAnswer` has already run. The real risk: if `reviewLanguageItem` is slow and the user dismisses the incorrect feedback before the await resolves, `advanceToNext` runs while the DB write is still in flight.
+**Fix:** Remove `isProcessing = false` from `advanceToNext()`. The `finally` block in `submitAnswer` is the single source of truth. For the correct path where `advanceToNext` runs via setTimeout after `submitAnswer` has already completed (and `finally` already ran), `isProcessing` is already false -- removing the redundant reset is safe.
 
-## Progression Model
+### C2. LessonSession quiz completion logic
+**File:** `src/lib/components/language/LanguageLessonSession.svelte:186-209`
+**Problem:** When a quiz answer is wrong (line 182-189), the failed question is spliced out of its current position and appended at the end of `quizQueue`. The queue length stays the same. `dismissIncorrect` does NOT increment `quizIndex`, so the user continues to the next item at the same index. The re-queued item appears later. After reviewing, the actual flow is: the re-queued item must be answered correctly before `quizIndex` can reach `quizQueue.length`. The `completeLesson` guard (`isCompleting`) also prevents double-invocation.
 
-**Hiragana seion first, then Katakana begins.** Complete basic Hiragana (vowels through W-row + n), then Katakana seion begins. Dakuten/handakuten/yoon are taught for both scripts together after both seion sets are done.
+However, there IS a subtle bug: `dismissIncorrect` (line 202-209) checks `quizIndex >= quizQueue.length` without incrementing first. Since the wrong answer was spliced out and re-appended, the queue shifted but `quizIndex` didn't move. If the failed item was the LAST item in the queue, after splice: `quizQueue` still has the same length (item removed from end, re-appended at end -- net zero). `quizIndex` is at the last position. `dismissIncorrect` checks `quizIndex >= quizQueue.length` -- this is false because `quizIndex` equals `quizQueue.length - 1`. So the user gets the re-queued item. This is actually correct.
 
-**Gate threshold:** 80% of items in the previous group must reach Apprentice 4+ (srs_stage >= 4) before the next group unlocks.
+**Actual fix needed:** The quiz completion condition should be more explicit. Replace `quizIndex >= quizQueue.length` with `quizQueue.every((q) => q.answered && q.correct)` in both `advanceQuiz` and `dismissIncorrect`. This makes the intent clear and prevents edge cases where queue manipulation could cause premature completion.
 
-## Lesson Group Structure
+### C3. DB init promise never cleared on error
+**File:** `src/lib/db/database.ts:24-34`
+**Problem:** If `Database.load()` or `runMigrations()` throws, `dbInitPromise` stores the rejected promise. All subsequent `getDb()` calls return this rejected promise, permanently breaking the app.
+**Fix:** Wrap the async IIFE in a `.catch` that clears `dbInitPromise` before rethrowing:
+```typescript
+dbInitPromise = (async () => {
+    const instance = await Database.load("sqlite:janki.db");
+    await runMigrations(instance);
+    db = instance;
+    return instance;
+})().catch((e) => {
+    dbInitPromise = null;
+    throw e;
+});
+```
 
-| Order | Group Key | Label | Characters |
-|-------|-----------|-------|------------|
-| 1 | `hiragana-vowels` | Hiragana: Vowels | あ い う え お |
-| 2 | `hiragana-k` | Hiragana: K-row | か き く け こ |
-| 3 | `hiragana-s` | Hiragana: S-row | さ し す せ そ |
-| 4 | `hiragana-t` | Hiragana: T-row | た ち つ て と |
-| 5 | `hiragana-n` | Hiragana: N-row | な に ぬ ね の |
-| 6 | `hiragana-h` | Hiragana: H-row | は ひ ふ へ ほ |
-| 7 | `hiragana-m` | Hiragana: M-row | ま み む め も |
-| 8 | `hiragana-y` | Hiragana: Y-row | や ゆ よ |
-| 9 | `hiragana-r` | Hiragana: R-row | ら り る れ ろ |
-| 10 | `hiragana-w` | Hiragana: W & N | わ を ん |
-| 11 | `katakana-vowels` | Katakana: Vowels | ア イ ウ エ オ |
-| 12 | `katakana-k` | Katakana: K-row | カ キ ク ケ コ |
-| 13 | `katakana-s` | Katakana: S-row | サ シ ス セ ソ |
-| 14 | `katakana-t` | Katakana: T-row | タ チ ツ テ ト |
-| 15 | `katakana-n` | Katakana: N-row | ナ ニ ヌ ネ ノ |
-| 16 | `katakana-h` | Katakana: H-row | ハ ヒ フ ヘ ホ |
-| 17 | `katakana-m` | Katakana: M-row | マ ミ ム メ モ |
-| 18 | `katakana-y` | Katakana: Y-row | ヤ ユ ヨ |
-| 19 | `katakana-r` | Katakana: R-row | ラ リ ル レ ロ |
-| 20 | `katakana-w` | Katakana: W & N | ワ ヲ ン |
-| 21 | `dakuten` | Dakuten (Both) | ga-go, za-zo, da-do, ba-bo (ひらがな + カタカナ) |
-| 22 | `handakuten` | Handakuten (Both) | pa-po (ひらがな + カタカナ) |
-| 23 | `yoon` | Combinations (Both) | kya, sha, cha, nya, etc. (ひらがな + カタカナ) |
-| 24 | `extended` | Extended Kana | yi, ye, wi, we, etc. (rare/obsolete, both scripts) |
+### C4. Seed totalInserted counter wrong on rollback
+**File:** `src/lib/db/seed/language-data.ts:165-179`
+**Problem:** `totalInserted += batch.length` at line 173 is inside the loop, before COMMIT. If ROLLBACK occurs, the count is inflated.
+**Fix:** Move `totalInserted` increment after COMMIT:
+```typescript
+await db.execute("BEGIN");
+try {
+    let batchCount = 0;
+    for (...) { batchCount += batch.length; }
+    await db.execute("COMMIT");
+    totalInserted += batchCount;
+} catch (e) {
+    await db.execute("ROLLBACK").catch(() => {});
+    console.error(`[Seed] Failed to seed ${contentType}:`, e);
+}
+```
+Also change from `throw e` to logging + continue so one failed content type doesn't abort the entire seed.
+
+## Warning Fixes (11)
+
+### W1. Vocab unlock fetch multiplier cap
+**File:** `src/lib/srs/language-unlock.ts:130`
+**Fix:** Cap fetch at `Math.min(remaining * 3, 50)`. Add comment explaining the multiplier.
+
+### W2. Undo doesn't invalidate srsSummary cache
+**File:** `src/lib/components/language/LanguageReviewSession.svelte:236`
+**Fix:** Change `invalidateCache("contentTypeCounts")` to `invalidateCache()` (full clear) after undo.
+
+### W3. getJlptLevelProgress / getKanaGroupProgress / getJlptLevelProgressByType return rows[0] without fallback
+**File:** `src/lib/db/queries/language.ts:508,549,661`
+**Fix:** Change `return rows[0]` to `return rows[0] ?? { total: 0, guru_plus: 0 }` (or `at_apprentice4_plus: 0` for kana).
+
+### W4. kanji.ts getLevelProgress / getDueKanjiCount / getAvailableLessonCount null checks
+**File:** `src/lib/db/queries/kanji.ts:145,412,438`
+**Fix:** Add null guards: `rows[0] ?? { total: 0, ... }` for getLevelProgress, `rows[0]?.count ?? 0` for count queries.
+
+### W5. checkAndUnlockItems re-entrancy guard
+**File:** `src/lib/srs/language-unlock.ts:41`
+**Fix:** Add module-level `let unlockRunning = false`. At top of `checkAndUnlockItems`, check and return early if already running. Set true on entry, false in finally.
+
+### W6. n5Data JSON import -- no runtime validation
+**File:** `src/views/Search.svelte:14`
+**Fix:** Low risk -- n5Data is a checked-in static file, not user-supplied. Add a `console.warn` if `!Array.isArray(n5Data)` rather than a full Zod schema. Minimal change.
+
+### W7. Migration version ordering validation
+**File:** `src/lib/db/database.ts` (in `runMigrations`)
+**Fix:** Add assertion before the migration loop:
+```typescript
+for (let i = 1; i < migrations.length; i++) {
+    if (migrations[i].version <= migrations[i - 1].version) {
+        throw new Error(`Migration versions out of order: ${migrations[i - 1].version} -> ${migrations[i].version}`);
+    }
+}
+```
+
+### W8. getLanguageSrsDistribution has no caching
+**File:** `src/lib/db/queries/language.ts:285`
+**Fix:** Add cache using existing `CACHE_KEYS.srsSummary`:
+```typescript
+const cached = getCached<...>(CACHE_KEYS.srsSummary);
+if (cached) return { ok: true, data: cached };
+// ... query ...
+setCache(CACHE_KEYS.srsSummary, data, 30_000);
+```
+
+### W9. Picker mode fetches 200 items to filter by IDs
+**File:** `src/views/LanguageLessons.svelte:25-32`
+**Fix:** Add `getLanguageItemsByIds(ids: number[])` query to `language.ts` using `WHERE id IN (${placeholders})`. Use it in picker mode instead of `getAvailableLessons(undefined, 200)`.
+
+### W10. hasLockedItemsForJlptLevel uses COUNT with LIMIT 1
+**File:** `src/lib/db/queries/language.ts:690-695`
+**Fix:** Change to `SELECT 1 FROM language_items WHERE ... LIMIT 1` and return `rows.length > 0`.
+
+### W11. (Merged -- undo cache is W2)
+
+## Suggestion Fixes (9)
+
+### S1. computeFirstReviewTime duplication in kanji.ts
+**File:** `src/lib/db/queries/kanji.ts:5-15`
+**Fix:** Import `calculateNextReview` from `$lib/srs/srs-common` and use it instead of the hand-rolled function. Pass `ACCELERATED_INTERVALS` for levels 1-2, `STANDARD_INTERVALS` otherwise.
+
+### S2. Migration string splitter -- require array format
+**File:** `src/lib/db/database.ts:61-64`
+**Fix:** Add `console.warn` if migration.up is a string (not array). All current migrations already use arrays or semicolon-delimited strings that work. Low priority -- just a safety net.
+
+### S3. Svelte 4 idiom in LessonSession
+**File:** `src/lib/components/language/LanguageLessonSession.svelte`
+**Fix:** Find `{#each [...] as examples}` pattern and replace with `{@const}`. Grep first to confirm the exact location.
+
+### S4. Settings loaded one-by-one triggering re-renders
+**File:** `src/lib/stores/app-settings.svelte.ts:62-78`
+**Fix:** Build a temp object, then assign once: collect all parsed values in a plain object, then `settings = { ...settings, ...parsed }` at the end.
+
+### S5. prevView in App.svelte unnecessarily reactive
+**File:** `src/App.svelte:34-44`
+**Fix:** Change `let prevView = $state(...)` to plain `let prevView = currentView()`.
+
+### S6. Hardcoded zoom 1.5 with no user setting
+**File:** `src/main.ts:27`
+**Fix:** Add `uiZoom` to AppSettings (default 1.5). Use it in `init()`. Add UI control in Settings page. This is a small feature addition.
+
+### S7. markLessonsBatchCompleted documentation
+**File:** `src/lib/db/queries/language.ts:380`
+**Fix:** Add JSDoc comment clarifying that `lesson_completed_at IS NOT NULL` is the "lesson done" flag and `srs_stage = 1` means "available for first review."
+
+### S8. hasLockedItemsForJlptLevel redundant LIMIT
+(Merged into W10)
+
+### S9. fuzzyMatch kana false positive
+**File:** `src/lib/utils/answer-validation.ts`
+**Fix:** Already gated with 60% length ratio check from round 1. Kana review uses exact match (not fuzzyMatch). No further change needed -- document this in a comment.
 
 ## Critical Files
 
-- `src/lib/db/migrations.ts` -- new migration adding columns + backfill
-- `src/lib/data/kana-groups.ts` -- **new file**, shared constant defining group mapping (romaji + unicode range -> group key + order)
-- `src/lib/db/seed/language-data.ts` -- update seeder to populate lesson_group/lesson_order for new installs
-- `src/lib/srs/language-unlock.ts` -- change `unlockKana()` from "unlock all" to "unlock next group"
-- `src/lib/db/queries/language.ts` -- update `getAvailableLessons()` ordering, add group-aware queries
-- `src/views/LanguageLessonPicker.svelte` -- show kana sub-grouped by lesson group with Hiragana/Katakana sections
-- `src/views/LanguageKana.svelte` -- reuse existing chart structure (already has Hiragana/Katakana tabs, no major changes needed)
+| File | Fixes |
+|---|---|
+| `src/lib/components/language/LanguageReviewSession.svelte` | C1, W2 |
+| `src/lib/components/language/LanguageLessonSession.svelte` | C2, S3 |
+| `src/lib/db/database.ts` | C3, W7, S2 |
+| `src/lib/db/seed/language-data.ts` | C4 |
+| `src/lib/srs/language-unlock.ts` | W1, W5 |
+| `src/lib/db/queries/language.ts` | W3, W8, W9, W10, S7 |
+| `src/lib/db/queries/kanji.ts` | W4, S1 |
+| `src/views/Search.svelte` | W6 |
+| `src/views/LanguageLessons.svelte` | W9 |
+| `src/lib/stores/app-settings.svelte.ts` | S4, S6 |
+| `src/App.svelte` | S5 |
+| `src/main.ts` | S6 |
+| `src/views/Settings.svelte` | S6 |
 
-## Implementation Steps
+## Execution Order
 
-### Step 1: Create kana group mapping (`src/lib/data/kana-groups.ts`)
-
-Define a `KANA_LESSON_GROUPS` constant that maps each romaji value to its group key and order number. Use unicode range detection (already exists in LanguageKana.svelte as `isHiragana`/`isKatakana`) to determine script type. Structure:
-
-```typescript
-export interface KanaGroup {
-  key: string;        // e.g. "hiragana-vowels"
-  label: string;      // e.g. "Hiragana: Vowels"
-  order: number;      // 1-28
-  script: "hiragana" | "katakana";
-  category: "seion" | "dakuten" | "handakuten" | "yoon" | "extended";
-}
-
-// Map from romaji -> row category (script is determined by unicode)
-export const ROMAJI_TO_ROW: Record<string, { row: string; category: string }>;
-
-// Full group definitions
-export const KANA_GROUPS: KanaGroup[];
-
-// Helper: given a kana item (romaji + primary_text), return group key + lesson_order
-export function getKanaGroupInfo(romaji: string, primaryText: string): { group: string; order: number };
-```
-
-Reuse the row definitions already in [LanguageKana.svelte:38-79](src/views/LanguageKana.svelte#L38-L79) (GOJUON_ROWS, DAKUTEN_ROWS, etc.) to build the mapping. Move those constants to the shared file so both the chart view and the group logic use the same source of truth.
-
-### Step 2: Add DB migration
-
-New migration (version 12 or next available):
-- `ALTER TABLE language_items ADD COLUMN lesson_group TEXT`
-- `ALTER TABLE language_items ADD COLUMN lesson_order INTEGER`
-- `CREATE INDEX idx_language_items_lesson_group ON language_items(lesson_group)`
-- Backfill via UPDATE statements using the romaji + unicode detection logic:
-  - For each group, build an UPDATE with `WHERE content_type = 'kana' AND romaji IN (...) AND primary_text GLOB '[hiragana-range]*'`
-  - SQLite doesn't have regex, so use hex(primary_text) range checks or hardcode item_key lists
-
-### Step 3: Update seeder
-
-In [language-data.ts](src/lib/db/seed/language-data.ts), after inserting kana items, run a post-seed step that calls `getKanaGroupInfo()` for each kana item and updates `lesson_group` and `lesson_order`. This ensures new installs get the data populated without relying on the migration backfill.
-
-### Step 4: Update unlock logic
-
-In [language-unlock.ts:51-58](src/lib/srs/language-unlock.ts#L51-L58), change `unlockKana()`:
-- Instead of unlocking ALL locked kana, find the lowest-order lesson_group that has locked items
-- Only unlock that group IF either: (a) it's group order 1 (hiragana vowels), or (b) 80% of items in the previous group have reached Apprentice 4+ (srs_stage >= 4)
-- This creates a natural gate: learn vowels -> K-row unlocks -> learn K-row -> S-row unlocks, etc.
-- After all hiragana seion groups (1-10) are done, katakana seion (11-20) begins, then dakuten/handakuten/yoon for both scripts together (21-23), then extended (24)
-- Add new queries in language.ts:
-  - `getLockedKanaByGroup()` -- get locked items for a specific lesson_group
-  - `getKanaGroupProgress(groupKey)` -- returns `{ total, at_apprentice4_plus }` for gate checking
-  - `getNextLockedKanaGroup()` -- find the lowest lesson_order group that still has locked items
-
-### Step 5: Update lesson ordering query
-
-In [language.ts:315-340](src/lib/db/queries/language.ts#L315-L340), update `getAvailableLessons()`:
-- When `content_type = 'kana'`, order by `lesson_order ASC, id ASC` instead of `frequency_rank`
-- This ensures lessons present kana in the correct pedagogical order
-
-### Step 6: Update lesson picker UI
-
-In [LanguageLessonPicker.svelte](src/views/LanguageLessonPicker.svelte):
-- When kana items are present, sub-group them by `lesson_group` instead of showing a flat list
-- Show group labels (e.g., "Hiragana: Vowels", "Hiragana: K-row")
-- Add Hiragana/Katakana filter tabs (similar to [LanguageKana.svelte:191-193](src/views/LanguageKana.svelte#L191-L193))
-- Show progress per group (e.g., "3/5 learned")
-
-### Step 6b: Replace "Kana" label with Hiragana/Katakana throughout
-
-Currently "Kana" is used as the generic content_type label everywhere. Update all user-facing labels:
-- **Lesson picker** ([LanguageLessonPicker.svelte:114](src/views/LanguageLessonPicker.svelte#L114)): Change `getTypeLabel("kana")` from "Kana" to show "Hiragana" / "Katakana" based on the items' script. When both are present, show them as separate sections rather than one "Kana" bucket.
-- **Lesson session header**: Show "Hiragana: Vowels" (the lesson_group label) instead of just "Kana" so the user knows exactly what they're studying.
-- **Overview/stats cards** ([LanguageOverviewCard.svelte](src/lib/components/language/LanguageOverviewCard.svelte)): If kana stats are shown, break them into Hiragana/Katakana counts.
-- **Content type badges** ([ContentTypeBadge.svelte](src/lib/components/language/ContentTypeBadge.svelte)): When displaying a kana item's badge, show "Hiragana" or "Katakana" instead of "Kana". Use the existing `isHiragana()`/`isKatakana()` unicode detection.
-- **Navigation/sidebar**: If there's a "Kana" nav entry, consider splitting into "Hiragana" and "Katakana" or keeping "Kana" as the parent with sub-labels inside.
-
-### Step 7: Refactor LanguageKana.svelte chart constants
-
-Move GOJUON_ROWS, DAKUTEN_ROWS, HANDAKUTEN_ROWS, YOON_ROWS from [LanguageKana.svelte:38-79](src/views/LanguageKana.svelte#L38-L79) into the shared `kana-groups.ts` file. Import them back in the chart view. This prevents duplication and ensures both the reference chart and the lesson system use the same row definitions.
+1. **Database layer:** database.ts (C3, W7, S2), language.ts (W3, W8, W9, W10, S7), kanji.ts (W4, S1)
+2. **Seed:** language-data.ts (C4)
+3. **Unlock:** language-unlock.ts (W1, W5)
+4. **Components:** ReviewSession (C1, W2), LessonSession (C2, S3)
+5. **Views:** Search (W6), LanguageLessons (W9)
+6. **Settings + App:** app-settings (S4, S6), App.svelte (S5), main.ts (S6), Settings.svelte (S6)
 
 ## Verification
 
-1. **New install test**: Delete DB, restart app. Verify only hiragana vowels (a, i, u, e, o) are available as first lessons
-2. **Progression test**: Complete vowel lessons, verify K-row unlocks next
-3. **Lesson picker**: Open picker, verify kana are grouped by lesson group with labels
-4. **Ordering**: Start auto-lesson with kana, verify they come in row order (vowels first, not random)
-5. **Migration test**: Run with existing DB, verify lesson_group/lesson_order are backfilled for all kana items
-6. **Chart view**: Verify LanguageKana.svelte still renders correctly after constant extraction
+1. `npx vite build` -- no compilation errors
+2. `npx vitest run` -- all tests pass
+3. Manual: Delete DB, restart -- app initializes without hanging (C3 test)
+4. Manual: Lesson quiz with wrong answer on last item -- re-queued item must be answered correctly before session completes (C2)
+5. Manual: Review session rapid Enter after wrong answer -- no UI glitch (C1)
+6. Manual: Undo in review -- dashboard SRS chart updates immediately (W2)
 
 ## Lessons Learned / Gotchas
 

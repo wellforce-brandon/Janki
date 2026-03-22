@@ -7,6 +7,8 @@ import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import { Progress } from "$lib/components/ui/progress";
 import { getLanguageItems, type LanguageItem } from "$lib/db/queries/language";
 import { getSettings } from "$lib/stores/app-settings.svelte";
+import { safeParseJson } from "$lib/utils/common";
+import { sanitizeCardHtml } from "$lib/utils/sanitize";
 import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
 import { containsKanji, furiganaToHtml, simpleFurigana } from "$lib/utils/japanese";
@@ -66,7 +68,7 @@ async function loadImported() {
 			en: item.meaning ?? "",
 			reading: item.reading ?? "",
 			source: "imported" as const,
-			deck_name: item.source_decks ? (JSON.parse(item.source_decks) as string[])[0] : undefined,
+			deck_name: item.source_decks ? safeParseJson<string[]>(item.source_decks, [])[0] : undefined,
 		}));
 	}
 	loading = false;
@@ -93,7 +95,7 @@ let progressPercent = $derived(
 let furiganaHtml = $derived.by(() => {
 	if (!currentSentence) return "";
 	const segments = simpleFurigana(currentSentence.ja, currentSentence.reading);
-	return furiganaToHtml(segments);
+	return sanitizeCardHtml(furiganaToHtml(segments));
 });
 
 function nextSentence() {

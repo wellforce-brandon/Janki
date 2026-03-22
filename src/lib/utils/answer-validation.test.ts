@@ -40,12 +40,16 @@ describe("Answer Validation", () => {
 			expect(fuzzyMatch("hello", "hello")).toBe(true);
 		});
 
-		it("should match when user answer contains expected", () => {
-			expect(fuzzyMatch("the big hello world", "hello world")).toBe(true);
+		it("should match when user answer contains expected with similar length", () => {
+			// "hello world" (11) in "the big hello world" (19): 11/19 = 58% -- below 60% threshold
+			expect(fuzzyMatch("the big hello world", "hello world")).toBe(false);
+			// But similar-length substring works: "hello world" (11) in "hello world!" (12): 11/12 = 92%
+			expect(fuzzyMatch("hello world!", "hello world")).toBe(true);
 		});
 
-		it("should match when expected contains user answer", () => {
-			expect(fuzzyMatch("hello", "hello world")).toBe(true);
+		it("should not match short substring in long string", () => {
+			// "hello" (5) in "hello world" (11): 5/11 = 45% -- below threshold
+			expect(fuzzyMatch("hello", "hello world")).toBe(false);
 		});
 
 		it("should not match completely different strings", () => {
@@ -66,9 +70,10 @@ describe("Answer Validation", () => {
 
 		it("should handle 60% boundary for longer phrases", () => {
 			// 5 expected words, need ceil(5*0.6) = 3 matching words
-			expect(fuzzyMatch("quick brown jumps", "the quick brown fox jumps")).toBe(true); // 3/5
-			// "quick brown" is a substring of "the quick brown fox jumps" so it still matches
-			expect(fuzzyMatch("quick brown", "the quick brown fox jumps")).toBe(true);
+			expect(fuzzyMatch("quick brown jumps", "the quick brown fox jumps")).toBe(true); // 3/5 word overlap
+			// "quick brown" is short (11) vs "the quick brown fox jumps" (25): 11/25 = 44% -- no substring match
+			// but word overlap: 2/5 = 40% < 60% threshold -- fails
+			expect(fuzzyMatch("quick brown", "the quick brown fox jumps")).toBe(false);
 			// truly partial non-substring, 1/5 match
 			expect(fuzzyMatch("only jumps here now", "the quick brown fox jumps")).toBe(false);
 		});
@@ -79,8 +84,8 @@ describe("Answer Validation", () => {
 		});
 
 		it("should handle empty strings", () => {
-			expect(fuzzyMatch("", "")).toBe(true);
-			expect(fuzzyMatch("hello", "")).toBe(true); // "" includes ""
+			expect(fuzzyMatch("", "")).toBe(true); // exact match
+			expect(fuzzyMatch("hello", "")).toBe(false); // short strings below 3-char threshold
 		});
 	});
 });

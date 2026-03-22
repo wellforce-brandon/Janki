@@ -16,6 +16,11 @@ export interface AppSettings {
 	kanjiReviewOrder: KanjiReviewOrder;
 	kanjiShowSrsIndicator: boolean;
 	kanjiAutoplayAudio: boolean;
+	vocabLessonCap: number;
+	grammarLessonCap: number;
+	sentenceLessonCap: number;
+	conjugationLessonCap: number;
+	uiZoom: number;
 }
 
 const DEFAULTS: AppSettings = {
@@ -32,6 +37,11 @@ const DEFAULTS: AppSettings = {
 	kanjiReviewOrder: "due-first",
 	kanjiShowSrsIndicator: true,
 	kanjiAutoplayAudio: false,
+	vocabLessonCap: 10,
+	grammarLessonCap: 5,
+	sentenceLessonCap: 5,
+	conjugationLessonCap: 5,
+	uiZoom: 1.5,
 };
 
 let settings = $state<AppSettings>({ ...DEFAULTS });
@@ -52,20 +62,23 @@ export async function loadSettings(): Promise<void> {
 			"SELECT key, value FROM settings WHERE key LIKE 'app_%'",
 		);
 
+		const parsed: Record<string, unknown> = {};
 		for (const row of rows) {
-			const key = row.key.replace("app_", "") as keyof AppSettings;
-			if (key in DEFAULTS) {
+			const possibleKey = row.key.replace("app_", "");
+			if (possibleKey in DEFAULTS) {
+				const key = possibleKey as keyof AppSettings;
 				const val = row.value;
 				if (typeof DEFAULTS[key] === "number") {
-					const parsed = Number(val);
-					(settings as Record<string, unknown>)[key] = Number.isFinite(parsed) ? parsed : DEFAULTS[key];
+					const num = Number(val);
+					parsed[key] = Number.isFinite(num) ? num : DEFAULTS[key];
 				} else if (typeof DEFAULTS[key] === "boolean") {
-					(settings as Record<string, unknown>)[key] = val === "true";
+					parsed[key] = val === "true";
 				} else {
-					(settings as Record<string, unknown>)[key] = val;
+					parsed[key] = val;
 				}
 			}
 		}
+		settings = { ...settings, ...parsed } as AppSettings;
 	} catch (e) {
 		console.error("[Settings] Failed to load settings:", e);
 	}

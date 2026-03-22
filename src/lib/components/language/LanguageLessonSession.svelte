@@ -2,7 +2,7 @@
 import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import type { LanguageItem } from "$lib/db/queries/language";
-import { getKanaScriptLabel, getKanaGroupLabel } from "$lib/data/kana-groups";
+import { getTypeLabel, getTypeColor } from "$lib/utils/content-type";
 import { completeLessonBatch } from "$lib/srs/language-lessons";
 import { addToast } from "$lib/stores/toast.svelte";
 import { normalizeLanguageAnswer } from "$lib/utils/answer-validation";
@@ -42,10 +42,8 @@ let isCompleting = $state(false);
 let quizInputEl = $state<HTMLInputElement | null>(null);
 
 $effect(() => {
-	void quizIndex;
-	void feedbackState;
-	if (phase === "quiz" && feedbackState === "none") {
-		setTimeout(() => quizInputEl?.focus(), 0);
+	if (phase === "quiz" && feedbackState === "none" && quizIndex >= 0) {
+		setTimeout(() => quizInputEl?.focus(), 50);
 	}
 });
 
@@ -59,29 +57,7 @@ let quizProgress = $derived(
 
 // --- Helpers ---
 
-function getTypeLabel(type: string, item?: LanguageItem): string {
-	if (type === "kana" && item) {
-		return getKanaScriptLabel(item.primary_text);
-	}
-	const labels: Record<string, string> = {
-		vocabulary: "Vocabulary",
-		grammar: "Grammar",
-		sentence: "Sentence",
-		conjugation: "Conjugation",
-	};
-	return labels[type] ?? type;
-}
-
-function getTypeColor(type: string): string {
-	const colors: Record<string, string> = {
-		kana: "bg-teal-500",
-		vocabulary: "bg-purple-500",
-		grammar: "bg-amber-500",
-		sentence: "bg-blue-500",
-		conjugation: "bg-rose-500",
-	};
-	return colors[type] ?? "bg-gray-500";
-}
+// getTypeLabel and getTypeColor imported from $lib/utils/content-type
 
 function getExpectedAnswer(item: LanguageItem): string {
 	if (item.content_type === "kana") return item.romaji ?? item.reading ?? item.meaning ?? "";
@@ -213,12 +189,16 @@ function submitQuizAnswer() {
 	}
 }
 
+function isQuizComplete(): boolean {
+	return quizQueue.every((q) => q.answered && q.correct);
+}
+
 function advanceQuiz() {
 	feedbackState = "none";
 	inputValue = "";
 	correctAnswer = "";
 	quizIndex++;
-	if (quizIndex >= quizQueue.length) {
+	if (isQuizComplete()) {
 		completeLesson();
 	}
 }
@@ -227,12 +207,13 @@ function dismissIncorrect() {
 	feedbackState = "none";
 	inputValue = "";
 	correctAnswer = "";
-	if (quizIndex >= quizQueue.length) {
+	if (isQuizComplete()) {
 		completeLesson();
 	}
 }
 
 async function completeLesson() {
+	if (isCompleting) return;
 	isCompleting = true;
 	const ids = items.map((i) => i.id);
 	const result = await completeLessonBatch(ids);

@@ -1,5 +1,5 @@
 import { getDb, safeQuery, sqlPlaceholders, type QueryResult } from "../database";
-import { getCached, setCache } from "../query-cache";
+import { getCached, setCache, CACHE_KEYS } from "../query-cache";
 
 // Content type literal
 export type ContentType = "vocabulary" | "grammar" | "sentence" | "kana" | "conjugation";
@@ -139,6 +139,19 @@ export async function getLanguageItemById(id: number): Promise<QueryResult<Langu
 	});
 }
 
+/** Get multiple language items by their IDs */
+export async function getLanguageItemsByIds(ids: number[]): Promise<QueryResult<LanguageItem[]>> {
+	if (ids.length === 0) return { ok: true, data: [] };
+	return safeQuery(async () => {
+		const db = await getDb();
+		const placeholders = sqlPlaceholders(ids.length);
+		return db.select<LanguageItem[]>(
+			`SELECT * FROM language_items WHERE id IN (${placeholders})`,
+			ids,
+		);
+	});
+}
+
 export async function findWkCrossReference(
 	character: string,
 ): Promise<QueryResult<WkCrossReference | null>> {
@@ -182,7 +195,7 @@ export async function searchLanguageItems(
 
 		// Try FTS5 first, fall back to LIKE
 		try {
-			const ftsQuery = `${trimmed.replace(/['"]/g, "")}*`;
+			const ftsQuery = `"${trimmed.replace(/"/g, '""')}"*`;
 			const params: (string | number)[] = [ftsQuery];
 			let typeWhere = "";
 
@@ -282,34 +295,17 @@ export async function getDueLanguageItems(
 	});
 }
 
-export async function getNewLanguageItems(
-	contentType?: ContentType,
-	limit = 20,
-): Promise<QueryResult<LanguageItem[]>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		const params: (string | number)[] = [];
-		let where = "srs_stage = 0";
-
-		if (contentType) {
-			where += " AND content_type = ?";
-			params.push(contentType);
-		}
-
-		params.push(limit);
-		return db.select<LanguageItem[]>(
-			`SELECT * FROM language_items WHERE ${where} ORDER BY id ASC LIMIT ?`,
-			params,
-		);
-	});
-}
-
 export async function getLanguageSrsDistribution(): Promise<QueryResult<{ srs_stage: number; count: number }[]>> {
+	const cached = getCached<{ srs_stage: number; count: number }[]>(CACHE_KEYS.srsSummary);
+	if (cached) return { ok: true, data: cached };
+
 	return safeQuery(async () => {
 		const db = await getDb();
-		return db.select<{ srs_stage: number; count: number }[]>(
+		const data = await db.select<{ srs_stage: number; count: number }[]>(
 			"SELECT srs_stage, COUNT(*) as count FROM language_items WHERE srs_stage > 0 GROUP BY srs_stage ORDER BY srs_stage",
 		);
+		setCache(CACHE_KEYS.srsSummary, data, 30_000);
+		return data;
 	});
 }
 
@@ -359,7 +355,7 @@ export async function getAvailableLessonCount(
 			`SELECT COUNT(*) as count FROM language_items WHERE ${where}`,
 			params,
 		);
-		return rows[0].count;
+		return rows[0]?.count ?? 0;
 	});
 }
 
@@ -398,7 +394,11 @@ export async function markLessonCompleted(
 	});
 }
 
-/** Batch mark lessons completed: set lesson_completed_at and schedule first review for multiple items */
+/**
+ * Batch mark lessons completed: set lesson_completed_at and schedule first review.
+ * Items stay at srs_stage=1 (Apprentice 1) -- lesson_completed_at IS NOT NULL is the
+ * canonical "lesson done" flag. First review advances to srs_stage=2+.
+ */
 export async function markLessonsBatchCompleted(
 	ids: number[],
 	nextReview: string,
@@ -449,7 +449,7 @@ export async function getDueLanguageCount(
 			`SELECT COUNT(*) as count FROM language_items WHERE ${where}`,
 			params,
 		);
-		return rows[0].count;
+		return rows[0]?.count ?? 0;
 	});
 }
 
@@ -473,46 +473,6 @@ export async function getLockedKanaItems(): Promise<QueryResult<{ id: number }[]
 		const db = await getDb();
 		return db.select<{ id: number }[]>(
 			"SELECT id FROM language_items WHERE content_type = 'kana' AND srs_stage = 0",
-		);
-	});
-}
-
-/** Get locked vocabulary items with their primary_text for kanji checking */
-export async function getLockedVocabularyItems(): Promise<QueryResult<{ id: number; primary_text: string }[]>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		return db.select<{ id: number; primary_text: string }[]>(
-			"SELECT id, primary_text FROM language_items WHERE content_type = 'vocabulary' AND srs_stage = 0",
-		);
-	});
-}
-
-/** Get locked grammar items for unlock checking */
-export async function getLockedGrammarItems(): Promise<QueryResult<{ id: number; jlpt_level: string | null; frequency_rank: number | null }[]>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		return db.select<{ id: number; jlpt_level: string | null; frequency_rank: number | null }[]>(
-			"SELECT id, jlpt_level, frequency_rank FROM language_items WHERE content_type = 'grammar' AND srs_stage = 0 ORDER BY COALESCE(frequency_rank, 999999) ASC",
-		);
-	});
-}
-
-/** Get locked sentence items with their prerequisite_keys */
-export async function getLockedSentenceItems(): Promise<QueryResult<{ id: number; prerequisite_keys: string | null }[]>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		return db.select<{ id: number; prerequisite_keys: string | null }[]>(
-			"SELECT id, prerequisite_keys FROM language_items WHERE content_type = 'sentence' AND srs_stage = 0",
-		);
-	});
-}
-
-/** Get locked conjugation items with their prerequisite_keys */
-export async function getLockedConjugationItems(): Promise<QueryResult<{ id: number; prerequisite_keys: string | null }[]>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		return db.select<{ id: number; prerequisite_keys: string | null }[]>(
-			"SELECT id, prerequisite_keys FROM language_items WHERE content_type = 'conjugation' AND srs_stage = 0",
 		);
 	});
 }
@@ -567,7 +527,7 @@ export async function getJlptLevelProgress(jlptLevel: string): Promise<QueryResu
 			FROM language_items WHERE jlpt_level = ?`,
 			[jlptLevel],
 		);
-		return rows[0];
+		return rows[0] ?? { total: 0, guru_plus: 0 };
 	});
 }
 
@@ -608,7 +568,7 @@ export async function getKanaGroupProgress(lessonGroup: string): Promise<QueryRe
 			FROM language_items WHERE content_type = 'kana' AND lesson_group = ?`,
 			[lessonGroup],
 		);
-		return rows[0];
+		return rows[0] ?? { total: 0, at_apprentice4_plus: 0 };
 	});
 }
 
@@ -623,5 +583,138 @@ export async function getPreviousKanaGroup(lessonOrder: number): Promise<QueryRe
 			[lessonOrder - 1],
 		);
 		return rows.length > 0 ? rows[0].lesson_group : null;
+	});
+}
+
+// --- Cap-based unlock queries ---
+
+/** Count unlocked-but-not-yet-learned items for a specific content type */
+export async function getPendingLessonCount(contentType: ContentType): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ count: number }[]>(
+			`SELECT COUNT(*) as count FROM language_items
+			WHERE content_type = ? AND srs_stage >= 1 AND lesson_completed_at IS NULL`,
+			[contentType],
+		);
+		return rows[0]?.count ?? 0;
+	});
+}
+
+/** Get a batch of locked vocabulary items for a JLPT level, ordered by frequency */
+export async function getLockedVocabularyBatch(
+	jlptLevel: string | null,
+	limit: number,
+): Promise<QueryResult<{ id: number; primary_text: string }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const levelClause = jlptLevel === null ? "jlpt_level IS NULL" : "jlpt_level = ?";
+		const params = jlptLevel === null ? [limit] : [jlptLevel, limit];
+		return db.select<{ id: number; primary_text: string }[]>(
+			`SELECT id, primary_text FROM language_items
+			WHERE content_type = 'vocabulary' AND srs_stage = 0 AND ${levelClause}
+			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
+			LIMIT ?`,
+			params,
+		);
+	});
+}
+
+/** Get a batch of locked grammar items for a JLPT level, ordered by frequency */
+export async function getLockedGrammarBatch(
+	jlptLevel: string | null,
+	limit: number,
+): Promise<QueryResult<{ id: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const levelClause = jlptLevel === null ? "jlpt_level IS NULL" : "jlpt_level = ?";
+		const params = jlptLevel === null ? [limit] : [jlptLevel, limit];
+		return db.select<{ id: number }[]>(
+			`SELECT id FROM language_items
+			WHERE content_type = 'grammar' AND srs_stage = 0 AND ${levelClause}
+			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
+			LIMIT ?`,
+			params,
+		);
+	});
+}
+
+/** Get a batch of locked sentences ordered by frequency (corrupted values cleaned by migration) */
+export async function getLockedSentenceBatch(limit: number): Promise<QueryResult<{ id: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number }[]>(
+			`SELECT id FROM language_items
+			WHERE content_type = 'sentence' AND srs_stage = 0
+			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
+/** Get a batch of locked conjugation items ordered by frequency/id */
+export async function getLockedConjugationBatch(limit: number): Promise<QueryResult<{ id: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number }[]>(
+			`SELECT id FROM language_items
+			WHERE content_type = 'conjugation' AND srs_stage = 0
+			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
+/** Count items at Guru+ (srs_stage >= 5) for a given JLPT level, filtered by content type */
+export async function getJlptLevelProgressByType(
+	jlptLevel: string,
+	contentType: ContentType,
+): Promise<QueryResult<{ total: number; guru_plus: number }>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ total: number; guru_plus: number }[]>(
+			`SELECT COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
+			FROM language_items WHERE jlpt_level = ? AND content_type = ?`,
+			[jlptLevel, contentType],
+		);
+		return rows[0] ?? { total: 0, guru_plus: 0 };
+	});
+}
+
+/** Count items of a content type at or above a minimum SRS stage (with lesson completed) */
+export async function getContentTypeMilestone(
+	contentType: ContentType,
+	minStage: number,
+): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ count: number }[]>(
+			`SELECT COUNT(*) as count FROM language_items
+			WHERE content_type = ? AND srs_stage >= ? AND lesson_completed_at IS NOT NULL`,
+			[contentType, minStage],
+		);
+		return rows[0]?.count ?? 0;
+	});
+}
+
+/** Check if there are any locked items for a given content type and JLPT level */
+export async function hasLockedItemsForJlptLevel(
+	contentType: ContentType,
+	jlptLevel: string | null,
+): Promise<QueryResult<boolean>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const levelClause = jlptLevel === null ? "jlpt_level IS NULL" : "jlpt_level = ?";
+		const params = jlptLevel === null ? [] : [jlptLevel];
+		const rows = await db.select<{ id: number }[]>(
+			`SELECT 1 as id FROM language_items
+			WHERE content_type = ? AND srs_stage = 0 AND ${levelClause}
+			LIMIT 1`,
+			[contentType, ...params],
+		);
+		return rows.length > 0;
 	});
 }

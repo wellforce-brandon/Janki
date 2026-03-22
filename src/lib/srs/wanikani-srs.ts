@@ -1,34 +1,12 @@
 import { checkAndUnlockLevel, updateKanjiSrsState } from "../db/queries/kanji";
 import { logKanjiReview } from "../db/queries/kanji-reviews";
 import { invalidateCache } from "../db/query-cache";
-import { toSqliteDateTime } from "../utils/common";
-
-// WaniKani SRS stages (intervals match WK API: /v2/spaced_repetition_systems)
-// Stage 0: Locked | Stage 1-4: Apprentice | Stage 5-6: Guru
-// Stage 7: Master | Stage 8: Enlightened | Stage 9: Burned
-
-const STAGE_INTERVALS_HOURS: Record<number, number> = {
-	1: 4, // 14400s
-	2: 8, // 28800s
-	3: 23, // 82800s
-	4: 47, // 169200s
-	5: 167, // 601200s
-	6: 335, // 1206000s
-	7: 719, // 2588400s
-	8: 2879, // 10364400s
-};
-
-// Accelerated intervals for levels 1-2 (stages 1-4 halved, 5-8 unchanged)
-const ACCELERATED_INTERVALS_HOURS: Record<number, number> = {
-	1: 2, // 7200s
-	2: 4, // 14400s
-	3: 8, // 28800s
-	4: 23, // 82800s
-	5: 167,
-	6: 335,
-	7: 719,
-	8: 2879,
-};
+import {
+	calculateNextReview as calculateNextReviewBase,
+	calculateDrop,
+	STANDARD_INTERVALS,
+	ACCELERATED_INTERVALS,
+} from "./srs-common";
 
 export const STAGE_NAMES: Record<number, string> = {
 	0: "Locked",
@@ -57,25 +35,8 @@ export const STAGE_CATEGORIES: Record<number, string> = {
 };
 
 function calculateNextReview(stage: number, level: number): string | null {
-	if (stage <= 0 || stage >= 9) return null;
-	const intervals = level <= 2 ? ACCELERATED_INTERVALS_HOURS : STAGE_INTERVALS_HOURS;
-	const hours = intervals[stage] ?? 4;
-	const next = new Date();
-	next.setTime(next.getTime() + hours * 60 * 60 * 1000);
-	// Round up to top of next hour (WK behavior)
-	next.setMinutes(0, 0, 0);
-	if (next.getTime() <= Date.now()) {
-		next.setTime(next.getTime() + 3600000);
-	}
-	return toSqliteDateTime(next);
-}
-
-// WK drop formula: new_stage = current - ceil(incorrectCount / 2) * penaltyFactor
-// penaltyFactor = 2 for Guru+ (stage >= 5), 1 otherwise. Min stage = 1.
-function calculateDrop(currentStage: number, incorrectCount: number): number {
-	const penaltyFactor = currentStage >= 5 ? 2 : 1;
-	const adjustment = Math.ceil(incorrectCount / 2) * penaltyFactor;
-	return Math.max(1, currentStage - adjustment);
+	const intervals = level <= 2 ? ACCELERATED_INTERVALS : STANDARD_INTERVALS;
+	return calculateNextReviewBase(stage, intervals);
 }
 
 export async function reviewKanjiItem(

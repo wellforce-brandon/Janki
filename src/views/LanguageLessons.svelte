@@ -6,6 +6,7 @@ import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import {
 	getAvailableLessonCount,
 	getAvailableLessons,
+	getLanguageItemsByIds,
 	type ContentType,
 	type LanguageItem,
 } from "$lib/db/queries/language";
@@ -23,12 +24,11 @@ async function loadLessons() {
 	const params = viewParams();
 
 	if (params.ids) {
-		// Picker mode: load specific items by ID
+		// Picker mode: load specific items by ID directly
 		const ids = params.ids.split(",").map(Number);
-		const allResult = await getAvailableLessons(undefined, 200);
-		if (allResult.ok) {
-			const idSet = new Set(ids);
-			batchItems = allResult.data.filter((item) => idSet.has(item.id));
+		const result = await getLanguageItemsByIds(ids);
+		if (result.ok) {
+			batchItems = result.data;
 			availableCount = batchItems.length;
 		}
 	} else {

@@ -161,14 +161,21 @@ export async function seedLanguageData(): Promise<void> {
 
 		console.log(`Seeding ${items.length} ${contentType} items...`);
 
-		// Batch insert in groups of BATCH_SIZE
-		for (let i = 0; i < items.length; i += BATCH_SIZE) {
-			const batch = items.slice(i, i + BATCH_SIZE);
-			for (const item of batch) {
-				const { sql, params } = insertItem(item, contentType);
-				await db.execute(sql, params);
+		// Batch insert in groups of BATCH_SIZE, wrapped in transaction for performance
+		await db.execute("BEGIN");
+		try {
+			for (let i = 0; i < items.length; i += BATCH_SIZE) {
+				const batch = items.slice(i, i + BATCH_SIZE);
+				for (const item of batch) {
+					const { sql, params } = insertItem(item, contentType);
+					await db.execute(sql, params);
+				}
 			}
-			totalInserted += batch.length;
+			await db.execute("COMMIT");
+			totalInserted += items.length;
+		} catch (e) {
+			await db.execute("ROLLBACK").catch(() => {});
+			console.error(`[Seed] Failed to seed ${contentType}:`, e);
 		}
 	}
 

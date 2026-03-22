@@ -1,17 +1,10 @@
 import { getDb, type QueryResult, safeQuery, sqlPlaceholders } from "../database";
 import { safeParseJson } from "$lib/utils/common";
+import { calculateNextReview, STANDARD_INTERVALS, ACCELERATED_INTERVALS } from "$lib/srs/srs-common";
 
-// Compute first review time (avoids circular dep with wanikani-srs)
 function computeFirstReviewTime(level: number): string {
-	const hours = level <= 2 ? 2 : 4; // Accelerated for levels 1-2
-	const next = new Date();
-	next.setTime(next.getTime() + hours * 60 * 60 * 1000);
-	next.setMinutes(0, 0, 0);
-	if (next.getTime() <= Date.now()) next.setTime(next.getTime() + 3600000);
-	return next
-		.toISOString()
-		.replace("T", " ")
-		.replace(/\.\d{3}Z$/, "");
+	const intervals = level <= 2 ? ACCELERATED_INTERVALS : STANDARD_INTERVALS;
+	return calculateNextReview(1, intervals) ?? "";
 }
 
 export interface KanjiLevelItem {
@@ -142,7 +135,7 @@ export async function getLevelProgress(level: number): Promise<QueryResult<Level
 			FROM kanji_levels WHERE level = ? AND item_type = 'kanji'`,
 			[level],
 		);
-		const { total, guru_plus, unlocked } = rows[0];
+		const { total, guru_plus, unlocked } = rows[0] ?? { total: 0, guru_plus: 0, unlocked: 0 };
 		return {
 			level,
 			total,
@@ -409,7 +402,7 @@ export async function getDueKanjiCount(): Promise<QueryResult<number>> {
 			AND lesson_completed_at IS NOT NULL
 			AND next_review IS NOT NULL AND next_review <= datetime('now')`,
 		);
-		return rows[0].count;
+		return rows[0]?.count ?? 0;
 	});
 }
 
@@ -435,7 +428,7 @@ export async function getAvailableLessonCount(): Promise<QueryResult<number>> {
 			`SELECT COUNT(*) as count FROM kanji_levels
 			WHERE srs_stage >= 1 AND lesson_completed_at IS NULL`,
 		);
-		return rows[0].count;
+		return rows[0]?.count ?? 0;
 	});
 }
 
@@ -745,5 +738,39 @@ export async function updateUserNotes(
 			notes.trim() || null,
 			id,
 		]);
+	});
+}
+
+/** Search kanji items via FTS5, falling back to LIKE on FTS failure */
+export async function searchKanjiItems(
+	query: string,
+	limit = 50,
+): Promise<QueryResult<KanjiLevelItem[]>> {
+	const trimmed = query.trim();
+	if (!trimmed) return { ok: true, data: [] };
+
+	return safeQuery(async () => {
+		const db = await getDb();
+		const ftsQuery = `"${trimmed.replace(/"/g, '""')}"*`;
+		try {
+			return await db.select<KanjiLevelItem[]>(
+				`SELECT kl.* FROM kanji_levels kl
+				JOIN kanji_fts ON kanji_fts.rowid = kl.id
+				WHERE kanji_fts MATCH ?
+				ORDER BY rank
+				LIMIT ?`,
+				[ftsQuery, limit],
+			);
+		} catch {
+			// FTS5 failed (malformed query, missing table, etc.) -- fall back to LIKE
+			const likeQuery = `%${trimmed}%`;
+			return db.select<KanjiLevelItem[]>(
+				`SELECT * FROM kanji_levels
+				WHERE character LIKE ? OR meanings LIKE ? OR readings_on LIKE ? OR readings_kun LIKE ?
+				ORDER BY level ASC
+				LIMIT ?`,
+				[likeQuery, likeQuery, likeQuery, likeQuery, limit],
+			);
+		}
 	});
 }

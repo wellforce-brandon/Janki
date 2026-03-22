@@ -1,7 +1,8 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
 import { type LanguageItem, updateLanguageItemSrs } from "$lib/db/queries/language";
-import { getKanaScriptLabel } from "$lib/data/kana-groups";
+import { getTypeLabel, getTypeColor } from "$lib/utils/content-type";
+import { invalidateCache } from "$lib/db/query-cache";
 import { reviewLanguageItem, type LanguageReviewResult } from "$lib/srs/language-srs";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
@@ -61,32 +62,7 @@ let current = $derived(currentIndex < queue.length ? queue[currentIndex] : null)
 let remaining = $derived(queue.length - currentIndex);
 let progressPercent = $derived(Math.round((currentIndex / queue.length) * 100));
 
-/** Get display label for the content type */
-function getTypeLabel(type: string, item?: LanguageItem): string {
-	if (type === "kana" && item) {
-		return getKanaScriptLabel(item.primary_text);
-	}
-	const labels: Record<string, string> = {
-		vocabulary: "Vocabulary",
-		grammar: "Grammar",
-		sentence: "Sentence",
-		conjugation: "Conjugation",
-	};
-	return labels[type] ?? type;
-}
-
-/** Get the background color for the item type */
-function getTypeColor(type: string): string {
-	const colors: Record<string, string> = {
-		kana: "bg-teal-500",
-		vocabulary: "bg-purple-500",
-		grammar: "bg-amber-500",
-		sentence: "bg-blue-500",
-		conjugation: "bg-rose-500",
-	};
-	return colors[type] ?? "bg-gray-500";
-}
-
+// getTypeLabel and getTypeColor imported from $lib/utils/content-type
 
 /** Check if user's answer is correct */
 function checkAnswer(): boolean {
@@ -173,48 +149,53 @@ async function submitAnswer() {
 	const oldStage = current.srs_stage;
 	const prevNextReview = current.next_review;
 
-	if (isCorrect) {
-		feedbackState = "correct";
-		totalReviewed++;
-		totalCorrect++;
+	try {
+		if (isCorrect) {
+			feedbackState = "correct";
+			totalReviewed++;
+			totalCorrect++;
 
-		const result = await reviewLanguageItem(current.id, true, durationMs);
-		showStageTransition(oldStage, result);
-		showInfoPeek = true;
+			const result = await reviewLanguageItem(current.id, true, durationMs);
+			showStageTransition(oldStage, result);
+			showInfoPeek = true;
 
-		// Save undo entry
-		undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
-			index: currentIndex,
-			wasCorrect: true,
-			reviewResult: result,
-			item: current,
-			prevCorrectCount: current.correct_count,
-			prevIncorrectCount: current.incorrect_count,
-			prevSrsStage: oldStage,
-			prevNextReview,
-		}];
+			undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
+				index: currentIndex,
+				wasCorrect: true,
+				reviewResult: result,
+				item: current,
+				prevCorrectCount: current.correct_count,
+				prevIncorrectCount: current.incorrect_count,
+				prevSrsStage: oldStage,
+				prevNextReview,
+			}];
 
-		setTimeout(() => advanceToNext(), 1200);
-	} else {
-		feedbackState = "incorrect";
-		correctAnswer = getCorrectAnswerDisplay(current);
-		totalReviewed++;
+			setTimeout(() => advanceToNext(), 1200);
+		} else {
+			feedbackState = "incorrect";
+			correctAnswer = getCorrectAnswerDisplay(current);
+			totalReviewed++;
 
-		const result = await reviewLanguageItem(current.id, false, durationMs);
-		showStageTransition(oldStage, result);
-		showInfoPeek = true;
+			const result = await reviewLanguageItem(current.id, false, durationMs);
+			showStageTransition(oldStage, result);
+			showInfoPeek = true;
 
-		// Save undo entry
-		undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
-			index: currentIndex,
-			wasCorrect: false,
-			reviewResult: result,
-			item: current,
-			prevCorrectCount: current.correct_count,
-			prevIncorrectCount: current.incorrect_count,
-			prevSrsStage: oldStage,
-			prevNextReview,
-		}];
+			undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
+				index: currentIndex,
+				wasCorrect: false,
+				reviewResult: result,
+				item: current,
+				prevCorrectCount: current.correct_count,
+				prevIncorrectCount: current.incorrect_count,
+				prevSrsStage: oldStage,
+				prevNextReview,
+			}];
+		}
+	} catch (e) {
+		console.error("[review] Failed to process review:", e);
+		addToast("Failed to save review", "error");
+	} finally {
+		isProcessing = false;
 	}
 }
 
@@ -229,7 +210,6 @@ function showStageTransition(oldStage: number, result: LanguageReviewResult) {
 }
 
 function advanceToNext() {
-	isProcessing = false;
 	feedbackState = "none";
 	inputValue = "";
 	correctAnswer = "";
@@ -280,6 +260,7 @@ async function undoLast() {
 	showInfoPeek = false;
 	itemStartTime = Date.now();
 
+	invalidateCache();
 	addToast("Answer undone", "info", 2000);
 }
 

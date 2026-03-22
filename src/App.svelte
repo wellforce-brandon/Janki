@@ -31,7 +31,7 @@ import Settings from "./views/Settings.svelte";
 import Stats from "./views/Stats.svelte";
 
 // Focus first heading when view changes
-let prevView = $state(currentView());
+let prevView = currentView();
 $effect(() => {
 	const view = currentView();
 	if (view !== prevView) {

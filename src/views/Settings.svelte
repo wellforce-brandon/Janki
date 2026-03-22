@@ -12,6 +12,7 @@ import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
 import { rebuildFtsIndex } from "$lib/db/queries/language";
 import { checkForUpdates } from "$lib/updater/check-update";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
 let s = $derived(getSettings());
 let appVersion = $state("...");
@@ -95,6 +96,23 @@ async function handleResetDefaults() {
 					{theme}
 				</Button>
 			{/each}
+		</div>
+		<div class="space-y-1">
+			<label class="text-sm text-muted-foreground" for="ui-zoom">UI Zoom: {(s.uiZoom * 100).toFixed(0)}%</label>
+			<input
+				id="ui-zoom"
+				type="range"
+				min="0.8"
+				max="2.0"
+				step="0.1"
+				class="w-full"
+				value={s.uiZoom}
+				oninput={(e) => {
+					const val = Number((e.target as HTMLInputElement).value);
+					saveSetting("uiZoom", val);
+					getCurrentWebviewWindow().setZoom(val).catch(console.error);
+				}}
+			/>
 		</div>
 	</section>
 
@@ -219,6 +237,80 @@ async function handleResetDefaults() {
 			/>
 			<span class="text-sm">Show timer during review</span>
 		</label>
+	</section>
+
+	<!-- Language Lesson Caps -->
+	<section class="space-y-3 rounded-lg border bg-card p-4">
+		<h3 class="font-medium">Language Lessons</h3>
+		<p class="text-sm text-muted-foreground">
+			Maximum number of pending (unlocked but unlearned) lessons per content type. Lower values keep sessions focused.
+		</p>
+		<div class="grid grid-cols-2 gap-4">
+			<div class="space-y-1">
+				<label class="text-sm text-muted-foreground" for="vocab-cap">Vocabulary cap</label>
+				<input
+					id="vocab-cap"
+					type="number"
+					min="1"
+					max="50"
+					class="w-full rounded-md border bg-background px-3 py-2"
+					value={s.vocabLessonCap}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLInputElement).value);
+						saveSetting("vocabLessonCap", val);
+						addToast("Vocabulary lesson cap saved", "success");
+					}}
+				/>
+			</div>
+			<div class="space-y-1">
+				<label class="text-sm text-muted-foreground" for="grammar-cap">Grammar cap</label>
+				<input
+					id="grammar-cap"
+					type="number"
+					min="1"
+					max="50"
+					class="w-full rounded-md border bg-background px-3 py-2"
+					value={s.grammarLessonCap}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLInputElement).value);
+						saveSetting("grammarLessonCap", val);
+						addToast("Grammar lesson cap saved", "success");
+					}}
+				/>
+			</div>
+			<div class="space-y-1">
+				<label class="text-sm text-muted-foreground" for="sentence-cap">Sentence cap</label>
+				<input
+					id="sentence-cap"
+					type="number"
+					min="1"
+					max="50"
+					class="w-full rounded-md border bg-background px-3 py-2"
+					value={s.sentenceLessonCap}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLInputElement).value);
+						saveSetting("sentenceLessonCap", val);
+						addToast("Sentence lesson cap saved", "success");
+					}}
+				/>
+			</div>
+			<div class="space-y-1">
+				<label class="text-sm text-muted-foreground" for="conj-cap">Conjugation cap</label>
+				<input
+					id="conj-cap"
+					type="number"
+					min="1"
+					max="50"
+					class="w-full rounded-md border bg-background px-3 py-2"
+					value={s.conjugationLessonCap}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLInputElement).value);
+						saveSetting("conjugationLessonCap", val);
+						addToast("Conjugation lesson cap saved", "success");
+					}}
+				/>
+			</div>
+		</div>
 	</section>
 
 	<!-- Kanji -->

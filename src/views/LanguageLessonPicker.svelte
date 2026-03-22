@@ -6,7 +6,8 @@ import {
 	getAvailableLessons,
 	type LanguageItem,
 } from "$lib/db/queries/language";
-import { getKanaGroupLabel, getKanaScriptLabel } from "$lib/data/kana-groups";
+import { getKanaGroupLabel } from "$lib/data/kana-groups";
+import { getTypeLabel, getTypeColor } from "$lib/utils/content-type";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -126,27 +127,7 @@ function startSession() {
 	navigate("lang-lessons", { ids, source: "picker" });
 }
 
-function getTypeLabel(type: string): string {
-	const labels: Record<string, string> = {
-		kana: "Kana",
-		vocabulary: "Vocabulary",
-		grammar: "Grammar",
-		sentence: "Sentences",
-		conjugation: "Conjugation",
-	};
-	return labels[type] ?? type;
-}
-
-function getTypeColor(type: string): string {
-	const colors: Record<string, string> = {
-		kana: "bg-teal-500",
-		vocabulary: "bg-purple-500",
-		grammar: "bg-amber-500",
-		sentence: "bg-blue-500",
-		conjugation: "bg-rose-500",
-	};
-	return colors[type] ?? "bg-gray-500";
-}
+// getTypeLabel and getTypeColor imported from $lib/utils/content-type
 
 function getDisplayText(item: LanguageItem): string {
 	return item.primary_text;

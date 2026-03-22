@@ -1,0 +1,4370 @@
+[
+  {
+    "primary_text": "あ",
+    "romaji": "a",
+    "audio": [
+      "1c691caf3d1568f8bff6771a8b49876f.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:あ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03042.svg\" alt=\"あ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ア",
+    "audio": [
+      "1c691caf3d1568f8bff6771a8b49876f.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ア",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "a",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030a2.svg\" alt=\"ア stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "い",
+    "romaji": "i",
+    "audio": [
+      "227b7b1cb6974e2f6a7ca21d1dd95cdb.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:い",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03044.svg\" alt=\"い stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "イ",
+    "audio": [
+      "227b7b1cb6974e2f6a7ca21d1dd95cdb.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:イ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "i",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030a4.svg\" alt=\"イ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "いぃ",
+    "romaji": "yi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:いぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "イィ",
+    "romaji": "yi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:イィ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "いぇ",
+    "romaji": "ye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:いぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "イェ",
+    "romaji": "ye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:イェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "う",
+    "romaji": "u",
+    "audio": [
+      "0c966eb98b0198ce00fd5dd4449afb2f.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:う",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03046.svg\" alt=\"う stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ウ",
+    "audio": [
+      "0c966eb98b0198ce00fd5dd4449afb2f.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ウ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "u",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030a6.svg\" alt=\"ウ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ゔ",
+    "romaji": "vu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03094.svg\" alt=\"ゔ stroke order SVG\"></div>",
+    "item_key": "kana:ゔ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴ",
+    "romaji": "vu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030f4.svg\" alt=\"ヴ stroke order SVG\"></div>",
+    "item_key": "kana:ヴ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゔぁ",
+    "romaji": "va",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ゔぁ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴァ(ヷ)",
+    "romaji": "va",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヴァ(ヷ)",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "うぃ",
+    "romaji": "wi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:うぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ウィ",
+    "romaji": "wi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ウィ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゔぃ",
+    "romaji": "vi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ゔぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴィ(ヸ)",
+    "romaji": "vi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヴィ(ヸ)",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゔぃぇ",
+    "romaji": "vye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ゔぃぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴィェ",
+    "romaji": "vye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヴィェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "うぅ/うゅ",
+    "romaji": "wu/wyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:うぅ/うゅ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ウゥ/ウュ",
+    "romaji": "wu/wyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ウゥ/ウュ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "うぇ",
+    "romaji": "we",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:うぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ウェ",
+    "romaji": "we",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ウェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゔぇ",
+    "romaji": "ve",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ゔぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴェ",
+    "romaji": "ve",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヴェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "うぉ",
+    "romaji": "wo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:うぉ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ウォ",
+    "romaji": "wo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ウォ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゔぉ",
+    "romaji": "vo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ゔぉ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴォ",
+    "romaji": "vo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヴォ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゔゃ",
+    "romaji": "vya",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ゔゃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴャ",
+    "romaji": "vya",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヴャ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゔゅ",
+    "romaji": "vyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ゔゅ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴュ",
+    "romaji": "vyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヴュ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゔょ",
+    "romaji": "vyo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ゔょ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヴョ",
+    "romaji": "vyo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヴョ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "え",
+    "romaji": "e",
+    "audio": [
+      "90a459e1c190b6ec0cc89b95913b7bb6.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:え",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03048.svg\" alt=\"え stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "エ",
+    "audio": [
+      "90a459e1c190b6ec0cc89b95913b7bb6.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:エ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "e",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030a8.svg\" alt=\"エ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "お",
+    "romaji": "o",
+    "audio": [
+      "67f7695a462d685fbcb97d56e874ffcc.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:お",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0304a.svg\" alt=\"お stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "オ",
+    "audio": [
+      "67f7695a462d685fbcb97d56e874ffcc.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:オ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "o",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030aa.svg\" alt=\"オ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "か",
+    "romaji": "ka",
+    "audio": [
+      "0fad4df0d98912eb292a39e31e5b7d9e.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:か",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0304b.svg\" alt=\"か stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "カ",
+    "audio": [
+      "0fad4df0d98912eb292a39e31e5b7d9e.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:カ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ka",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ab.svg\" alt=\"カ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "が",
+    "romaji": "ga",
+    "audio": [
+      "9826690be838de368c2fbb216704e3e6.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:が",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0304c.svg\" alt=\"が stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ガ",
+    "audio": [
+      "9826690be838de368c2fbb216704e3e6.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ガ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ga",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ac.svg\" alt=\"ガ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "き",
+    "romaji": "ki",
+    "audio": [
+      "4f248aa73bfc143587808090d6a7bc18.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:き",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0304d.svg\" alt=\"き stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "キ",
+    "audio": [
+      "4f248aa73bfc143587808090d6a7bc18.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:キ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ki",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ad.svg\" alt=\"キ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぎ",
+    "romaji": "gi",
+    "audio": [
+      "3d37628bfaeff934e0cc15c5fec69d7c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぎ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0304e.svg\" alt=\"ぎ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ギ",
+    "audio": [
+      "3d37628bfaeff934e0cc15c5fec69d7c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ギ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "gi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ae.svg\" alt=\"ギ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "きぇ",
+    "romaji": "kye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:きぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "キェ",
+    "romaji": "kye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:キェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぎぇ",
+    "romaji": "gye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぎぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ギェ",
+    "romaji": "gye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ギェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "きゃ",
+    "romaji": "kya",
+    "audio": [
+      "9f2723f20bf2183f6dfa4c45b0c045fb.mp3"
+    ],
+    "item_key": "kana:きゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "キャ",
+    "audio": [
+      "9f2723f20bf2183f6dfa4c45b0c045fb.mp3"
+    ],
+    "item_key": "kana:キャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "kya",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぎゃ",
+    "romaji": "gya",
+    "audio": [
+      "6905d40fc05f6dcf4ac6fd5614621790.mp3"
+    ],
+    "item_key": "kana:ぎゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ギャ",
+    "audio": [
+      "6905d40fc05f6dcf4ac6fd5614621790.mp3"
+    ],
+    "item_key": "kana:ギャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "gya",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "きゅ",
+    "romaji": "kyu",
+    "audio": [
+      "487ef3309bf5d4569243b587a47833af.mp3"
+    ],
+    "item_key": "kana:きゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "キュ",
+    "audio": [
+      "487ef3309bf5d4569243b587a47833af.mp3"
+    ],
+    "item_key": "kana:キュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "kyu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぎゅ",
+    "romaji": "gyu",
+    "audio": [
+      "4ab9e0296e73266747ebb4d6cf54272b.mp3"
+    ],
+    "item_key": "kana:ぎゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ギュ",
+    "audio": [
+      "4ab9e0296e73266747ebb4d6cf54272b.mp3"
+    ],
+    "item_key": "kana:ギュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "gyu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "きゅう",
+    "romaji": "kyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:きゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "キュウ",
+    "romaji": "kyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:キュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぎゅう",
+    "romaji": "gyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぎゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ギュウ",
+    "romaji": "gyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ギュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "きょ",
+    "romaji": "kyo",
+    "audio": [
+      "12f75c6255fdf691beaf2f6fefac49c8.mp3"
+    ],
+    "item_key": "kana:きょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "キョ",
+    "audio": [
+      "12f75c6255fdf691beaf2f6fefac49c8.mp3"
+    ],
+    "item_key": "kana:キョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "kyo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぎょ",
+    "romaji": "gyo",
+    "audio": [
+      "98ff67364f20ed14f097d39e70fb1724.mp3"
+    ],
+    "item_key": "kana:ぎょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ギョ",
+    "audio": [
+      "98ff67364f20ed14f097d39e70fb1724.mp3"
+    ],
+    "item_key": "kana:ギョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "gyo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "きょう",
+    "romaji": "kyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:きょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "キョウ",
+    "romaji": "kyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:キョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぎょう",
+    "romaji": "gyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぎょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ギョウ",
+    "romaji": "gyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ギョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "く",
+    "romaji": "ku",
+    "audio": [
+      "e5412b74306469c6009f5b90303df303.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:く",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0304f.svg\" alt=\"く stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ク",
+    "audio": [
+      "e5412b74306469c6009f5b90303df303.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ク",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ku",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030af.svg\" alt=\"ク stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぐ",
+    "romaji": "gu",
+    "audio": [
+      "eec03f75638b3997b8951eb4b9eaa300.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぐ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03050.svg\" alt=\"ぐ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "グ",
+    "audio": [
+      "eec03f75638b3997b8951eb4b9eaa300.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:グ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "gu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b0.svg\" alt=\"グ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "くぃ",
+    "romaji": "kwi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:くぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "クィ",
+    "romaji": "kwi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:クィ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぐぃ",
+    "romaji": "gwi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぐぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "グィ",
+    "romaji": "gwi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:グィ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "くぇ",
+    "romaji": "kwe",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:くぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "クェ",
+    "romaji": "kwe",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:クェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぐぇ",
+    "romaji": "gwe",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぐぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "グェ",
+    "romaji": "gwe",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:グェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "くぉ",
+    "romaji": "kwo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:くぉ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "クォ",
+    "romaji": "kwo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:クォ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぐぉ",
+    "romaji": "gwo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぐぉ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "グォ",
+    "romaji": "gwo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:グォ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "くゎ",
+    "romaji": "kwa",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:くゎ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "クヮ",
+    "romaji": "kwa",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:クヮ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぐゎ",
+    "romaji": "gwa",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぐゎ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "グヮ",
+    "romaji": "gwa",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:グヮ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "け",
+    "romaji": "ke",
+    "audio": [
+      "fe2bcd6752195f1a1628dc73f13db649.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:け",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03051.svg\" alt=\"け stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ケ",
+    "audio": [
+      "fe2bcd6752195f1a1628dc73f13db649.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ケ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ke",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b1.svg\" alt=\"ケ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "げ",
+    "romaji": "ge",
+    "audio": [
+      "ae702bd3f4d9078777a5f503b2fec400.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:げ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03052.svg\" alt=\"げ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ゲ",
+    "audio": [
+      "ae702bd3f4d9078777a5f503b2fec400.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ゲ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ge",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b2.svg\" alt=\"ゲ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "こ",
+    "romaji": "ko",
+    "audio": [
+      "4f36fbba6df791c049d2b2aa89878a5d.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:こ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03053.svg\" alt=\"こ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "コ",
+    "audio": [
+      "4f36fbba6df791c049d2b2aa89878a5d.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:コ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ko",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b3.svg\" alt=\"コ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ご",
+    "romaji": "go",
+    "audio": [
+      "a6fa764c8c205907543910bca0d7ef9c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ご",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03054.svg\" alt=\"ご stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ゴ",
+    "audio": [
+      "a6fa764c8c205907543910bca0d7ef9c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ゴ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "go",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b4.svg\" alt=\"ゴ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "さ",
+    "romaji": "sa",
+    "audio": [
+      "72369741156a34cd39275c638b017e78.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:さ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03055.svg\" alt=\"さ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "サ",
+    "audio": [
+      "72369741156a34cd39275c638b017e78.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:サ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "sa",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b5.svg\" alt=\"サ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ざ",
+    "romaji": "za",
+    "audio": [
+      "8d83cf9a11a4f3c1a75008c3c2a267ee.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ざ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03056.svg\" alt=\"ざ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ザ",
+    "audio": [
+      "8d83cf9a11a4f3c1a75008c3c2a267ee.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ザ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "za",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b6.svg\" alt=\"ザ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "し",
+    "romaji": "shi",
+    "audio": [
+      "a8c34ddc67a86e8c2180cb7e10a734fc.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:し",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03057.svg\" alt=\"し stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "シ",
+    "audio": [
+      "a8c34ddc67a86e8c2180cb7e10a734fc.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:シ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "shi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b7.svg\" alt=\"シ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "じ",
+    "romaji": "ji",
+    "audio": [
+      "b6cc05754183a53767e643cb9dc3176d.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:じ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03058.svg\" alt=\"じ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ジ",
+    "audio": [
+      "b6cc05754183a53767e643cb9dc3176d.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ジ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ji",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b8.svg\" alt=\"ジ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "しぇ",
+    "romaji": "she",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:しぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "シェ",
+    "romaji": "she",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:シェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "じぇ",
+    "romaji": "je",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:じぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ジェ",
+    "romaji": "je",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ジェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "しゃ",
+    "romaji": "sha",
+    "audio": [
+      "c50d7399bd815284ba6ab36fdd6a791f.mp3"
+    ],
+    "item_key": "kana:しゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "シャ",
+    "audio": [
+      "c50d7399bd815284ba6ab36fdd6a791f.mp3"
+    ],
+    "item_key": "kana:シャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "sha",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "じゃ",
+    "romaji": "ja",
+    "audio": [
+      "e039aafce92a3ae15857ca060340c574.mp3"
+    ],
+    "item_key": "kana:じゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ジャ",
+    "audio": [
+      "e039aafce92a3ae15857ca060340c574.mp3"
+    ],
+    "item_key": "kana:ジャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ja",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "しゅ",
+    "romaji": "shu",
+    "audio": [
+      "6c2fb9d9c40bc1f5a4fb6ec408525230.mp3"
+    ],
+    "item_key": "kana:しゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "シュ",
+    "audio": [
+      "6c2fb9d9c40bc1f5a4fb6ec408525230.mp3"
+    ],
+    "item_key": "kana:シュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "shu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "じゅ",
+    "romaji": "ju",
+    "audio": [
+      "fefdc9bc4143072d2873dcbe24fdb5b8.mp3"
+    ],
+    "item_key": "kana:じゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ジュ",
+    "audio": [
+      "fefdc9bc4143072d2873dcbe24fdb5b8.mp3"
+    ],
+    "item_key": "kana:ジュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ju",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "しゅう",
+    "romaji": "shū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:しゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "シュウ",
+    "romaji": "shū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:シュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "じゅう",
+    "romaji": "jū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:じゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ジュウ",
+    "romaji": "jū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ジュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "しょ",
+    "romaji": "sho",
+    "audio": [
+      "9762f746648fdc8a5b64af9eafc708b4.mp3"
+    ],
+    "item_key": "kana:しょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ショ",
+    "audio": [
+      "9762f746648fdc8a5b64af9eafc708b4.mp3"
+    ],
+    "item_key": "kana:ショ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "sho",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "じょ",
+    "romaji": "jo",
+    "audio": [
+      "10cd5c8264659e55a2c857f4c04fc1b4.mp3"
+    ],
+    "item_key": "kana:じょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ジョ",
+    "audio": [
+      "10cd5c8264659e55a2c857f4c04fc1b4.mp3"
+    ],
+    "item_key": "kana:ジョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "jo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "しょう",
+    "romaji": "shō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:しょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ショウ",
+    "romaji": "shō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ショウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "じょう",
+    "romaji": "jō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:じょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ジョウ",
+    "romaji": "jō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ジョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "す",
+    "romaji": "su",
+    "audio": [
+      "b1fb3f16207187de1b0089f5ef638d99.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:す",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03059.svg\" alt=\"す stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ス",
+    "audio": [
+      "b1fb3f16207187de1b0089f5ef638d99.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ス",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "su",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030b9.svg\" alt=\"ス stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ず",
+    "romaji": "zu",
+    "audio": [
+      "354893691d82a5c2b1f6e4e655779d47.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ず",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0305a.svg\" alt=\"ず stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ズ",
+    "audio": [
+      "354893691d82a5c2b1f6e4e655779d47.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ズ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "zu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ba.svg\" alt=\"ズ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "すぃ",
+    "romaji": "si",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:すぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "スィ",
+    "romaji": "si",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:スィ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ずぃ",
+    "romaji": "zi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ずぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ズィ",
+    "romaji": "zi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ズィ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "せ",
+    "romaji": "se",
+    "audio": [
+      "aaaa432db909e4e0b617cadcfbf5448e.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:せ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0305b.svg\" alt=\"せ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "セ",
+    "audio": [
+      "aaaa432db909e4e0b617cadcfbf5448e.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:セ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "se",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030bb.svg\" alt=\"セ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぜ",
+    "romaji": "ze",
+    "audio": [
+      "754f033cf02091597d9cb42d1cdc13e5.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぜ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0305c.svg\" alt=\"ぜ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ゼ",
+    "audio": [
+      "754f033cf02091597d9cb42d1cdc13e5.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ゼ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ze",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030bc.svg\" alt=\"ゼ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "そ",
+    "romaji": "so",
+    "audio": [
+      "75aabedba715f57d2a95b5533281572a.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:そ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0305d.svg\" alt=\"そ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ソ",
+    "audio": [
+      "75aabedba715f57d2a95b5533281572a.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ソ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "so",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030bd.svg\" alt=\"ソ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぞ",
+    "romaji": "zo",
+    "audio": [
+      "54cbf1bef874786cd864823dc8d81da5.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぞ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0305e.svg\" alt=\"ぞ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ゾ",
+    "audio": [
+      "54cbf1bef874786cd864823dc8d81da5.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ゾ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "zo",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030be.svg\" alt=\"ゾ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "た",
+    "romaji": "ta",
+    "audio": [
+      "c0966f7121989eb49d21bdadb9bfdc7b.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:た",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0305f.svg\" alt=\"た stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "タ",
+    "audio": [
+      "c0966f7121989eb49d21bdadb9bfdc7b.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:タ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ta",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030bf.svg\" alt=\"タ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "だ",
+    "romaji": "da",
+    "audio": [
+      "0b18aa4f286b9762f0988350f2d2dd1d.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:だ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03060.svg\" alt=\"だ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ダ",
+    "audio": [
+      "0b18aa4f286b9762f0988350f2d2dd1d.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ダ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "da",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c0.svg\" alt=\"ダ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ち",
+    "romaji": "chi",
+    "audio": [
+      "1095c9186ff448719525f5031defd075.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ち",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03061.svg\" alt=\"ち stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "チ",
+    "audio": [
+      "1095c9186ff448719525f5031defd075.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:チ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "chi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c1.svg\" alt=\"チ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぢ",
+    "romaji": "dzi",
+    "audio": [
+      "7fc964dd827587f7b5f6c1db361cc924.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぢ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03062.svg\" alt=\"ぢ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ヂ",
+    "audio": [
+      "7fc964dd827587f7b5f6c1db361cc924.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ヂ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ji",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c2.svg\" alt=\"ヂ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ちぇ",
+    "romaji": "che",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ちぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "チェ",
+    "romaji": "che",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:チェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ちゃ",
+    "romaji": "cha",
+    "audio": [
+      "ced9b3c3d96d146ce320819f09d193a6.mp3"
+    ],
+    "item_key": "kana:ちゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "チャ",
+    "audio": [
+      "ced9b3c3d96d146ce320819f09d193a6.mp3"
+    ],
+    "item_key": "kana:チャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "cha",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぢゃ",
+    "romaji": "ja",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぢゃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヂャ",
+    "romaji": "ja",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヂャ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ちゅ",
+    "romaji": "chu",
+    "audio": [
+      "472f4e63eaf8f4996056421114032027.mp3"
+    ],
+    "item_key": "kana:ちゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "チュ",
+    "audio": [
+      "472f4e63eaf8f4996056421114032027.mp3"
+    ],
+    "item_key": "kana:チュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "chu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぢゅ",
+    "romaji": "ju",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぢゅ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヂュ",
+    "romaji": "ju",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヂュ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ちゅう",
+    "romaji": "chū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ちゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "チュウ",
+    "romaji": "chū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:チュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぢゅう",
+    "romaji": "jū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぢゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヂュウ",
+    "romaji": "jū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヂュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ちょ",
+    "romaji": "cho",
+    "audio": [
+      "7cb58acbe2f954a7cc67cf373fc0575d.mp3"
+    ],
+    "item_key": "kana:ちょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "チョ",
+    "audio": [
+      "7cb58acbe2f954a7cc67cf373fc0575d.mp3"
+    ],
+    "item_key": "kana:チョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "cho",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぢょ",
+    "romaji": "jo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぢょ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヂョ",
+    "romaji": "jo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヂョ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ちょう",
+    "romaji": "chō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ちょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "チョウ",
+    "romaji": "chō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:チョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぢょう",
+    "romaji": "jō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぢょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヂョウ",
+    "romaji": "jō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヂョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "つ",
+    "romaji": "tsu",
+    "audio": [
+      "3b2d51b34218b650140be8faf397a466.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:つ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03064.svg\" alt=\"つ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ツ",
+    "audio": [
+      "3b2d51b34218b650140be8faf397a466.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ツ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "tsu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c4.svg\" alt=\"ツ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "づ",
+    "romaji": "dzu",
+    "audio": [
+      "fe9651bc4e790c3628931cd59ca39f08.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:づ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03065.svg\" alt=\"づ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ヅ",
+    "audio": [
+      "fe9651bc4e790c3628931cd59ca39f08.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ヅ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "zu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c5.svg\" alt=\"ヅ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "つぁ",
+    "romaji": "tsa",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:つぁ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ツァ",
+    "romaji": "tsa",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ツァ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "つぃ",
+    "romaji": "tsi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:つぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ツィ",
+    "romaji": "tsi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ツィ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "つぇ",
+    "romaji": "tse",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:つぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ツェ",
+    "romaji": "tse",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ツェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "つぉ",
+    "romaji": "tso",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:つぉ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ツォ",
+    "romaji": "tso",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ツォ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "て",
+    "romaji": "te",
+    "audio": [
+      "4f5b393c84277324d72e43a01e7471f7.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:て",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03066.svg\" alt=\"て stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "テ",
+    "audio": [
+      "4f5b393c84277324d72e43a01e7471f7.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:テ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "te",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c6.svg\" alt=\"テ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "で",
+    "romaji": "de",
+    "audio": [
+      "111be31be940897009e6394e37049f4c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:で",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03067.svg\" alt=\"で stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "デ",
+    "audio": [
+      "111be31be940897009e6394e37049f4c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:デ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "de",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c7.svg\" alt=\"デ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "てぃ",
+    "romaji": "ti",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:てぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ティ",
+    "romaji": "ti",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ティ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "でぃ",
+    "romaji": "di",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:でぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ディ",
+    "romaji": "di",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ディ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "と",
+    "romaji": "to",
+    "audio": [
+      "2b738c658f255af801829746128c2890.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:と",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03068.svg\" alt=\"と stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ト",
+    "audio": [
+      "2b738c658f255af801829746128c2890.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ト",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "to",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c8.svg\" alt=\"ト stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ど",
+    "romaji": "do",
+    "audio": [
+      "41ff81db000dbecb880a06094c2c4bec.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ど",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03069.svg\" alt=\"ど stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ド",
+    "audio": [
+      "41ff81db000dbecb880a06094c2c4bec.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ド",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "do",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030c9.svg\" alt=\"ド stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "とぅ/てゅ",
+    "romaji": "tu/tyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:とぅ/てゅ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "トゥ/テュ",
+    "romaji": "tu/tyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:トゥ/テュ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "どぅ/でゅ",
+    "romaji": "du/dyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:どぅ/でゅ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ドゥ/デュ",
+    "romaji": "du/dyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ドゥ/デュ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "な",
+    "romaji": "na",
+    "audio": [
+      "129c013d55c64e458c9cf91efb714533.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:な",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0306a.svg\" alt=\"な stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ナ",
+    "audio": [
+      "129c013d55c64e458c9cf91efb714533.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ナ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "na",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ca.svg\" alt=\"ナ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "に",
+    "romaji": "ni",
+    "audio": [
+      "fe002cb36b41a84e2f905a3eaeedc6f5.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:に",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0306b.svg\" alt=\"に stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ニ",
+    "audio": [
+      "fe002cb36b41a84e2f905a3eaeedc6f5.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ニ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ni",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030cb.svg\" alt=\"ニ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "にぇ",
+    "romaji": "nye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:にぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ニェ",
+    "romaji": "nye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ニェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "にゃ",
+    "romaji": "nya",
+    "audio": [
+      "39326b30b5cdd63beb59200fe8111c67.mp3"
+    ],
+    "item_key": "kana:にゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ニャ",
+    "audio": [
+      "39326b30b5cdd63beb59200fe8111c67.mp3"
+    ],
+    "item_key": "kana:ニャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "nya",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "にゅ",
+    "romaji": "nyu",
+    "audio": [
+      "390fde4a49bbb049d78246ec32631f15.mp3"
+    ],
+    "item_key": "kana:にゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ニュ",
+    "audio": [
+      "390fde4a49bbb049d78246ec32631f15.mp3"
+    ],
+    "item_key": "kana:ニュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "nyu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "にゅう",
+    "romaji": "nyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:にゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ニュウ",
+    "romaji": "nyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ニュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "にょ",
+    "romaji": "nyo",
+    "audio": [
+      "7c95f7147b5229a9182119f338b15a7f.mp3"
+    ],
+    "item_key": "kana:にょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ニョ",
+    "audio": [
+      "7c95f7147b5229a9182119f338b15a7f.mp3"
+    ],
+    "item_key": "kana:ニョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "nyo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "にょう",
+    "romaji": "nyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:にょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ニョウ",
+    "romaji": "nyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ニョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぬ",
+    "romaji": "nu",
+    "audio": [
+      "c4cacb086bc8e6857d1d699f11357b2c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぬ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0306c.svg\" alt=\"ぬ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ヌ",
+    "audio": [
+      "c4cacb086bc8e6857d1d699f11357b2c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ヌ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "nu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030cc.svg\" alt=\"ヌ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ね",
+    "romaji": "ne",
+    "audio": [
+      "bb2c439eaa4f862b1bfd3bedec7a312b.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ね",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0306d.svg\" alt=\"ね stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ネ",
+    "audio": [
+      "bb2c439eaa4f862b1bfd3bedec7a312b.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ネ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ne",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030cd.svg\" alt=\"ネ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "の",
+    "romaji": "no",
+    "audio": [
+      "1dea268b8e8dbdc1802db8c31f5b0f29.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:の",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0306e.svg\" alt=\"の stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ノ",
+    "audio": [
+      "1dea268b8e8dbdc1802db8c31f5b0f29.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ノ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "no",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ce.svg\" alt=\"ノ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "は",
+    "romaji": "ha",
+    "audio": [
+      "a2fddb8a7119b0c39cef98cb857e704b.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:は",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0306f.svg\" alt=\"は stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ハ",
+    "audio": [
+      "a2fddb8a7119b0c39cef98cb857e704b.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ハ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ha",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030cf.svg\" alt=\"ハ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ば",
+    "romaji": "ba",
+    "audio": [
+      "7da6b12ffa865cb24bc16d25708e0379.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ば",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03070.svg\" alt=\"ば stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "バ",
+    "audio": [
+      "7da6b12ffa865cb24bc16d25708e0379.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:バ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ba",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d0.svg\" alt=\"バ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぱ",
+    "romaji": "pa",
+    "audio": [
+      "9705eb31f73ea403e4b6acbbeadba2f2.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぱ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03071.svg\" alt=\"ぱ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "パ",
+    "audio": [
+      "9705eb31f73ea403e4b6acbbeadba2f2.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:パ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "pa",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d1.svg\" alt=\"パ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ひ",
+    "romaji": "hi",
+    "audio": [
+      "89f37494b876534d1b887fc8e9f1ac9c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ひ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03072.svg\" alt=\"ひ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ヒ",
+    "audio": [
+      "89f37494b876534d1b887fc8e9f1ac9c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ヒ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "hi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d2.svg\" alt=\"ヒ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "び",
+    "romaji": "bi",
+    "audio": [
+      "29562d26dcab25136706ad32aaedc4ba.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:び",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03073.svg\" alt=\"び stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ビ",
+    "audio": [
+      "29562d26dcab25136706ad32aaedc4ba.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ビ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "bi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d3.svg\" alt=\"ビ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぴ",
+    "romaji": "pi",
+    "audio": [
+      "d36acb9aa2beb4dd79748e9ee520921c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぴ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03074.svg\" alt=\"ぴ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ピ",
+    "audio": [
+      "d36acb9aa2beb4dd79748e9ee520921c.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ピ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "pi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d4.svg\" alt=\"ピ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ひぇ",
+    "romaji": "hye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ひぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヒェ",
+    "romaji": "hye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヒェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "びぇ",
+    "romaji": "bye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:びぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ビェ",
+    "romaji": "bye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ビェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぴぇ",
+    "romaji": "pye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぴぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ピェ",
+    "romaji": "pye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ピェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ひゃ",
+    "romaji": "hya",
+    "audio": [
+      "72efdd5bc48bf65690220c598877e91d.mp3"
+    ],
+    "item_key": "kana:ひゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ヒャ",
+    "audio": [
+      "72efdd5bc48bf65690220c598877e91d.mp3"
+    ],
+    "item_key": "kana:ヒャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "hya",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "びゃ",
+    "romaji": "bya",
+    "audio": [
+      "ceb730b38349b06003df632a4a320c03.mp3"
+    ],
+    "item_key": "kana:びゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ビャ",
+    "audio": [
+      "ceb730b38349b06003df632a4a320c03.mp3"
+    ],
+    "item_key": "kana:ビャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "bya",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぴゃ",
+    "romaji": "pya",
+    "audio": [
+      "02489b81bdd4173dd040ca5670c86676.mp3"
+    ],
+    "item_key": "kana:ぴゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ピャ",
+    "audio": [
+      "02489b81bdd4173dd040ca5670c86676.mp3"
+    ],
+    "item_key": "kana:ピャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "pya",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ひゅ",
+    "romaji": "hyu",
+    "audio": [
+      "5a76656fe165ff7a030274e239a51ee7.mp3"
+    ],
+    "item_key": "kana:ひゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ヒュ",
+    "audio": [
+      "5a76656fe165ff7a030274e239a51ee7.mp3"
+    ],
+    "item_key": "kana:ヒュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "hyu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "びゅ",
+    "romaji": "byu",
+    "audio": [
+      "e20c770c6f0d8ab96fad35b884f7c4bc.mp3"
+    ],
+    "item_key": "kana:びゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ビュ",
+    "audio": [
+      "e20c770c6f0d8ab96fad35b884f7c4bc.mp3"
+    ],
+    "item_key": "kana:ビュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "byu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぴゅ",
+    "romaji": "pyu",
+    "audio": [
+      "b222bc24da48a2002ef58ed6873b3d75.mp3"
+    ],
+    "item_key": "kana:ぴゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ピュ",
+    "audio": [
+      "b222bc24da48a2002ef58ed6873b3d75.mp3"
+    ],
+    "item_key": "kana:ピュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "pyu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ひゅう",
+    "romaji": "hyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ひゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヒュウ",
+    "romaji": "hyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヒュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "びゅう",
+    "romaji": "byū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:びゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ビュウ",
+    "romaji": "byū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ビュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぴゅう",
+    "romaji": "pyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぴゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ピュウ",
+    "romaji": "pyū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ピュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ひょ",
+    "romaji": "hyo",
+    "audio": [
+      "db31f292f78da034f04f3be80fcc38ad.mp3"
+    ],
+    "item_key": "kana:ひょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ヒョ",
+    "audio": [
+      "db31f292f78da034f04f3be80fcc38ad.mp3"
+    ],
+    "item_key": "kana:ヒョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "hyo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "びょ",
+    "romaji": "byo",
+    "audio": [
+      "631aa0cb653c1ff8d16797ccd802423c.mp3"
+    ],
+    "item_key": "kana:びょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ビョ",
+    "audio": [
+      "631aa0cb653c1ff8d16797ccd802423c.mp3"
+    ],
+    "item_key": "kana:ビョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "byo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ぴょ",
+    "romaji": "pyo",
+    "audio": [
+      "71e3f4b1a0a39111e0d53812140c32da.mp3"
+    ],
+    "item_key": "kana:ぴょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ピョ",
+    "audio": [
+      "71e3f4b1a0a39111e0d53812140c32da.mp3"
+    ],
+    "item_key": "kana:ピョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "pyo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ひょう",
+    "romaji": "hyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ひょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヒョウ",
+    "romaji": "hyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ヒョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "びょう",
+    "romaji": "byō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:びょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ビョウ",
+    "romaji": "byō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ビョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぴょう",
+    "romaji": "pyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ぴょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ピョウ",
+    "romaji": "pyō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ピョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふ",
+    "romaji": "fu",
+    "audio": [
+      "6ea3115f733dd63f4502095e15e64a37.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ふ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03075.svg\" alt=\"ふ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "フ",
+    "audio": [
+      "6ea3115f733dd63f4502095e15e64a37.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:フ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "fu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d5.svg\" alt=\"フ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぶ",
+    "romaji": "bu",
+    "audio": [
+      "3ab93a6fab4081ef673f2e5343c1d713.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぶ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03076.svg\" alt=\"ぶ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ブ",
+    "audio": [
+      "3ab93a6fab4081ef673f2e5343c1d713.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ブ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "bu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d6.svg\" alt=\"ブ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぷ",
+    "romaji": "pu",
+    "audio": [
+      "012ae54211f4234b52d71b7ee96801e0.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぷ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03077.svg\" alt=\"ぷ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "プ",
+    "audio": [
+      "012ae54211f4234b52d71b7ee96801e0.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:プ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "pu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d7.svg\" alt=\"プ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ふぁ",
+    "romaji": "fa",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ふぁ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ファ",
+    "romaji": "fa",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ファ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふぃ",
+    "romaji": "fi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ふぃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "フィ",
+    "romaji": "fi",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:フィ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふぃぇ",
+    "romaji": "fye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ふぃぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "フィェ",
+    "romaji": "fye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:フィェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふぇ",
+    "romaji": "fe",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ふぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "フェ",
+    "romaji": "fe",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:フェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふぉ",
+    "romaji": "fo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ふぉ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "フォ",
+    "romaji": "fo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:フォ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふゃ",
+    "romaji": "fya",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ふゃ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "フャ",
+    "romaji": "fya",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:フャ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふゅ",
+    "romaji": "fyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ふゅ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "フュ",
+    "romaji": "fyu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:フュ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふょ",
+    "romaji": "fyo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ふょ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "フョ",
+    "romaji": "fyo",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:フョ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "へ",
+    "romaji": "he",
+    "audio": [
+      "ef4fed229f4bc4ace84e199290e2d1c1.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:へ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03078.svg\" alt=\"へ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ヘ",
+    "audio": [
+      "ef4fed229f4bc4ace84e199290e2d1c1.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ヘ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "he",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d8.svg\" alt=\"ヘ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "べ",
+    "romaji": "be",
+    "audio": [
+      "0c1015ee8f06f923d6688e77d0960c99.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:べ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03079.svg\" alt=\"べ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ベ",
+    "audio": [
+      "0c1015ee8f06f923d6688e77d0960c99.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ベ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "be",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030d9.svg\" alt=\"ベ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぺ",
+    "romaji": "pe",
+    "audio": [
+      "17018d51c42c169295130875ab73d469.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぺ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0307a.svg\" alt=\"ぺ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ペ",
+    "audio": [
+      "17018d51c42c169295130875ab73d469.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ペ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "pe",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030da.svg\" alt=\"ペ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ほ",
+    "romaji": "ho",
+    "audio": [
+      "485d38126f4ce9c2e426294e73cdcc45.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ほ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0307b.svg\" alt=\"ほ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ホ",
+    "audio": [
+      "485d38126f4ce9c2e426294e73cdcc45.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ホ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ho",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030db.svg\" alt=\"ホ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぼ",
+    "romaji": "bo",
+    "audio": [
+      "e99c21aade989d0540f154c75e15e2d8.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぼ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0307c.svg\" alt=\"ぼ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ボ",
+    "audio": [
+      "e99c21aade989d0540f154c75e15e2d8.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ボ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "bo",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030dc.svg\" alt=\"ボ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ぽ",
+    "romaji": "po",
+    "audio": [
+      "54ecec7d9c009b415a861766c0cb4253.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ぽ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0307d.svg\" alt=\"ぽ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ポ",
+    "audio": [
+      "54ecec7d9c009b415a861766c0cb4253.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ポ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "po",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030dd.svg\" alt=\"ポ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ほぅ",
+    "romaji": "hu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ほぅ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ホゥ",
+    "romaji": "hu",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ホゥ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ま",
+    "romaji": "ma",
+    "audio": [
+      "3dc0a26d89c5ef3e88fbb7562e0be726.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ま",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0307e.svg\" alt=\"ま stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "マ",
+    "audio": [
+      "3dc0a26d89c5ef3e88fbb7562e0be726.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:マ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ma",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030de.svg\" alt=\"マ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "み",
+    "romaji": "mi",
+    "audio": [
+      "d4c6333587dc6650b2bea6a5fb43acca.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:み",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0307f.svg\" alt=\"み stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ミ",
+    "audio": [
+      "d4c6333587dc6650b2bea6a5fb43acca.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ミ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "mi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030df.svg\" alt=\"ミ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "みぇ",
+    "romaji": "mye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:みぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ミェ",
+    "romaji": "mye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ミェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "みゃ",
+    "romaji": "mya",
+    "audio": [
+      "4560cfc4dae4f37a0eaf02fea13cbaf0.mp3"
+    ],
+    "item_key": "kana:みゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ミャ",
+    "audio": [
+      "4560cfc4dae4f37a0eaf02fea13cbaf0.mp3"
+    ],
+    "item_key": "kana:ミャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "mya",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "みゅ",
+    "romaji": "myu",
+    "audio": [
+      "d87d40521e7e64280858734eae8ced69.mp3"
+    ],
+    "item_key": "kana:みゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ミュ",
+    "audio": [
+      "d87d40521e7e64280858734eae8ced69.mp3"
+    ],
+    "item_key": "kana:ミュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "myu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "みゅう",
+    "romaji": "myū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:みゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ミュウ",
+    "romaji": "myū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ミュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "みょ",
+    "romaji": "myo",
+    "audio": [
+      "1c5af0201085e523cbb9789ff98e315d.mp3"
+    ],
+    "item_key": "kana:みょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "ミョ",
+    "audio": [
+      "1c5af0201085e523cbb9789ff98e315d.mp3"
+    ],
+    "item_key": "kana:ミョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "myo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "みょう",
+    "romaji": "myō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:みょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ミョウ",
+    "romaji": "myō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:ミョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "む",
+    "romaji": "mu",
+    "audio": [
+      "933f6c7eef3106659540b6720d80ffed.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:む",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03080.svg\" alt=\"む stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ム",
+    "audio": [
+      "933f6c7eef3106659540b6720d80ffed.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ム",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "mu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030e0.svg\" alt=\"ム stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "め",
+    "romaji": "me",
+    "audio": [
+      "396998b20c156148d1ceec23bebd55e7.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:め",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03081.svg\" alt=\"め stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "メ",
+    "audio": [
+      "396998b20c156148d1ceec23bebd55e7.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:メ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "me",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030e1.svg\" alt=\"メ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "も",
+    "romaji": "mo",
+    "audio": [
+      "cc5c63e0e84621e95a8fe32592796fcf.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:も",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03082.svg\" alt=\"も stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "モ",
+    "audio": [
+      "cc5c63e0e84621e95a8fe32592796fcf.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:モ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "mo",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030e2.svg\" alt=\"モ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "や",
+    "romaji": "ya",
+    "audio": [
+      "b16f902f7ea991460c553ce6175cdf1e.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:や",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03084.svg\" alt=\"や stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ヤ",
+    "audio": [
+      "b16f902f7ea991460c553ce6175cdf1e.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ヤ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ya",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030e4.svg\" alt=\"ヤ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ゆ",
+    "romaji": "yu",
+    "audio": [
+      "31db9078fea840e53adb18e5ee44a73f.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ゆ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03086.svg\" alt=\"ゆ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ユ",
+    "audio": [
+      "31db9078fea840e53adb18e5ee44a73f.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ユ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "yu",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030e6.svg\" alt=\"ユ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "よ",
+    "romaji": "yo",
+    "audio": [
+      "98c38b2d1b32f5b2e25ab0ab73f4ed08.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:よ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03088.svg\" alt=\"よ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ヨ",
+    "audio": [
+      "98c38b2d1b32f5b2e25ab0ab73f4ed08.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ヨ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "yo",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030e8.svg\" alt=\"ヨ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ら",
+    "romaji": "ra",
+    "audio": [
+      "77ea87abb699ac92aab29faeb434a28e.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ら",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03089.svg\" alt=\"ら stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ラ",
+    "audio": [
+      "77ea87abb699ac92aab29faeb434a28e.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ラ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ra",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030e9.svg\" alt=\"ラ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "り",
+    "romaji": "ri",
+    "audio": [
+      "c457d1cba4cbb842fb0d3712f4fcc875.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:り",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0308a.svg\" alt=\"り stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "リ",
+    "audio": [
+      "c457d1cba4cbb842fb0d3712f4fcc875.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:リ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ri",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ea.svg\" alt=\"リ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "りぇ",
+    "romaji": "rye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:りぇ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "リェ",
+    "romaji": "rye",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:リェ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "りゃ",
+    "romaji": "rya",
+    "audio": [
+      "392d5306be4e931a33926ec247f137bc.mp3"
+    ],
+    "item_key": "kana:りゃ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "リャ",
+    "audio": [
+      "392d5306be4e931a33926ec247f137bc.mp3"
+    ],
+    "item_key": "kana:リャ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "rya",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "りゅ",
+    "romaji": "ryu",
+    "audio": [
+      "64ed0f7f9fceb4d164fcdea148693c5b.mp3"
+    ],
+    "item_key": "kana:りゅ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "リュ",
+    "audio": [
+      "64ed0f7f9fceb4d164fcdea148693c5b.mp3"
+    ],
+    "item_key": "kana:リュ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ryu",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "りゅう",
+    "romaji": "ryū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:りゅう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "リュウ",
+    "romaji": "ryū",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:リュウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "りょ",
+    "romaji": "ryo",
+    "audio": [
+      "d76e884253e4d93fb041a9014222d373.mp3"
+    ],
+    "item_key": "kana:りょ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "リョ",
+    "audio": [
+      "d76e884253e4d93fb041a9014222d373.mp3"
+    ],
+    "item_key": "kana:リョ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "romaji": "ryo",
+    "stroke_order": "(no stroke order SVG available)"
+  },
+  {
+    "primary_text": "りょう",
+    "romaji": "ryō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:りょう",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "リョウ",
+    "romaji": "ryō",
+    "stroke_order": "(no stroke order SVG available)",
+    "item_key": "kana:リョウ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "る",
+    "romaji": "ru",
+    "audio": [
+      "116c62bea1d763586699b0dc0c947f31.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:る",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0308b.svg\" alt=\"る stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ル",
+    "audio": [
+      "116c62bea1d763586699b0dc0c947f31.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ル",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ru",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030eb.svg\" alt=\"ル stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "れ",
+    "romaji": "re",
+    "audio": [
+      "212e88d1df2788728e773c95c2b34c66.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:れ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0308c.svg\" alt=\"れ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "レ",
+    "audio": [
+      "212e88d1df2788728e773c95c2b34c66.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:レ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "re",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ec.svg\" alt=\"レ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ろ",
+    "romaji": "ro",
+    "audio": [
+      "0fa58c80631de47fe4c4aeca097a7f30.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ろ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0308d.svg\" alt=\"ろ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ロ",
+    "audio": [
+      "0fa58c80631de47fe4c4aeca097a7f30.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ロ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "ro",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ed.svg\" alt=\"ロ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "わ",
+    "romaji": "wa",
+    "audio": [
+      "e55616caa773b71a88a9ec6b338e0dbe.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:わ",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"0308f.svg\" alt=\"わ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ワ",
+    "audio": [
+      "e55616caa773b71a88a9ec6b338e0dbe.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ワ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "wa",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030ef.svg\" alt=\"ワ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ゐ",
+    "romaji": "i/wi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03090.svg\" alt=\"ゐ stroke order SVG\"></div>",
+    "item_key": "kana:ゐ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヰ",
+    "romaji": "i/wi",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030f0.svg\" alt=\"ヰ stroke order SVG\"></div>",
+    "item_key": "kana:ヰ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ゑ",
+    "romaji": "e/we",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03091.svg\" alt=\"ゑ stroke order SVG\"></div>",
+    "item_key": "kana:ゑ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "ヱ",
+    "romaji": "e/we",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030f1.svg\" alt=\"ヱ stroke order SVG\"></div>",
+    "item_key": "kana:ヱ",
+    "source_decks": [
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ]
+  },
+  {
+    "primary_text": "を",
+    "romaji": "wo",
+    "audio": [
+      "e89a131058a3958b7ab7e014fdebec29.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:を",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03092.svg\" alt=\"を stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ヲ",
+    "audio": [
+      "e89a131058a3958b7ab7e014fdebec29.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ヲ",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "o/wo",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030f2.svg\" alt=\"ヲ stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ん",
+    "romaji": "n",
+    "audio": [
+      "538859662ff765dc6773646d21ac6dda.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ん",
+    "source_decks": [
+      "Japanese_Hiragana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg"
+    ],
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"03093.svg\" alt=\"ん stroke order SVG\"></div>"
+  },
+  {
+    "primary_text": "ン",
+    "audio": [
+      "538859662ff765dc6773646d21ac6dda.mp3"
+    ],
+    "jlpt_level": "N5",
+    "item_key": "kana:ン",
+    "source_decks": [
+      "Japanese_Katakana.apkg",
+      "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "Japanese_Basic_Katakana.apkg"
+    ],
+    "romaji": "n",
+    "stroke_order": "<div class=\"entry\"><img class=\"kana kana-stroke-order\" src=\"030f3.svg\" alt=\"ン stroke order SVG\"></div>"
+  }
+]

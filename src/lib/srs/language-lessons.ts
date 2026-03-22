@@ -1,7 +1,7 @@
 import {
 	getAvailableLessons,
 	getAvailableLessonCount,
-	markLessonCompleted,
+	markLessonsBatchCompleted,
 	type ContentType,
 	type LanguageItem,
 } from "../db/queries/language";
@@ -52,10 +52,5 @@ export async function completeLessonBatch(
 		return { ok: false, error: "Failed to calculate next review time" };
 	}
 
-	for (const id of itemIds) {
-		const result = await markLessonCompleted(id, nextReview);
-		if (!result.ok) return result;
-	}
-
-	return { ok: true, data: undefined };
+	return markLessonsBatchCompleted(itemIds, nextReview);
 }

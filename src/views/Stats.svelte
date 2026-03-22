@@ -183,12 +183,12 @@ let heatmapData = $derived.by(() => {
 let heatmapMax = $derived(Math.max(1, ...heatmapData.map((d) => d.total)));
 
 function heatColor(value: number, max: number): string {
-	if (value === 0) return "var(--color-muted, #e5e7eb)";
+	if (value === 0) return "bg-muted";
 	const intensity = Math.min(value / max, 1);
-	if (intensity < 0.25) return "#c4b5fd";
-	if (intensity < 0.5) return "#a78bfa";
-	if (intensity < 0.75) return "#8b5cf6";
-	return "#7c3aed";
+	if (intensity < 0.25) return "bg-violet-300";
+	if (intensity < 0.5) return "bg-violet-400";
+	if (intensity < 0.75) return "bg-violet-500";
+	return "bg-violet-600";
 }
 
 function changeDateRange(value: number) {
@@ -249,19 +249,18 @@ $effect(() => {
 				<div class="flex flex-wrap gap-1">
 					{#each heatmapData as day}
 						<div
-							class="h-4 w-4 rounded-sm"
-							style="background: {heatColor(day.total, heatmapMax)}"
+							class="h-4 w-4 rounded-sm {heatColor(day.total, heatmapMax)}"
 							title="{day.date}: {day.total} reviews ({day.kanji} kanji, {day.language} language)"
 						></div>
 					{/each}
 				</div>
 				<div class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
 					<span>Less</span>
-					<div class="h-3 w-3 rounded-sm" style="background: var(--color-muted, #e5e7eb)"></div>
-					<div class="h-3 w-3 rounded-sm" style="background: #c4b5fd"></div>
-					<div class="h-3 w-3 rounded-sm" style="background: #a78bfa"></div>
-					<div class="h-3 w-3 rounded-sm" style="background: #8b5cf6"></div>
-					<div class="h-3 w-3 rounded-sm" style="background: #7c3aed"></div>
+					<div class="h-3 w-3 rounded-sm bg-muted"></div>
+					<div class="h-3 w-3 rounded-sm bg-violet-300"></div>
+					<div class="h-3 w-3 rounded-sm bg-violet-400"></div>
+					<div class="h-3 w-3 rounded-sm bg-violet-500"></div>
+					<div class="h-3 w-3 rounded-sm bg-violet-600"></div>
 					<span>More</span>
 				</div>
 			</div>

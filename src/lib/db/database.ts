@@ -17,6 +17,10 @@ export async function safeQuery<T>(fn: () => Promise<T>): Promise<QueryResult<T>
 	}
 }
 
+export function sqlPlaceholders(count: number): string {
+	return Array(count).fill("?").join(",");
+}
+
 export async function getDb(): Promise<Database> {
 	if (db) return db;
 	if (dbInitPromise) return dbInitPromise;
@@ -33,6 +37,7 @@ export async function closeDb(): Promise<void> {
 	if (db) {
 		await db.close();
 		db = null;
+		dbInitPromise = null;
 	}
 }
 
@@ -53,8 +58,11 @@ async function runMigrations(database: Database): Promise<void> {
 	for (const migration of migrations) {
 		if (migration.version > currentVersion) {
 			console.log(`Running migration v${migration.version}: ${migration.description}`);
-			const statements = migration.up
-				.split(";")
+			const statements = (
+				Array.isArray(migration.up)
+					? migration.up
+					: migration.up.split(";")
+			)
 				.map((s) => s.trim())
 				.filter((s) => s.length > 0);
 			for (const stmt of statements) {

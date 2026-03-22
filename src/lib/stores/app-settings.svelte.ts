@@ -1,6 +1,6 @@
 import { getDb } from "$lib/db/database";
 
-export type KanjiReviewOrder = "shuffled" | "apprentice-first" | "lower-srs" | "lower-level";
+export type KanjiReviewOrder = "due-first" | "apprentice-first" | "lower-srs" | "lower-level";
 
 export interface AppSettings {
 	theme: "dark" | "light" | "system";
@@ -29,7 +29,7 @@ const DEFAULTS: AppSettings = {
 	showReviewTimer: true,
 	kanjiBatchSize: 5,
 	kanjiMaxDailyLessons: 15,
-	kanjiReviewOrder: "shuffled",
+	kanjiReviewOrder: "due-first",
 	kanjiShowSrsIndicator: true,
 	kanjiAutoplayAudio: false,
 };
@@ -57,7 +57,8 @@ export async function loadSettings(): Promise<void> {
 			if (key in DEFAULTS) {
 				const val = row.value;
 				if (typeof DEFAULTS[key] === "number") {
-					(settings as Record<string, unknown>)[key] = Number(val);
+					const parsed = Number(val);
+					(settings as Record<string, unknown>)[key] = Number.isFinite(parsed) ? parsed : DEFAULTS[key];
 				} else if (typeof DEFAULTS[key] === "boolean") {
 					(settings as Record<string, unknown>)[key] = val === "true";
 				} else {
@@ -108,13 +109,34 @@ export async function resetAllSettings(): Promise<void> {
 	applyTheme(DEFAULTS.theme);
 }
 
+let systemThemeHandler: ((e: MediaQueryListEvent) => void) | null = null;
+
 function applyTheme(theme: string): void {
-	if (
+	// Clean up previous system theme listener
+	if (systemThemeHandler) {
+		window.matchMedia("(prefers-color-scheme: dark)").removeEventListener("change", systemThemeHandler);
+		systemThemeHandler = null;
+	}
+
+	const prefersDark =
 		theme === "dark" ||
-		(theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-	) {
+		(theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+	if (prefersDark) {
 		document.documentElement.classList.add("dark");
 	} else {
 		document.documentElement.classList.remove("dark");
+	}
+
+	// Listen for OS theme changes when set to "system"
+	if (theme === "system") {
+		systemThemeHandler = (e: MediaQueryListEvent) => {
+			if (e.matches) {
+				document.documentElement.classList.add("dark");
+			} else {
+				document.documentElement.classList.remove("dark");
+			}
+		};
+		window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", systemThemeHandler);
 	}
 }

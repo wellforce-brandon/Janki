@@ -5,8 +5,8 @@ import { reviewLanguageItem, type LanguageReviewResult } from "$lib/srs/language
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
 import { speakJapanese } from "$lib/tts/speech";
-import { normalizeAnswer, fuzzyMatch } from "$lib/utils/answer-validation";
-import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
+import { normalizeLanguageAnswer, fuzzyMatch } from "$lib/utils/answer-validation";
+import { fisherYatesShuffle } from "$lib/utils/common";
 
 interface Props {
 	items: LanguageItem[];
@@ -21,17 +21,7 @@ export interface ReviewSummary {
 
 let { items, oncomplete }: Props = $props();
 
-// Shuffle items
-function shuffle<T>(arr: T[]): T[] {
-	const a = [...arr];
-	for (let i = a.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[a[i], a[j]] = [a[j], a[i]];
-	}
-	return a;
-}
-
-let queue = $state(shuffle(items));
+let queue = $state(fisherYatesShuffle(items));
 let currentIndex = $state(0);
 let inputValue = $state("");
 let feedbackState = $state<"none" | "correct" | "incorrect">("none");
@@ -61,6 +51,7 @@ interface UndoEntry {
 	prevCorrectCount: number;
 	prevIncorrectCount: number;
 	prevSrsStage: number;
+	prevNextReview: string | null;
 }
 const MAX_UNDO_DEPTH = 10;
 let undoStack = $state<UndoEntry[]>([]);
@@ -68,12 +59,6 @@ let undoStack = $state<UndoEntry[]>([]);
 let current = $derived(currentIndex < queue.length ? queue[currentIndex] : null);
 let remaining = $derived(queue.length - currentIndex);
 let progressPercent = $derived(Math.round((currentIndex / queue.length) * 100));
-
-// Vocabulary reading uses romaji-to-hiragana conversion
-let isReadingInput = $derived(
-	current?.content_type === "vocabulary" && false, // vocabulary is meaning-only for now
-);
-let displayValue = $derived(isReadingInput ? romajiToHiragana(inputValue) : inputValue);
 
 /** Get display label for the content type */
 function getTypeLabel(type: string): string {
@@ -104,14 +89,14 @@ function getTypeColor(type: string): string {
 function checkAnswer(): boolean {
 	if (!current) return false;
 
-	const userAnswer = normalizeAnswer(inputValue);
+	const userAnswer = normalizeLanguageAnswer(inputValue);
 	if (userAnswer.length === 0) return false;
 
 	if (current.content_type === "kana") {
 		const accepted: string[] = [];
-		if (current.reading) accepted.push(normalizeAnswer(current.reading));
-		if (current.meaning) accepted.push(normalizeAnswer(current.meaning));
-		if (current.romaji) accepted.push(normalizeAnswer(current.romaji));
+		if (current.reading) accepted.push(normalizeLanguageAnswer(current.reading));
+		if (current.meaning) accepted.push(normalizeLanguageAnswer(current.meaning));
+		if (current.romaji) accepted.push(normalizeLanguageAnswer(current.romaji));
 		return accepted.some((a) => a === userAnswer);
 	}
 
@@ -119,21 +104,21 @@ function checkAnswer(): boolean {
 		const accepted: string[] = [];
 		if (current.meaning) {
 			for (const m of current.meaning.split(/[;,]/)) {
-				accepted.push(normalizeAnswer(m));
+				accepted.push(normalizeLanguageAnswer(m));
 			}
 		}
 		return accepted.some((a) => fuzzyMatch(userAnswer, a));
 	}
 
 	if (current.content_type === "sentence") {
-		const expected = normalizeAnswer(current.sentence_en ?? current.meaning ?? "");
+		const expected = normalizeLanguageAnswer(current.sentence_en ?? current.meaning ?? "");
 		return fuzzyMatch(userAnswer, expected);
 	}
 
 	if (current.content_type === "conjugation") {
 		const accepted: string[] = [];
-		if (current.meaning) accepted.push(normalizeAnswer(current.meaning));
-		if (current.reading) accepted.push(normalizeAnswer(current.reading));
+		if (current.meaning) accepted.push(normalizeLanguageAnswer(current.meaning));
+		if (current.reading) accepted.push(normalizeLanguageAnswer(current.reading));
 		return accepted.some((a) => a === userAnswer);
 	}
 
@@ -141,7 +126,7 @@ function checkAnswer(): boolean {
 	const accepted: string[] = [];
 	if (current.meaning) {
 		for (const m of current.meaning.split(/[;,]/)) {
-			accepted.push(normalizeAnswer(m));
+			accepted.push(normalizeLanguageAnswer(m));
 		}
 	}
 	return accepted.some((a) => fuzzyMatch(userAnswer, a));
@@ -178,9 +163,12 @@ async function submitAnswer() {
 	const answer = inputValue.trim();
 	if (answer.length === 0) return;
 
+	isProcessing = true;
+
 	const isCorrect = checkAnswer();
 	const durationMs = Date.now() - itemStartTime;
 	const oldStage = current.srs_stage;
+	const prevNextReview = current.next_review;
 
 	if (isCorrect) {
 		feedbackState = "correct";
@@ -200,6 +188,7 @@ async function submitAnswer() {
 			prevCorrectCount: current.correct_count,
 			prevIncorrectCount: current.incorrect_count,
 			prevSrsStage: oldStage,
+			prevNextReview,
 		}];
 
 		setTimeout(() => advanceToNext(), 1200);
@@ -221,6 +210,7 @@ async function submitAnswer() {
 			prevCorrectCount: current.correct_count,
 			prevIncorrectCount: current.incorrect_count,
 			prevSrsStage: oldStage,
+			prevNextReview,
 		}];
 	}
 }
@@ -236,6 +226,7 @@ function showStageTransition(oldStage: number, result: LanguageReviewResult) {
 }
 
 function advanceToNext() {
+	isProcessing = false;
 	feedbackState = "none";
 	inputValue = "";
 	correctAnswer = "";
@@ -268,7 +259,7 @@ async function undoLast() {
 	await updateLanguageItemSrs(
 		entry.item.id,
 		entry.prevSrsStage,
-		entry.item.next_review,
+		entry.prevNextReview,
 		entry.prevCorrectCount,
 		entry.prevIncorrectCount,
 	);

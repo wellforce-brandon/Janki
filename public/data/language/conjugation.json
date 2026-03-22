@@ -1,0 +1,1330 @@
+[
+  {
+    "primary_text": "あ",
+    "meaning": "to exist (inanimate)",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:あ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "あが",
+    "meaning": "to rise/ to go up",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:あが",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "あけ",
+    "meaning": "to open",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:あけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "あげ",
+    "meaning": "to give",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:あげ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "あそ",
+    "meaning": "to play (have fun)",
+    "conjugation_forms": {
+      "te_ta_form": "nd",
+      "mizenkei": "ば",
+      "renyoukei": "び",
+      "dictionary": "ぶ",
+      "rentaikei": "べ",
+      "kateikei": "ぼう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:あそ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "あら",
+    "meaning": "to wash",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "わ",
+      "renyoukei": "い",
+      "dictionary": "う",
+      "rentaikei": "え",
+      "kateikei": "おう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:あら",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "ある",
+    "meaning": "to walk (to get somewhere)",
+    "conjugation_forms": {
+      "te_ta_form": "it",
+      "mizenkei": "か",
+      "renyoukei": "き",
+      "dictionary": "く",
+      "rentaikei": "け",
+      "kateikei": "こう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:ある",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "い",
+    "meaning": "to go",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "か",
+      "renyoukei": "き",
+      "dictionary": "く",
+      "rentaikei": "け",
+      "kateikei": "こう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:い",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ],
+    "verb_group": "y"
+  },
+  {
+    "primary_text": "いき",
+    "meaning": "to be alive",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:いき",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "いた",
+    "meaning": "to do (humble form)",
+    "conjugation_forms": {
+      "te_ta_form": "shit",
+      "mizenkei": "さ",
+      "renyoukei": "し",
+      "dictionary": "す",
+      "rentaikei": "せ",
+      "kateikei": "そう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:いた",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "いただ",
+    "meaning": "to receive (humble form)",
+    "conjugation_forms": {
+      "te_ta_form": "it",
+      "mizenkei": "か",
+      "renyoukei": "き",
+      "dictionary": "く",
+      "rentaikei": "け",
+      "kateikei": "こう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:いただ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "う",
+    "meaning": "to sell",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:う",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "うた",
+    "meaning": "to sing",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "わ",
+      "renyoukei": "い",
+      "dictionary": "う",
+      "rentaikei": "え",
+      "kateikei": "おう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:うた",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "うまれ",
+    "meaning": "to be born",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:うまれ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "お",
+    "meaning": "to place",
+    "conjugation_forms": {
+      "te_ta_form": "it",
+      "mizenkei": "か",
+      "renyoukei": "き",
+      "dictionary": "く",
+      "rentaikei": "け",
+      "kateikei": "こう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:お",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おえ",
+    "meaning": "to finish",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:おえ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おき",
+    "meaning": "to get up",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:おき",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おく",
+    "meaning": "to send",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:おく",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おしえ",
+    "meaning": "to teach",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:おしえ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おど",
+    "meaning": "to dance",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:おど",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おぼえ",
+    "meaning": "to memorize",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:おぼえ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おも",
+    "meaning": "to think",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "わ",
+      "renyoukei": "い",
+      "dictionary": "う",
+      "rentaikei": "え",
+      "kateikei": "おう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:おも",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おもいだ",
+    "meaning": "to remember",
+    "conjugation_forms": {
+      "te_ta_form": "shite",
+      "mizenkei": "さ",
+      "renyoukei": "し",
+      "dictionary": "す",
+      "rentaikei": "せ",
+      "kateikei": "そう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:おもいだ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "およ",
+    "meaning": "to swim",
+    "conjugation_forms": {
+      "te_ta_form": "id",
+      "mizenkei": "が",
+      "renyoukei": "ぎ",
+      "dictionary": "ぐ",
+      "rentaikei": "げ",
+      "kateikei": "ごう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:およ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おり",
+    "meaning": "to get off (alight)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:おり",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "おわ",
+    "meaning": "to finish",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:おわ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "か",
+    "meaning": "to write",
+    "conjugation_forms": {
+      "te_ta_form": "it",
+      "mizenkei": "か",
+      "renyoukei": "き",
+      "dictionary": "く",
+      "rentaikei": "け",
+      "kateikei": "こう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:か",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "かえ",
+    "meaning": "to change/replace",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:かえ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "かけ",
+    "meaning": "to wear (hang on the face)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:かけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "かぶ",
+    "meaning": "to wear (on the head)",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:かぶ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "かり",
+    "meaning": "to borrow",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:かり",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "かんがえ",
+    "meaning": "to think (about something)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:かんがえ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "かんじ",
+    "meaning": "to feel",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:かんじ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "き",
+    "meaning": "to wear (around the body)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:き",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "きこえ",
+    "meaning": "to be heard",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:きこえ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "こたえ",
+    "meaning": "to answer",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:こたえ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "こわれ",
+    "meaning": "to be broken",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:こわれ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "さが",
+    "meaning": "to look for",
+    "conjugation_forms": {
+      "te_ta_form": "shit",
+      "mizenkei": "さ",
+      "renyoukei": "し",
+      "dictionary": "す",
+      "rentaikei": "せ",
+      "kateikei": "そう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:さが",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "し",
+    "meaning": "to know (info)",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:し",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "したが",
+    "meaning": "to wish",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:したが",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "しま",
+    "meaning": "to close (intransitive)",
+    "conjugation_forms": {
+      "te_ta_form": "tte",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:しま",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "しめ",
+    "meaning": "to wear (tie around)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:しめ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "しらべ",
+    "meaning": "to investigate",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:しらべ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "しんじ",
+    "meaning": "to believe/trust",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:しんじ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "す",
+    "meaning": "to live (reside)",
+    "conjugation_forms": {
+      "te_ta_form": "nd",
+      "mizenkei": "ま",
+      "renyoukei": "み",
+      "dictionary": "む",
+      "rentaikei": "め",
+      "kateikei": "もう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:す",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "すわ",
+    "meaning": "to sit",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:すわ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "た",
+    "meaning": "to leave (departure)",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "た",
+      "renyoukei": "ち",
+      "dictionary": "つ",
+      "rentaikei": "て",
+      "kateikei": "とう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:た",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "たすけ",
+    "meaning": "to help/save",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:たすけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "たずね",
+    "meaning": "to ask",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:たずね",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "たべ",
+    "meaning": "to eat",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:たべ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "つか",
+    "meaning": "to use",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "わ",
+      "renyoukei": "い",
+      "dictionary": "う",
+      "rentaikei": "え",
+      "kateikei": "おう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:つか",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "つく",
+    "meaning": "to make",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:つく",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "つけ",
+    "meaning": "to wear (attached to clothes)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:つけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "つづけ",
+    "meaning": "to continue",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:つづけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "で",
+    "meaning": "to go out (of something)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:で",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "でかけ",
+    "meaning": "to go out (to do something)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:でかけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "でき",
+    "meaning": "to be able to",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:でき",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "と",
+    "meaning": "to take",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:と",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "とじ",
+    "meaning": "to close (transitive)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:とじ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "とどけ",
+    "meaning": "to deliver",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:とどけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "とま",
+    "meaning": "to stop/to lodge",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:とま",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "なお",
+    "meaning": "to fix",
+    "conjugation_forms": {
+      "te_ta_form": "shit",
+      "mizenkei": "さ",
+      "renyoukei": "し",
+      "dictionary": "す",
+      "rentaikei": "せ",
+      "kateikei": "そう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:なお",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "なら",
+    "meaning": "to be taught",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "わ",
+      "renyoukei": "い",
+      "dictionary": "う",
+      "rentaikei": "え",
+      "kateikei": "おう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:なら",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "ぬ",
+    "meaning": "to undress",
+    "conjugation_forms": {
+      "te_ta_form": "id",
+      "mizenkei": "が",
+      "renyoukei": "ぎ",
+      "dictionary": "ぐ",
+      "rentaikei": "げ",
+      "kateikei": "ごう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:ぬ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "ね",
+    "meaning": "to sleep",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:ね",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "ねが",
+    "meaning": "to request/hope for",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "わ",
+      "renyoukei": "い",
+      "dictionary": "う",
+      "rentaikei": "え",
+      "kateikei": "おう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:ねが",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "の",
+    "meaning": "to drink",
+    "conjugation_forms": {
+      "te_ta_form": "nd",
+      "mizenkei": "ま",
+      "renyoukei": "み",
+      "dictionary": "む",
+      "rentaikei": "め",
+      "kateikei": "もう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:の",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "のぼ",
+    "meaning": "to climb",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:のぼ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "は",
+    "meaning": "to wear (on lower body)",
+    "conjugation_forms": {
+      "te_ta_form": "it",
+      "mizenkei": "か",
+      "renyoukei": "き",
+      "dictionary": "く",
+      "rentaikei": "け",
+      "kateikei": "こう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:は",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はい",
+    "meaning": "to enter",
+    "conjugation_forms": {
+      "te_ta_form": "tte",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:はい",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はこ",
+    "meaning": "to carry (transport)",
+    "conjugation_forms": {
+      "te_ta_form": "nd",
+      "mizenkei": "ば",
+      "renyoukei": "び",
+      "dictionary": "ぶ",
+      "rentaikei": "べ",
+      "kateikei": "ぼう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:はこ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はし",
+    "meaning": "to run",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:はし",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はじま",
+    "meaning": "to begin",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:はじま",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はじめ",
+    "meaning": "to begin",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:はじめ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はたら",
+    "meaning": "to work",
+    "conjugation_forms": {
+      "te_ta_form": "it",
+      "mizenkei": "か",
+      "renyoukei": "き",
+      "dictionary": "く",
+      "rentaikei": "け",
+      "kateikei": "こう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:はたら",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はな",
+    "meaning": "to speak/talk",
+    "conjugation_forms": {
+      "te_ta_form": "shit",
+      "mizenkei": "さ",
+      "renyoukei": "し",
+      "dictionary": "す",
+      "rentaikei": "せ",
+      "kateikei": "そう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:はな",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はめ",
+    "meaning": "to wear (on a finger)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:はめ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "はら",
+    "meaning": "to pay",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "わ",
+      "renyoukei": "い",
+      "dictionary": "う",
+      "rentaikei": "え",
+      "kateikei": "おう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:はら",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "ふえ",
+    "meaning": "to increase",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:ふえ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "へ",
+    "meaning": "to decrease",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:へ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "ま",
+    "meaning": "to wait",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "た",
+      "renyoukei": "ち",
+      "dictionary": "つ",
+      "rentaikei": "て",
+      "kateikei": "とう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:ま",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "まが",
+    "meaning": "to turn",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "ら",
+      "renyoukei": "り",
+      "dictionary": "る",
+      "rentaikei": "れ",
+      "kateikei": "ろう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:まが",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "まけ",
+    "meaning": "to be defeated",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:まけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "まな",
+    "meaning": "to learn",
+    "conjugation_forms": {
+      "te_ta_form": "nd",
+      "mizenkei": "ば",
+      "renyoukei": "び",
+      "dictionary": "ぶ",
+      "rentaikei": "べ",
+      "kateikei": "ぼう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:まな",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "み",
+    "meaning": "to see",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:み",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "みせ",
+    "meaning": "to show",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:みせ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "みつけ",
+    "meaning": "to find (unintentionally)",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:みつけ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "も",
+    "meaning": "to have (possession)",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "た",
+      "renyoukei": "ち",
+      "dictionary": "つ",
+      "rentaikei": "て",
+      "kateikei": "とう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:も",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "もら",
+    "meaning": "to receive",
+    "conjugation_forms": {
+      "te_ta_form": "tt",
+      "mizenkei": "わ",
+      "renyoukei": "い",
+      "dictionary": "う",
+      "rentaikei": "え",
+      "kateikei": "おう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:もら",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "や",
+    "meaning": "to grill/burn",
+    "conjugation_forms": {
+      "te_ta_form": "it",
+      "mizenkei": "か",
+      "renyoukei": "き",
+      "dictionary": "く",
+      "rentaikei": "け",
+      "kateikei": "こう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:や",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "やく",
+    "meaning": "to translate",
+    "conjugation_forms": {
+      "te_ta_form": "shit",
+      "mizenkei": "さ",
+      "renyoukei": "し",
+      "dictionary": "す",
+      "rentaikei": "せ",
+      "kateikei": "そう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:やく",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "やす",
+    "meaning": "to rest",
+    "conjugation_forms": {
+      "te_ta_form": "nd",
+      "mizenkei": "ば",
+      "renyoukei": "び",
+      "dictionary": "ぶ",
+      "rentaikei": "べ",
+      "kateikei": "ぼう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:やす",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "やめ",
+    "meaning": "to stop/resign",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:やめ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "よ",
+    "meaning": "to read",
+    "conjugation_forms": {
+      "te_ta_form": "nd",
+      "mizenkei": "ま",
+      "renyoukei": "み",
+      "dictionary": "む",
+      "rentaikei": "め",
+      "kateikei": "もう"
+    },
+    "jlpt_level": "N5",
+    "item_key": "conj:よ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  },
+  {
+    "primary_text": "わすれ",
+    "meaning": "to forget",
+    "verb_group": "y",
+    "jlpt_level": "N5",
+    "item_key": "conj:わすれ",
+    "source_decks": [
+      "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg"
+    ]
+  }
+]

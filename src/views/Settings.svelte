@@ -270,7 +270,7 @@ async function handleResetDefaults() {
 					addToast("Review order updated", "success");
 				}}
 			>
-				<option value="shuffled">Shuffled</option>
+				<option value="due-first">Due First</option>
 				<option value="apprentice-first">Apprentice First</option>
 				<option value="lower-srs">Lower SRS Stages First</option>
 				<option value="lower-level">Lower Levels First</option>

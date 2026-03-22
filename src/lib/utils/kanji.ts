@@ -1,3 +1,7 @@
+import { safeParseJson, fisherYatesShuffle } from "./common";
+
+export { safeParseJson, fisherYatesShuffle };
+
 export function getTypeColor(itemType: string): string {
 	switch (itemType) {
 		case "radical":
@@ -43,15 +47,6 @@ export interface CharacterImage {
 	metadata: Record<string, unknown>;
 }
 
-function safeParseJson<T>(json: string | null, fallback: T): T {
-	if (!json) return fallback;
-	try {
-		return JSON.parse(json) as T;
-	} catch {
-		return fallback;
-	}
-}
-
 export function parseReadings(json: string | null): string[] {
 	return safeParseJson<string[]>(json, []);
 }
@@ -94,6 +89,8 @@ const ITEM_SRS_COLORS: Record<string, { locked: string; lesson: string; review: 
 	},
 };
 
+// Couples SRS classification logic with CSS class selection. A future refactor could
+// extract getSrsCategory() to separate business logic from styling.
 export function getTileClasses(item: { item_type: string; srs_stage: number; lesson_completed_at: string | null }): string {
 	const colorSet = ITEM_SRS_COLORS[item.item_type] ?? ITEM_SRS_COLORS.kanji;
 	if (item.srs_stage === 0) return colorSet.locked;
@@ -109,11 +106,3 @@ export function getStageDots(srsStage: number): { filled: number; total: number 
 	return { filled: 4, total: 4 }; // guru+ = all 4 filled
 }
 
-export function fisherYatesShuffle<T>(arr: T[]): T[] {
-	const shuffled = [...arr];
-	for (let i = shuffled.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-	}
-	return shuffled;
-}

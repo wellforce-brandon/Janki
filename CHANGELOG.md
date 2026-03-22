@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.19.1.0] - 2026-03-21
+
+### Fixed
+
+- Kanji review SRS results now save per-item instead of batching at session end (prevents data loss on mid-session close)
+- Consolidated duplicate updateUserSynonyms/updateUserNotes APIs into single canonical versions
+- Added error handling with toast notifications for synonym and notes save failures
+- Wrapped getGuruPlusKanji in safeQuery so vocabulary unlock failures don't abort other unlock phases
+- Added runtime assertion to kanji review ORDER BY allowlist
+- Escaped LIKE wildcards in language item search to prevent unintended pattern matching
+- Fixed race condition in language review from rapid keypresses during async DB writes
+- Added NaN validation for settings number parsing with fallback to defaults
+- Fixed v1 down migration drop order to respect foreign key dependencies
+- Added cache invalidation after kanji reviews for consistent dashboard counts
+
+### Changed
+
+- Replaced hardcoded hex colors in Stats heatmap with Tailwind classes (dark mode support)
+- Moved toSqliteDateTime to shared utility module, eliminating duplication
+- Renamed normalizeAnswer to normalizeLanguageAnswer across all consumers, removed deprecated alias
+- Optimized romaji prefix lookup from O(n) linear scan to O(1) Set lookup
+- Added whole-word fallback in simpleFurigana when suffix alignment fails
+- Lazy-initialized window.speechSynthesis via getter for SSR safety
+- Documented migration 10 table drops with explanatory comments
+
 ## [0.19.0.1] - 2026-03-21
 
 ### Added

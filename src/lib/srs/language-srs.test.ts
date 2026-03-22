@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { calculateNextReview, toSqliteDateTime } from "./language-srs";
+import { calculateNextReview } from "./language-srs";
+import { toSqliteDateTime } from "../utils/common";
 
 // Mock DB modules
 vi.mock("../db/queries/language", () => ({

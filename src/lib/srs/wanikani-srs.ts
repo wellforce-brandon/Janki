@@ -1,5 +1,7 @@
 import { checkAndUnlockLevel, updateKanjiSrsState } from "../db/queries/kanji";
 import { logKanjiReview } from "../db/queries/kanji-reviews";
+import { invalidateCache } from "../db/query-cache";
+import { toSqliteDateTime } from "../utils/common";
 
 // WaniKani SRS stages (intervals match WK API: /v2/spaced_repetition_systems)
 // Stage 0: Locked | Stage 1-4: Apprentice | Stage 5-6: Guru
@@ -53,13 +55,6 @@ export const STAGE_CATEGORIES: Record<number, string> = {
 	8: "enlightened",
 	9: "burned",
 };
-
-function toSqliteDateTime(date: Date): string {
-	return date
-		.toISOString()
-		.replace("T", " ")
-		.replace(/\.\d{3}Z$/, "");
-}
 
 function calculateNextReview(stage: number, level: number): string | null {
 	if (stage <= 0 || stage >= 9) return null;
@@ -121,8 +116,12 @@ export async function reviewKanjiItem(
 		const unlockResult = await checkAndUnlockLevel(level);
 		if (unlockResult.ok) {
 			unlockedIds = unlockResult.data;
+		} else {
+			console.error("[WK-SRS] Unlock cascade failed:", unlockResult.error);
 		}
 	}
+
+	invalidateCache("contentTypeCounts");
 
 	return { newStage, nextReview, unlockedIds };
 }

@@ -87,16 +87,6 @@ export async function getStreak(): Promise<QueryResult<number>> {
 	});
 }
 
-export interface CardStateCount {
-	state: number;
-	count: number;
-}
-
-export async function getCardStateDistribution(): Promise<QueryResult<CardStateCount[]>> {
-	// Cards table dropped in v10 -- return empty until Phase 2 replaces this
-	return { ok: true, data: [] };
-}
-
 export interface KanjiStageCount {
 	srs_stage: number;
 	count: number;
@@ -123,19 +113,6 @@ export async function getAverageTimePerCard(days = 30): Promise<QueryResult<numb
 		);
 		return rows[0]?.avg_ms ?? 0;
 	});
-}
-
-export async function getStatsByDeck(
-	_deckId: number,
-	_days: number,
-): Promise<QueryResult<DailyStats[]>> {
-	// Decks/review_log dropped in v10 -- return empty until Phase 2 replaces this
-	return { ok: true, data: [] };
-}
-
-export async function getBuiltinStateDistribution(): Promise<QueryResult<CardStateCount[]>> {
-	// builtin_items dropped in v10 -- return empty until Phase 2 replaces this
-	return { ok: true, data: [] };
 }
 
 export interface ContentTypeStats {

@@ -1,4 +1,5 @@
-import { getDb, type QueryResult, safeQuery } from "../database";
+import { getDb, type QueryResult, safeQuery, sqlPlaceholders } from "../database";
+import { safeParseJson } from "$lib/utils/common";
 
 // Compute first review time (avoids circular dep with wanikani-srs)
 function computeFirstReviewTime(level: number): string {
@@ -89,15 +90,19 @@ export async function getKanjiByCharacter(
 }
 
 export async function getDueKanjiReviews(
-	order: "shuffled" | "apprentice-first" | "lower-srs" | "lower-level" = "shuffled",
+	order: "due-first" | "apprentice-first" | "lower-srs" | "lower-level" = "due-first",
 ): Promise<QueryResult<KanjiLevelItem[]>> {
+	// Intentional SQL interpolation from static allowlist -- safe because ORDER_CLAUSES values are hardcoded
 	const ORDER_CLAUSES: Record<string, string> = {
-		shuffled: "next_review ASC",
+		"due-first": "next_review ASC",
 		"apprentice-first": "CASE WHEN srs_stage <= 4 THEN 0 ELSE 1 END, srs_stage ASC",
 		"lower-srs": "srs_stage ASC, next_review ASC",
 		"lower-level": "level ASC, next_review ASC",
 	};
-	const orderBy = ORDER_CLAUSES[order] ?? "next_review ASC";
+	if (!(order in ORDER_CLAUSES)) {
+		throw new Error(`Invalid review order: ${order}`);
+	}
+	const orderBy = ORDER_CLAUSES[order];
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<KanjiLevelItem[]>(
@@ -233,7 +238,7 @@ export async function updateKanjiSrsState(
 export async function unlockItems(ids: number[]): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const placeholders = ids.map(() => "?").join(",");
+		const placeholders = sqlPlaceholders(ids.length);
 		await db.execute(
 			`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
 			WHERE id IN (${placeholders}) AND srs_stage = 0`,
@@ -262,7 +267,7 @@ export async function checkAndUnlockLevel(level: number): Promise<QueryResult<nu
 			);
 			const kanjiIds = lockedKanji.map((r) => r.id);
 			if (kanjiIds.length > 0) {
-				const ph = kanjiIds.map(() => "?").join(",");
+				const ph = sqlPlaceholders(kanjiIds.length);
 				await db.execute(
 					`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
 					WHERE id IN (${ph})`,
@@ -285,13 +290,13 @@ export async function checkAndUnlockLevel(level: number): Promise<QueryResult<nu
 		);
 		const vocabToUnlock: number[] = [];
 		for (const v of lockedVocab) {
-			const components = JSON.parse(v.component_ids) as number[];
+			const components = safeParseJson<number[]>(v.component_ids, []);
 			if (components.length > 0 && components.every((cid) => guruWkIds.has(cid))) {
 				vocabToUnlock.push(v.id);
 			}
 		}
 		if (vocabToUnlock.length > 0) {
-			const ph = vocabToUnlock.map(() => "?").join(",");
+			const ph = sqlPlaceholders(vocabToUnlock.length);
 			await db.execute(
 				`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
 				WHERE id IN (${ph})`,
@@ -317,7 +322,7 @@ export async function checkAndUnlockLevel(level: number): Promise<QueryResult<nu
 				);
 				const nextRadicalIds = lockedNextRadicals.map((r) => r.id);
 				if (nextRadicalIds.length > 0) {
-					const ph = nextRadicalIds.map(() => "?").join(",");
+					const ph = sqlPlaceholders(nextRadicalIds.length);
 					await db.execute(
 						`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
 						WHERE id IN (${ph})`,
@@ -438,7 +443,7 @@ export async function markLessonCompleted(ids: number[], level = 1): Promise<Que
 	return safeQuery(async () => {
 		const db = await getDb();
 		const nextReview = computeFirstReviewTime(level);
-		const placeholders = ids.map(() => "?").join(",");
+		const placeholders = sqlPlaceholders(ids.length);
 		await db.execute(
 			`UPDATE kanji_levels
 			SET lesson_completed_at = datetime('now'),
@@ -531,7 +536,7 @@ export async function initializeKanjiProgression(): Promise<QueryResult<number[]
 		const ids = radicals.map((r) => r.id);
 		if (ids.length === 0) return [];
 
-		const placeholders = ids.map(() => "?").join(",");
+		const placeholders = sqlPlaceholders(ids.length);
 		await db.execute(
 			`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
 			WHERE id IN (${placeholders})`,
@@ -694,7 +699,7 @@ export async function getItemsByWkIds(
 	return safeQuery(async () => {
 		if (wkIds.length === 0) return [];
 		const db = await getDb();
-		const placeholders = wkIds.map(() => "?").join(",");
+		const placeholders = sqlPlaceholders(wkIds.length);
 		return db.select<KanjiLevelItem[]>(
 			`SELECT * FROM kanji_levels WHERE wk_id IN (${placeholders})`,
 			wkIds,

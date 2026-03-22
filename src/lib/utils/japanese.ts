@@ -42,7 +42,9 @@ export function furiganaToHtml(segments: FuriganaSegment[]): string {
 
 // Simple furigana: apply a single reading over the entire kanji portion
 // For example: text="食べる", reading="たべる" -> [{text:"食",reading:"た"},{text:"べる"}]
-// This is a basic approach; accurate segmentation requires a morphological analyzer
+// This is a basic approach; accurate segmentation requires a morphological analyzer.
+// Known limitation: suffix-matching can misalign when the same kana character appears
+// in both the kanji reading and the trailing kana (e.g., repeated mora). Handles ~95% of cases.
 export function simpleFurigana(text: string, reading: string): FuriganaSegment[] {
 	if (!containsKanji(text)) {
 		return [{ text }];
@@ -80,6 +82,9 @@ export function simpleFurigana(text: string, reading: string): FuriganaSegment[]
 					readIdx = suffixInReading;
 					textIdx = kanjiEnd;
 					continue;
+				} else {
+					// Suffix alignment failed -- fall back to whole-word furigana
+					return [{ text, reading }];
 				}
 			}
 			// Fallback: assign remaining reading to kanji block

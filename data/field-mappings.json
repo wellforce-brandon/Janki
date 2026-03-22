@@ -1,0 +1,760 @@
+{
+  "_comment": "Maps Anki deck models to semantic roles for the language_items merge pipeline. Generated from deck-analysis.json on 2026-03-21.",
+  "_roles": [
+    "primary_text",
+    "reading",
+    "meaning",
+    "part_of_speech",
+    "pitch_accent",
+    "audio",
+    "example_sentence_ja",
+    "example_sentence_en",
+    "example_sentence_reading",
+    "sentence_audio",
+    "formation",
+    "explanation",
+    "conjugation_forms",
+    "verb_group",
+    "romaji",
+    "stroke_order",
+    "frequency_rank",
+    "images",
+    "mnemonic",
+    "tags_source",
+    "jlpt_source",
+    "context_notes"
+  ],
+
+  "decks": [
+    {
+      "fileName": "Full_Japanese_Study_Deck_JLPT_N5N1_vocabkanji__more.apkg",
+      "category": "multi",
+      "priority": 2,
+      "notes": "Largest deck. 5 models covering vocab, grammar, kanji, kana, radicals. JLPT levels from tags. Kanji/radical models SKIPPED (WK handles).",
+      "models": [
+        {
+          "modelName": "FJSD-Word",
+          "contentType": "vocabulary",
+          "noteCount": 44008,
+          "fieldMap": {
+            "Kanji forms": "primary_text",
+            "Readings without audio": "reading",
+            "Readings": "_reading_with_audio",
+            "Translations": "meaning",
+            "Phrases": "example_sentence_ja",
+            "Japanese definitions": "context_notes",
+            "Kanji": "_kanji_chars",
+            "Search Keys": "_skip"
+          },
+          "jlptSource": "tags_prefix:word::common",
+          "notes": "HTML-heavy fields. primary_text and reading need HTML stripping. Translations field has POS info embedded. 44k items but many are rare/obscure -- filter by word::common tags."
+        },
+        {
+          "modelName": "FJSD-Grammar",
+          "contentType": "grammar",
+          "noteCount": 644,
+          "fieldMap": {
+            "Point": "primary_text",
+            "Reading": "reading",
+            "Meaning": "meaning",
+            "Usage": "formation",
+            "Phrases": "example_sentence_ja",
+            "Source": "_skip"
+          },
+          "jlptSource": "tags:grammar::n5,grammar::n4,grammar::n3,grammar::n2,grammar::n1",
+          "notes": "Grammar points tagged by JLPT level. Phrases field contains multiple example sentences with readings and translations embedded in HTML."
+        },
+        {
+          "modelName": "FJSD-Kana",
+          "contentType": "kana",
+          "noteCount": 372,
+          "fieldMap": {
+            "Kana": "primary_text",
+            "Reading": "romaji",
+            "Strokes": "stroke_order"
+          },
+          "jlptSource": "tags:hiragana,katakana",
+          "notes": "372 kana including extended sets. Reading field may contain audio refs."
+        },
+        {
+          "modelName": "FJSD-Kanji",
+          "contentType": "_skip",
+          "noteCount": 2772,
+          "notes": "SKIP -- WK handles kanji. Could cross-reference later."
+        },
+        {
+          "modelName": "FJSD-Radical",
+          "contentType": "_skip",
+          "noteCount": 261,
+          "notes": "SKIP -- WK handles radicals."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Kaishi_15k_Plus.apkg",
+      "category": "vocabulary",
+      "priority": 1,
+      "notes": "Highest quality vocab deck. 1,501 curated beginner words with audio, sentences, pitch accent, furigana, frequency. Kaishi 1.5k (non-Plus) is a strict subset -- skip it.",
+      "models": [
+        {
+          "modelName": "Kaishi 1.5k++",
+          "contentType": "vocabulary",
+          "noteCount": 1501,
+          "fieldMap": {
+            "Word": "primary_text",
+            "Word Reading": "reading",
+            "Word Meaning": "meaning",
+            "Word Furigana": "_furigana",
+            "Word Audio": "audio",
+            "Sentence": "example_sentence_ja",
+            "Sentence Meaning": "example_sentence_en",
+            "Sentence Furigana": "example_sentence_reading",
+            "Sentence Audio": "sentence_audio",
+            "Notes": "context_notes",
+            "Pitch Accent": "pitch_accent",
+            "Pitch Accent Notes": "_pitch_notes",
+            "Frequency": "frequency_rank",
+            "Picture": "images",
+            "StrokeOrder": "stroke_order",
+            "Radicals": "_radicals",
+            "Readings": "_extra_readings"
+          },
+          "jlptSource": "frequency_range",
+          "notes": "Note 1 is a welcome card (skip it). Frequency field is numeric. First sample has empty fields because it's the intro card."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Kaishi_15k_-_Basic_Japanese_Vocabulary.apkg",
+      "category": "vocabulary",
+      "priority": -1,
+      "notes": "SKIP -- Kaishi 1.5k Plus is a strict superset with additional fields (StrokeOrder, Radicals, Readings). Same 1,501 notes.",
+      "models": []
+    },
+
+    {
+      "fileName": "Japanese_Core_2000_Vocab__Pitch_Accent.apkg",
+      "category": "vocabulary",
+      "priority": 3,
+      "notes": "Core 2000 vocab with pitch accent. Rich format: word, reading, meaning, POS, example sentences, audio, pitch accent. Index 1001-2000.",
+      "models": [
+        {
+          "modelName": "Japanese Vocabulary",
+          "contentType": "vocabulary",
+          "noteCount": 1000,
+          "fieldMap": {
+            "Index": "frequency_rank",
+            "Word": "primary_text",
+            "Transliteration": "reading",
+            "Meaning": "meaning",
+            "Part of Speech": "part_of_speech",
+            "Example Sentence": "example_sentence_ja",
+            "Sentence Transliteration": "example_sentence_reading",
+            "Sentence Translation": "example_sentence_en",
+            "Word Audio": "audio",
+            "Sentence Audio": "sentence_audio",
+            "Pitch Accent URL": "_pitch_url",
+            "Pitch Accent": "pitch_accent"
+          },
+          "jlptSource": "frequency_range",
+          "notes": "Index 1001-2000 (not 1-1000). Pitch accent field is HTML with OJAD-style table."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Japanese_Core_6000_Vocab__Pitch_Accent.apkg",
+      "category": "vocabulary",
+      "priority": 4,
+      "notes": "Core 6000 vocab with pitch accent. Same format as Core 2000. Index 2001-3000 (only 1000 notes despite the name).",
+      "models": [
+        {
+          "modelName": "Japanese Vocabulary",
+          "contentType": "vocabulary",
+          "noteCount": 1000,
+          "fieldMap": {
+            "Index": "frequency_rank",
+            "Word": "primary_text",
+            "Transliteration": "reading",
+            "Meaning": "meaning",
+            "Part of Speech": "part_of_speech",
+            "Example Sentence": "example_sentence_ja",
+            "Sentence Transliteration": "example_sentence_reading",
+            "Sentence Translation": "example_sentence_en",
+            "Word Audio": "audio",
+            "Sentence Audio": "sentence_audio",
+            "Pitch Accent URL": "_pitch_url",
+            "Pitch Accent": "pitch_accent"
+          },
+          "jlptSource": "frequency_range",
+          "notes": "Index 2001-3000. Same format as Core 2000."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Core_2k6k_Sentences_sorted_by_WaniKani_Level.apkg",
+      "category": "sentence",
+      "priority": 1,
+      "notes": "6,000 sentences sorted by WK level. Each has vocab, translation, POS, sentence, sentence-translation, audio.",
+      "models": [
+        {
+          "modelName": "Core6k - WK",
+          "contentType": "sentence",
+          "noteCount": 6000,
+          "fieldMap": {
+            "CoreIndex": "frequency_rank",
+            "wk-level": "_wk_level",
+            "vocab": "_vocab_ref",
+            "vocab-translation": "_vocab_meaning",
+            "part-of-speech": "_vocab_pos",
+            "sentence": "primary_text",
+            "sentence-translation": "meaning",
+            "sentence-audio": "audio"
+          },
+          "jlptSource": "none",
+          "notes": "Sentence-focused. The vocab field can be used to cross-reference vocabulary items. wk-level for ordering."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Genki_12_with_official_app_ImagesAudioSentences_3e.apkg",
+      "category": "vocabulary",
+      "priority": 5,
+      "notes": "Genki 1+2 3rd edition with official app assets. Rich: images, audio, sentences. 1,241 notes.",
+      "models": [
+        {
+          "modelName": "Nice Genki",
+          "contentType": "vocabulary",
+          "noteCount": 1241,
+          "fieldMap": {
+            "English": "meaning",
+            "Japanese": "primary_text",
+            "Conjugation": "_conjugation",
+            "UKanji": "_kanji_form",
+            "Picture": "images",
+            "Audio": "audio",
+            "Part": "part_of_speech",
+            "JpSentence": "example_sentence_ja",
+            "EnSentence": "example_sentence_en",
+            "SentenceAudio": "sentence_audio",
+            "Note": "context_notes"
+          },
+          "jlptSource": "genki_chapter_to_jlpt",
+          "notes": "Japanese field is kana form. UKanji has kanji form (70% filled). Part field has POS."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Genki_1_3rd_edition_with_sound_files.apkg",
+      "category": "vocabulary",
+      "priority": 6,
+      "notes": "Genki 1 with sound. 1,076 notes. Kana + kanji forms, meanings, audio.",
+      "models": [
+        {
+          "modelName": "Simple Model+++++++++++++",
+          "contentType": "vocabulary",
+          "noteCount": 1076,
+          "fieldMap": {
+            "japanese_kana": "reading",
+            "kanjis": "primary_text",
+            "type": "part_of_speech",
+            "english": "meaning",
+            "kanji_meaning": "_kanji_detail",
+            "sound": "audio",
+            "sort_id": "frequency_rank",
+            "uid": "_uid"
+          },
+          "jlptSource": "genki1_is_n5",
+          "notes": "kanjis field 59% filled (rest are kana-only words). When kanjis is empty, japanese_kana becomes primary_text."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Genki_1_3rd_edition_with_sound_files (1).apkg",
+      "category": "vocabulary",
+      "priority": -1,
+      "notes": "SKIP -- Exact duplicate of Genki_1_3rd_edition_with_sound_files.apkg.",
+      "models": []
+    },
+
+    {
+      "fileName": "Genki_2_3rd_edition_with_sound_files.apkg",
+      "category": "vocabulary",
+      "priority": 6,
+      "notes": "Genki 2 with sound. 589 notes. Same model as Genki 1.",
+      "models": [
+        {
+          "modelName": "Simple Model+++++++++++++",
+          "contentType": "vocabulary",
+          "noteCount": 589,
+          "fieldMap": {
+            "japanese_kana": "reading",
+            "kanjis": "primary_text",
+            "type": "part_of_speech",
+            "english": "meaning",
+            "kanji_meaning": "_kanji_detail",
+            "sound": "audio",
+            "sort_id": "frequency_rank",
+            "uid": "_uid"
+          },
+          "jlptSource": "genki2_is_n4",
+          "notes": "Same model as Genki 1. kanjis 86% filled."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Genki_1__2_Incl_Genki_1_Supplementary_Vocab.apkg",
+      "category": "vocabulary",
+      "priority": 7,
+      "notes": "Genki 1+2 text-only vocab. 1,369 notes, no audio. Lower priority than audio versions.",
+      "models": [
+        {
+          "modelName": "Japanese",
+          "contentType": "vocabulary",
+          "noteCount": 1369,
+          "fieldMap": {
+            "Expression": "primary_text",
+            "Meaning": "meaning",
+            "Reading": "reading"
+          },
+          "jlptSource": "none",
+          "notes": "Simple 3-field model. Good for dedup verification but low enrichment value."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Genki_1__2_Kanji_.apkg",
+      "category": "_skip",
+      "priority": -1,
+      "notes": "SKIP -- 317 Genki kanji cards. WK handles kanji.",
+      "models": []
+    },
+
+    {
+      "fileName": "Genkikani_Genki_1_3rd_edition_kanji_and_related_vocabulary.apkg",
+      "category": "vocabulary",
+      "priority": 5,
+      "notes": "WK-style Genki 1 kanji + vocabulary. 759 vocab notes with mnemonics, sentences, audio. 145 kanji notes (skip). 134 radical-like notes (skip).",
+      "models": [
+        {
+          "modelName": "Genkikani Model__-1f1db",
+          "contentType": "vocabulary",
+          "noteCount": 759,
+          "fieldMap": {
+            "meanings": "meaning",
+            "word": "primary_text",
+            "readings": "reading",
+            "meaning_mnemonic": "mnemonic",
+            "reading_mnemonic": "_reading_mnemonic",
+            "kanjis": "_kanji_chars",
+            "kanjis_names": "_kanji_meanings",
+            "type": "part_of_speech",
+            "sentences": "example_sentence_ja",
+            "note": "context_notes",
+            "full_kanji": "_skip",
+            "sound": "audio",
+            "uuid": "_uid"
+          },
+          "jlptSource": "genki1_is_n5",
+          "notes": "Rich vocab with WK-style mnemonics. 80% fill on mnemonics/sentences/audio."
+        },
+        {
+          "modelName": "Genkikani Model_",
+          "contentType": "_skip",
+          "noteCount": 145,
+          "notes": "SKIP -- Kanji model. WK handles kanji."
+        },
+        {
+          "modelName": "Genkikani Model-f2d26",
+          "contentType": "_skip",
+          "noteCount": 134,
+          "notes": "SKIP -- Radical-like model (meanings + mnemonics only)."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Tae_Kims_Guide_to_Japanese_Grammar.apkg",
+      "category": "grammar",
+      "priority": 1,
+      "notes": "Best grammar source. 194 points with full explanations and up to 12 example sentence pairs. Covers Basic Grammar, Essential Grammar, Special Expressions.",
+      "models": [
+        {
+          "modelName": "Tae Kim's Guide to Grammar MIA",
+          "contentType": "grammar",
+          "noteCount": 194,
+          "fieldMap": {
+            "Sort": "frequency_rank",
+            "Link": "_source_url",
+            "Explanation": "explanation",
+            "Expression1": "primary_text",
+            "Meaning1": "meaning",
+            "Expression2": "_example_2_ja",
+            "Meaning2": "_example_2_en",
+            "Expression3": "_example_3_ja",
+            "Meaning3": "_example_3_en",
+            "Expression4": "_example_4_ja",
+            "Meaning4": "_example_4_en",
+            "Expression5": "_example_5_ja",
+            "Meaning5": "_example_5_en",
+            "Expression6": "_example_6_ja",
+            "Meaning6": "_example_6_en",
+            "Expression7": "_example_7_ja",
+            "Meaning7": "_example_7_en",
+            "Expression8": "_example_8_ja",
+            "Meaning8": "_example_8_en",
+            "Expression9": "_example_9_ja",
+            "Meaning9": "_example_9_en",
+            "Expression10": "_example_10_ja",
+            "Meaning10": "_example_10_en",
+            "Expression11": "_example_11_ja",
+            "Meaning11": "_example_11_en",
+            "Expression12": "_example_12_ja",
+            "Meaning12": "_example_12_en"
+          },
+          "jlptSource": "tags:Basic-Grammar,Essential-Grammar,Special-Expressions",
+          "notes": "Expression fields use furigana notation like 人[ひと]. Multiple examples per grammar point need to be collapsed into example_sentences array. Tags map: Basic-Grammar -> N5/N4, Essential-Grammar -> N3/N2, Special-Expressions -> N1."
+        }
+      ]
+    },
+
+    {
+      "fileName": "TAE_KIM_complete_guide_deck_Athos.apkg",
+      "category": "grammar",
+      "priority": 3,
+      "notes": "Tae Kim guide as flashcards. 181 grammar + 122 misc. Different format from the MIA version.",
+      "models": [
+        {
+          "modelName": "01 BASIC",
+          "contentType": "grammar",
+          "noteCount": 181,
+          "fieldMap": {
+            "Frente": "primary_text",
+            "Verso": "explanation"
+          },
+          "jlptSource": "none",
+          "notes": "Portuguese/English front-back cards. Less structured than MIA version. Use for enrichment only."
+        },
+        {
+          "modelName": "Japanese-256e2",
+          "contentType": "_skip",
+          "noteCount": 122,
+          "notes": "Misc supplementary cards. Low value for merge."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Tae_Kims_Grammar_Guide_-_Vocabulary_-_Basic_Grammar__audio.apkg",
+      "category": "vocabulary",
+      "priority": 6,
+      "notes": "Tae Kim vocabulary with audio. 226 words from Basic Grammar section.",
+      "models": [
+        {
+          "modelName": "Basic",
+          "contentType": "vocabulary",
+          "noteCount": 226,
+          "fieldMap": {
+            "Expression": "primary_text",
+            "Back": "meaning",
+            "Pronunciation": "reading"
+          },
+          "jlptSource": "basic_grammar_is_n5",
+          "notes": "Simple format. Audio in media files. 94% have pronunciation."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Tae_Kims_Grammar_Guide_Vocabulary_Grammar_and_Exercises.apkg",
+      "category": "multi",
+      "priority": 4,
+      "notes": "Combined Tae Kim with vocab, grammar exercises, and Core anime integration. 5 models. Key model: Japanese 2k/6k vocab (172 notes with rich Core-style fields).",
+      "models": [
+        {
+          "modelName": "Japanese 2k/6k vocab",
+          "contentType": "vocabulary",
+          "noteCount": 172,
+          "fieldMap": {
+            "Vocabulary-Kanji": "primary_text",
+            "Vocabulary-Furigana": "_furigana",
+            "Vocabulary-Kana": "reading",
+            "Vocabulary-English": "meaning",
+            "Vocabulary-Audio": "audio",
+            "Vocabulary-Pos": "part_of_speech",
+            "Caution": "_skip",
+            "Expression": "_expression",
+            "Reading": "_reading",
+            "Sentence-Kana": "example_sentence_reading",
+            "Sentence-English": "example_sentence_en",
+            "Sentence-Clozed": "example_sentence_ja",
+            "Sentence-Audio": "sentence_audio",
+            "Sentence-Image": "images",
+            "Notes": "context_notes",
+            "Core-Index": "frequency_rank",
+            "Optimized-Voc-Index": "_skip",
+            "Optimized-Sent-Index": "_skip",
+            "Inner-Kanji-1": "_skip",
+            "Inner-Kanji-Meaning-1": "_skip",
+            "Inner-Kanji-2": "_skip",
+            "Inner-Kanji-Meaning-2": "_skip"
+          },
+          "jlptSource": "none",
+          "notes": "Rich Core-style vocab. Good for enrichment of existing items."
+        },
+        {
+          "modelName": "Tae Kim Grammer Point",
+          "contentType": "grammar",
+          "noteCount": 64,
+          "fieldMap": {
+            "Question": "primary_text",
+            "Politeness": "_politeness_level",
+            "Answer": "explanation",
+            "Examples": "example_sentence_ja",
+            "Tae Kims Link": "_source_url"
+          },
+          "jlptSource": "none",
+          "notes": "64 grammar exercises. Good for enrichment."
+        },
+        {
+          "modelName": "Japanese (Tae Kim)-fe2c8",
+          "contentType": "grammar",
+          "noteCount": 149,
+          "fieldMap": {
+            "Note ID": "_uid",
+            "Cloze": "_cloze",
+            "Expression": "primary_text",
+            "Kana": "reading",
+            "English": "meaning",
+            "Notes": "context_notes",
+            "Reading": "_reading",
+            "Diagram": "_skip",
+            "DiagramFalls": "_skip"
+          },
+          "jlptSource": "none",
+          "notes": "Cloze-style grammar exercises."
+        },
+        {
+          "modelName": "Japanese Jo Mako's Core Anime Grammar",
+          "contentType": "_skip",
+          "noteCount": 1,
+          "notes": "SKIP -- Single note, too few to be useful."
+        },
+        {
+          "modelName": "Japanese Jo Mako's Core Anime Vocabulary",
+          "contentType": "_skip",
+          "noteCount": 4,
+          "notes": "SKIP -- 4 notes, too few to be useful."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Japanese_course_based_on_Tae_Kims_grammar_guide__anime.apkg",
+      "category": "sentence",
+      "priority": 2,
+      "notes": "Jlab's course based on Tae Kim. 2,076 sentences + 88 info notes. Rich: audio, kanji, hiragana, listening/cloze exercises.",
+      "models": [
+        {
+          "modelName": "JlabNote-JlabConverted-1",
+          "contentType": "sentence",
+          "noteCount": 2076,
+          "fieldMap": {
+            "Version": "_skip",
+            "Sequence": "frequency_rank",
+            "Source": "_source",
+            "Audio": "audio",
+            "Image": "images",
+            "RemarksFront": "_skip",
+            "RemarksBack": "context_notes",
+            "QuestionLink": "_source_url",
+            "References": "_references",
+            "Other-Front": "_skip",
+            "Other-Back": "_skip",
+            "Jlab-Kanji": "primary_text",
+            "Jlab-KanjiSpaced": "_skip",
+            "Jlab-Hiragana": "reading",
+            "Jlab-KanjiCloze": "_skip",
+            "Jlab-Lemma": "_lemma",
+            "Jlab-HiraganaCloze": "_skip",
+            "Jlab-Translation": "meaning",
+            "Jlab-DictionaryLookup": "_skip",
+            "Jlab-Metadata": "_skip",
+            "Jlab-Remarks": "_skip",
+            "Jlab-ListeningFront": "_skip",
+            "Jlab-ListeningBack": "_skip",
+            "Jlab-ClozeFront": "_skip",
+            "Jlab-ClozeBack": "_skip"
+          },
+          "jlptSource": "none",
+          "notes": "Jlab-Kanji is the sentence in kanji. Jlab-Hiragana is full hiragana reading. Jlab-Translation is 0% filled -- meaning may need to come from RemarksBack or cross-reference."
+        },
+        {
+          "modelName": "InfoNote",
+          "contentType": "_skip",
+          "noteCount": 88,
+          "notes": "SKIP -- Info/instruction cards, not learning content."
+        }
+      ]
+    },
+
+    {
+      "fileName": "106_Common_Japanese_Verbs_and_their_Different_Forms.apkg",
+      "category": "conjugation",
+      "priority": 1,
+      "notes": "106 verbs with conjugation forms. Primary source for conjugation content.",
+      "models": [
+        {
+          "modelName": "Verb Note",
+          "contentType": "conjugation",
+          "noteCount": 108,
+          "fieldMap": {
+            "Stem": "primary_text",
+            "Meaning": "meaning",
+            "Group2Verb?": "verb_group",
+            "TeTaForm": "_te_ta",
+            "Base1": "_base1",
+            "Base2": "_base2",
+            "DictionaryForm": "_dictionary",
+            "Base4": "_base4",
+            "Base5": "_base5"
+          },
+          "jlptSource": "tags:Verb-1Bu,Verb-1Gu,Verb-1Ku,Verb-1Mu,Verb-1Nu,Verb-1Ru,Verb-1Su,Verb-1Tsu,Verb-1U,Verb-2",
+          "notes": "Stem is the verb stem (e.g. はな). Dictionary form in DictionaryForm field. Base fields are verb bases. TeTaForm contains te/ta inflection ending. Group2Verb? marks ichidan verbs. Verb-1* tags = godan, Verb-2 = ichidan."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Japanese_Hiragana.apkg",
+      "category": "kana",
+      "priority": 1,
+      "notes": "104 hiragana characters with audio. Includes basic, dakuten, combination forms.",
+      "models": [
+        {
+          "modelName": "Hiragana Note",
+          "contentType": "kana",
+          "noteCount": 104,
+          "fieldMap": {
+            "Hiragana": "primary_text",
+            "Romaji": "romaji",
+            "Audio": "audio"
+          },
+          "jlptSource": "none",
+          "notes": "Tags: HiraganaBasic, HiraganaTenTen, HiraganaMaru, HiraganaYoon"
+        }
+      ]
+    },
+
+    {
+      "fileName": "Japanese_Katakana.apkg",
+      "category": "kana",
+      "priority": 1,
+      "notes": "104 katakana characters with audio. Includes hiragana equivalent field.",
+      "models": [
+        {
+          "modelName": "Katakana Note",
+          "contentType": "kana",
+          "noteCount": 104,
+          "fieldMap": {
+            "Katakana": "primary_text",
+            "Hiragana": "_hiragana_equiv",
+            "Audio": "audio"
+          },
+          "jlptSource": "none",
+          "notes": "No romaji field -- derive from hiragana equivalent. Tags: Kana, Katakana, KatakanaBasic, etc."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Japanese_Basic_Katakana.apkg",
+      "category": "kana",
+      "priority": 2,
+      "notes": "46 basic katakana with audio. Subset of the full katakana deck.",
+      "models": [
+        {
+          "modelName": "Big Singles",
+          "contentType": "kana",
+          "noteCount": 46,
+          "fieldMap": {
+            "Front": "primary_text",
+            "Back": "romaji"
+          },
+          "jlptSource": "none",
+          "notes": "Simple front/back. Has audio files. Lower priority than full katakana deck."
+        }
+      ]
+    },
+
+    {
+      "fileName": "Beginner_Japanese_Phrases.apkg",
+      "category": "sentence",
+      "priority": 3,
+      "notes": "61 beginner phrases. Simple format, no audio.",
+      "models": [
+        {
+          "modelName": "Japanese Card",
+          "contentType": "sentence",
+          "noteCount": 61,
+          "fieldMap": {
+            "Front": "primary_text",
+            "Back": "meaning",
+            "Romaji": "reading"
+          },
+          "jlptSource": "n5",
+          "notes": "All N5 level. Good starter sentences."
+        }
+      ]
+    },
+
+    {
+      "fileName": "JLPT_Kanji_-_N4.apkg",
+      "category": "_skip",
+      "priority": -1,
+      "notes": "SKIP -- 181 N4 kanji. WK handles kanji.",
+      "models": []
+    },
+
+    {
+      "fileName": "JLPT_Kanji_-_N5.apkg",
+      "category": "_skip",
+      "priority": -1,
+      "notes": "SKIP -- 103 N5 kanji. WK handles kanji.",
+      "models": []
+    },
+
+    {
+      "fileName": "Kanji_drawing_with_animated_strokes_WaniKani__Jy__more.apkg",
+      "category": "_skip",
+      "priority": -1,
+      "notes": "SKIP -- 2,432 kanji drawing practice. WK handles kanji.",
+      "models": []
+    },
+
+    {
+      "fileName": "Kanji_elements_radicals_for_Kaishi_15k.apkg",
+      "category": "_skip",
+      "priority": -1,
+      "notes": "SKIP -- 270 radicals for Kaishi. WK handles radicals.",
+      "models": []
+    }
+  ],
+
+  "_summary": {
+    "vocabulary_sources": "Kaishi 1.5k+ (1501) > FJSD-Word (44008, needs filtering) > Core 2k (1000) > Core 6k (1000) > Genki 1+2 3e (1241) > Genki 1 sound (1076) > Genki 2 sound (589) > Genkikani vocab (759) > Genki 1+2 text (1369) > TK Vocab (226) > TK 2k/6k (172)",
+    "grammar_sources": "FJSD-Grammar (644, JLPT-tagged) > Tae Kim MIA (194, explanations+examples) > TK Exercises grammar (64) > TK Cloze grammar (149) > TK Athos (181)",
+    "sentence_sources": "Core 2k/6k by WK (6000) > Jlab/TK anime (2076) > Beginner Phrases (61)",
+    "conjugation_sources": "106 Common Verbs (108)",
+    "kana_sources": "FJSD-Kana (372) > Hiragana (104) > Katakana (104) > Basic Katakana (46)",
+    "skipped": "Kaishi 1.5k (dup), Genki 1 dup, Genki 1+2 Kanji, JLPT N4 Kanji, JLPT N5 Kanji, Kanji Drawing, Kaishi Radicals"
+  }
+}

@@ -10,7 +10,14 @@ describe("migrations", () => {
 
 	it("should have non-empty up SQL", () => {
 		for (const m of migrations) {
-			expect(m.up.trim().length).toBeGreaterThan(0);
+			if (Array.isArray(m.up)) {
+				expect(m.up.length).toBeGreaterThan(0);
+				for (const stmt of m.up) {
+					expect(stmt.trim().length).toBeGreaterThan(0);
+				}
+			} else {
+				expect(m.up.trim().length).toBeGreaterThan(0);
+			}
 		}
 	});
 

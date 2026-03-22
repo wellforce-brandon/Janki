@@ -9,7 +9,7 @@ import {
 	getAcceptedReadings,
 	getCorrectDisplay,
 	isKunReadingForKanji,
-	normalizeAnswer,
+	normalizeKanjiAnswer,
 } from "$lib/utils/kanji-validation";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
@@ -71,6 +71,7 @@ type ItemResult = {
 	startTime: number;
 };
 let itemResults = $state<Map<number, ItemResult>>(new Map());
+let savedItems = $state<Map<number, { allCorrect: boolean; unlockedCount: number }>>(new Map());
 
 function getOrCreateItemResult(itemId: number): ItemResult {
 	let r = itemResults.get(itemId);
@@ -126,7 +127,7 @@ function checkAnswer(): "correct" | "incorrect" | "wrong-reading-type" {
 
 	if (current.type === "meaning") {
 		const accepted = getAcceptedMeanings(current.item);
-		return accepted.includes(normalizeAnswer(inputValue)) ? "correct" : "incorrect";
+		return accepted.includes(normalizeKanjiAnswer(inputValue)) ? "correct" : "incorrect";
 	}
 
 	// Reading: check for kun'yomi on kanji (shake, not wrong)
@@ -169,6 +170,7 @@ async function submitAnswer() {
 		if (current.type === "meaning") result.meaningCorrect = true;
 		else result.readingCorrect = true;
 
+		await saveItemIfComplete(current.item, result);
 		setTimeout(() => advanceToNext(), 600);
 	} else {
 		feedbackState = "incorrect";
@@ -185,6 +187,43 @@ async function submitAnswer() {
 			result.readingCorrect = false;
 			result.readingIncorrectCount++;
 		}
+
+		await saveItemIfComplete(current.item, result);
+	}
+}
+
+/** Save SRS result as soon as both meaning and reading are answered for an item */
+async function saveItemIfComplete(item: KanjiLevelItem, result: ItemResult) {
+	if (savedItems.has(item.id) || practiceMode) return;
+
+	const hasReading = item.item_type !== "radical";
+	const meaningDone = result.meaningCorrect !== null;
+	const readingDone = !hasReading || result.readingCorrect !== null;
+
+	if (!meaningDone || !readingDone) return;
+
+	const incorrectCount = result.meaningIncorrectCount + result.readingIncorrectCount;
+	const allCorrect = incorrectCount === 0;
+	const durationMs = Date.now() - result.startTime;
+
+	const srsResult = await reviewKanjiItem(
+		item.id,
+		allCorrect,
+		item.srs_stage,
+		item.level,
+		durationMs,
+		incorrectCount,
+		result.meaningIncorrectCount,
+		result.readingIncorrectCount,
+	);
+
+	savedItems.set(item.id, {
+		allCorrect,
+		unlockedCount: srsResult.unlockedIds.length,
+	});
+
+	if (srsResult.unlockedIds.length > 0) {
+		totalUnlocked += srsResult.unlockedIds.length;
 	}
 }
 
@@ -208,48 +247,19 @@ function dismissIncorrect() {
 async function processResults() {
 	isProcessing = true;
 
-	// Process each unique item
+	// Compute summary from already-saved per-item results
 	const processedItems = new Set<number>();
-	let unlocked = 0;
-
 	for (const q of queue) {
 		if (processedItems.has(q.item.id)) continue;
 		processedItems.add(q.item.id);
 
-		// Determine if item was answered correctly (all questions for this item must be correct)
-		const itemResult = itemResults.get(q.item.id);
-		const incorrectCount =
-			(itemResult?.meaningIncorrectCount ?? 0) + (itemResult?.readingIncorrectCount ?? 0);
-		const allCorrect = incorrectCount === 0;
-
+		const saved = savedItems.get(q.item.id);
 		totalReviewed++;
-		if (allCorrect) totalCorrect++;
-
-		// Skip SRS updates in practice mode
-		if (!practiceMode) {
-			const durationMs = Date.now() - (itemResult?.startTime ?? sessionStartTime);
-
-			const result = await reviewKanjiItem(
-				q.item.id,
-				allCorrect,
-				q.item.srs_stage,
-				q.item.level,
-				durationMs,
-				incorrectCount,
-				itemResult?.meaningIncorrectCount ?? 0,
-				itemResult?.readingIncorrectCount ?? 0,
-			);
-
-			if (result.unlockedIds.length > 0) {
-				unlocked += result.unlockedIds.length;
-			}
-		}
+		if (saved?.allCorrect) totalCorrect++;
 	}
 
-	totalUnlocked = unlocked;
-
-	if (unlocked > 0) {
-		addToast(`${unlocked} new item${unlocked > 1 ? "s" : ""} unlocked!`, "success");
+	if (totalUnlocked > 0) {
+		addToast(`${totalUnlocked} new item${totalUnlocked > 1 ? "s" : ""} unlocked!`, "success");
 	}
 
 	isProcessing = false;

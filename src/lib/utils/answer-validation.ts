@@ -1,5 +1,5 @@
-/** Normalize an answer for comparison: lowercase, trim, collapse whitespace, strip punctuation */
-export function normalizeAnswer(answer: string): string {
+/** Normalize a language answer for comparison: lowercase, trim, collapse whitespace, strip punctuation */
+export function normalizeLanguageAnswer(answer: string): string {
 	return answer
 		.toLowerCase()
 		.trim()

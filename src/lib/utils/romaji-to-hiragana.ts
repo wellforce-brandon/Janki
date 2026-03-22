@@ -156,12 +156,18 @@ const ROMAJI_MAP: Record<string, string> = {
 	"-": "ー",
 };
 
+// Pre-built set of all valid prefixes of ROMAJI_MAP keys for O(1) lookup
+const VALID_PREFIXES = new Set<string>();
+for (const key of Object.keys(ROMAJI_MAP)) {
+	for (let i = 1; i <= key.length; i++) {
+		VALID_PREFIXES.add(key.slice(0, i));
+	}
+}
+
 // Check if a romaji prefix could still become a valid syllable
 function isValidPrefix(prefix: string): boolean {
 	if (prefix.length === 0) return false;
-	for (const key of Object.keys(ROMAJI_MAP)) {
-		if (key.startsWith(prefix)) return true;
-	}
+	if (VALID_PREFIXES.has(prefix)) return true;
 	// Double consonant prefix (e.g., "kk" -> っ + "k")
 	if (prefix.length >= 2 && prefix[0] === prefix[1] && prefix[0] !== "n" && prefix[0] !== "a") {
 		return true;

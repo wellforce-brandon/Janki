@@ -1,4 +1,4 @@
-import { getDb, safeQuery, type QueryResult } from "../database";
+import { getDb, safeQuery, sqlPlaceholders, type QueryResult } from "../database";
 import { getCached, setCache } from "../query-cache";
 
 // Content type literal
@@ -105,8 +105,9 @@ export async function getLanguageItems(
 			params.push(options.jlptFilter);
 		}
 		if (options.searchQuery) {
-			where += " AND (primary_text LIKE ? OR reading LIKE ? OR meaning LIKE ? OR item_key LIKE ?)";
-			const like = `%${options.searchQuery}%`;
+			const escaped = options.searchQuery.replace(/[%_\\]/g, "\\$&");
+			where += " AND (primary_text LIKE ? ESCAPE '\\' OR reading LIKE ? ESCAPE '\\' OR meaning LIKE ? ESCAPE '\\' OR item_key LIKE ? ESCAPE '\\')";
+			const like = `%${escaped}%`;
 			params.push(like, like, like, like);
 		}
 
@@ -158,7 +159,7 @@ export async function findWkCrossReferences(
 	if (characters.length === 0) return { ok: true, data: [] };
 	return safeQuery(async () => {
 		const db = await getDb();
-		const placeholders = characters.map(() => "?").join(",");
+		const placeholders = sqlPlaceholders(characters.length);
 		return db.select<WkCrossReference[]>(
 			`SELECT id, character, item_type, srs_stage, level, meanings
 			 FROM kanji_levels
@@ -241,7 +242,7 @@ export async function updateLanguageItemSrs(
 
 export async function logLanguageReview(
 	itemId: number,
-	srsStage_before: number,
+	srsStageBefore: number,
 	srsStageAfter: number,
 	correct: boolean,
 	durationMs?: number,
@@ -251,7 +252,7 @@ export async function logLanguageReview(
 		const result = await db.execute(
 			`INSERT INTO language_review_log (item_id, srs_stage_before, srs_stage_after, correct, duration_ms)
 			VALUES (?, ?, ?, ?, ?)`,
-			[itemId, srsStage_before, srsStageAfter, correct ? 1 : 0, durationMs ?? null],
+			[itemId, srsStageBefore, srsStageAfter, correct ? 1 : 0, durationMs ?? null],
 		);
 		return result.lastInsertId ?? 0;
 	});
@@ -394,6 +395,24 @@ export async function markLessonCompleted(
 	});
 }
 
+/** Batch mark lessons completed: set lesson_completed_at and schedule first review for multiple items */
+export async function markLessonsBatchCompleted(
+	ids: number[],
+	nextReview: string,
+): Promise<QueryResult<void>> {
+	if (ids.length === 0) return { ok: true, data: undefined };
+	return safeQuery(async () => {
+		const db = await getDb();
+		const placeholders = sqlPlaceholders(ids.length);
+		await db.execute(
+			`UPDATE language_items
+			SET lesson_completed_at = datetime('now'), next_review = ?
+			WHERE id IN (${placeholders})`,
+			[nextReview, ...ids],
+		);
+	});
+}
+
 /** Find vocabulary items containing a specific kanji character */
 export async function getLanguageItemsByKanji(
 	character: string,
@@ -436,7 +455,7 @@ export async function unlockLanguageItems(ids: number[]): Promise<QueryResult<vo
 	if (ids.length === 0) return { ok: true, data: undefined };
 	return safeQuery(async () => {
 		const db = await getDb();
-		const placeholders = ids.map(() => "?").join(",");
+		const placeholders = sqlPlaceholders(ids.length);
 		await db.execute(
 			`UPDATE language_items SET srs_stage = 1, unlocked_at = datetime('now')
 			WHERE id IN (${placeholders}) AND srs_stage = 0`,
@@ -500,7 +519,7 @@ export async function getItemKeyStages(itemKeys: string[]): Promise<QueryResult<
 	if (itemKeys.length === 0) return { ok: true, data: [] };
 	return safeQuery(async () => {
 		const db = await getDb();
-		const placeholders = itemKeys.map(() => "?").join(",");
+		const placeholders = sqlPlaceholders(itemKeys.length);
 		return db.select<{ item_key: string; srs_stage: number }[]>(
 			`SELECT item_key, srs_stage FROM language_items WHERE item_key IN (${placeholders})`,
 			itemKeys,

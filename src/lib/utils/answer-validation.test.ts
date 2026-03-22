@@ -1,37 +1,37 @@
 import { describe, expect, it } from "vitest";
-import { normalizeAnswer, fuzzyMatch } from "./answer-validation";
+import { normalizeLanguageAnswer, fuzzyMatch } from "./answer-validation";
 
 describe("Answer Validation", () => {
-	describe("normalizeAnswer", () => {
+	describe("normalizeLanguageAnswer", () => {
 		it("should lowercase input", () => {
-			expect(normalizeAnswer("Hello")).toBe("hello");
+			expect(normalizeLanguageAnswer("Hello")).toBe("hello");
 		});
 
 		it("should trim whitespace", () => {
-			expect(normalizeAnswer("  hello  ")).toBe("hello");
+			expect(normalizeLanguageAnswer("  hello  ")).toBe("hello");
 		});
 
 		it("should collapse multiple spaces", () => {
-			expect(normalizeAnswer("hello   world")).toBe("hello world");
+			expect(normalizeLanguageAnswer("hello   world")).toBe("hello world");
 		});
 
 		it("should strip punctuation", () => {
-			expect(normalizeAnswer("hello, world!")).toBe("hello world");
-			expect(normalizeAnswer("(test)")).toBe("test");
-			expect(normalizeAnswer("it's")).toBe("its");
-			expect(normalizeAnswer("a; b; c")).toBe("a b c");
+			expect(normalizeLanguageAnswer("hello, world!")).toBe("hello world");
+			expect(normalizeLanguageAnswer("(test)")).toBe("test");
+			expect(normalizeLanguageAnswer("it's")).toBe("its");
+			expect(normalizeLanguageAnswer("a; b; c")).toBe("a b c");
 		});
 
 		it("should handle empty string", () => {
-			expect(normalizeAnswer("")).toBe("");
+			expect(normalizeLanguageAnswer("")).toBe("");
 		});
 
 		it("should handle complex input", () => {
-			expect(normalizeAnswer("  Hello,  WORLD!  (test)  ")).toBe("hello world test");
+			expect(normalizeLanguageAnswer("  Hello,  WORLD!  (test)  ")).toBe("hello world test");
 		});
 
 		it("should preserve numbers and underscores", () => {
-			expect(normalizeAnswer("test_123")).toBe("test_123");
+			expect(normalizeLanguageAnswer("test_123")).toBe("test_123");
 		});
 	});
 

@@ -95,17 +95,3 @@ export async function getRecentMistakes(
 		);
 	});
 }
-
-export async function updateUserNotes(id: number, notes: string): Promise<QueryResult<void>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		await db.execute("UPDATE kanji_levels SET user_notes = ? WHERE id = ?", [notes, id]);
-	});
-}
-
-export async function updateUserSynonyms(id: number, synonyms: string): Promise<QueryResult<void>> {
-	return safeQuery(async () => {
-		const db = await getDb();
-		await db.execute("UPDATE kanji_levels SET user_synonyms = ? WHERE id = ?", [synonyms, id]);
-	});
-}

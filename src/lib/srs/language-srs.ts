@@ -5,6 +5,7 @@ import {
 } from "../db/queries/language";
 import { invalidateCache } from "../db/query-cache";
 import { updateDailyStats } from "../db/queries/stats";
+import { toSqliteDateTime } from "../utils/common";
 
 // Reuse WK SRS stages: 0=Locked, 1-4=Apprentice, 5-6=Guru, 7=Master, 8=Enlightened, 9=Burned
 const STAGE_INTERVALS_HOURS: Record<number, number> = {
@@ -17,13 +18,6 @@ const STAGE_INTERVALS_HOURS: Record<number, number> = {
 	7: 719,
 	8: 2879,
 };
-
-export function toSqliteDateTime(date: Date): string {
-	return date
-		.toISOString()
-		.replace("T", " ")
-		.replace(/\.\d{3}Z$/, "");
-}
 
 export function calculateNextReview(stage: number): string | null {
 	if (stage <= 0 || stage >= 9) return null;
@@ -90,7 +84,7 @@ export async function reviewLanguageItem(
 	await logLanguageReview(itemId, currentStage, newStage, correct, durationMs);
 
 	// Update daily stats
-	const isNew = currentStage <= 1 && item.lesson_completed_at !== null;
+	const isNew = item.correct_count === 0 && item.incorrect_count === 0 && item.lesson_completed_at !== null;
 	await updateDailyStats(correct, isNew, durationMs);
 
 	// Invalidate cached counts since SRS state changed

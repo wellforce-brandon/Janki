@@ -5,7 +5,7 @@ export interface TtsEngine {
 }
 
 class WebSpeechTts implements TtsEngine {
-	private synth = window.speechSynthesis;
+	private get synth() { return window.speechSynthesis; }
 	private rate = 1.0;
 	private pitch = 1.0;
 

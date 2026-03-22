@@ -1,9 +1,8 @@
 <script lang="ts">
 import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
-import { type KanjiLevelItem, markLessonCompleted, getItemsContainingComponent } from "$lib/db/queries/kanji";
+import { type KanjiLevelItem, markLessonCompleted, getItemsContainingComponent, updateUserNotes, updateUserSynonyms } from "$lib/db/queries/kanji";
 import { sanitizeMnemonicHtml } from "$lib/utils/sanitize";
-import { updateUserNotes, updateUserSynonyms } from "$lib/db/queries/kanji-reviews";
 import { addToast } from "$lib/stores/toast.svelte";
 import { fisherYatesShuffle, getTypeColor } from "$lib/utils/kanji";
 import {
@@ -11,7 +10,7 @@ import {
 	getAcceptedReadings,
 	getCorrectDisplay,
 	isKunReadingForKanji,
-	normalizeAnswer,
+	normalizeKanjiAnswer,
 } from "$lib/utils/kanji-validation";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
@@ -156,19 +155,26 @@ function getUserSynonyms(item: KanjiLevelItem): string[] {
 
 async function saveNotes() {
 	if (!current) return;
-	await updateUserNotes(current.id, notesInput);
-	current.user_notes = notesInput;
-	editingNotes = false;
+	const result = await updateUserNotes(current.id, notesInput);
+	if (result.ok) {
+		current.user_notes = notesInput;
+		editingNotes = false;
+	} else {
+		addToast("Failed to save notes", "error");
+	}
 }
 
 async function addSynonym() {
 	if (!current || !synonymInput.trim()) return;
 	const existing = getUserSynonyms(current);
 	existing.push(synonymInput.trim());
-	const json = JSON.stringify(existing);
-	await updateUserSynonyms(current.id, json);
-	current.user_synonyms = json;
-	synonymInput = "";
+	const result = await updateUserSynonyms(current.id, existing);
+	if (result.ok) {
+		current.user_synonyms = JSON.stringify(existing);
+		synonymInput = "";
+	} else {
+		addToast("Failed to add synonym", "error");
+	}
 }
 
 // --- Quiz phase ---
@@ -179,7 +185,7 @@ function checkQuizAnswer(): "correct" | "incorrect" | "wrong-reading-type" {
 	if (!currentQuiz) return "incorrect";
 	if (currentQuiz.type === "meaning") {
 		const accepted = getAcceptedMeanings(currentQuiz.item);
-		return accepted.includes(normalizeAnswer(inputValue)) ? "correct" : "incorrect";
+		return accepted.includes(normalizeKanjiAnswer(inputValue)) ? "correct" : "incorrect";
 	}
 	if (isKunReadingForKanji(currentQuiz.item, inputValue)) {
 		return "wrong-reading-type";

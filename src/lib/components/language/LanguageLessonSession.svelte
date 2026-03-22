@@ -4,7 +4,7 @@ import Button from "$lib/components/ui/button/button.svelte";
 import type { LanguageItem } from "$lib/db/queries/language";
 import { completeLessonBatch } from "$lib/srs/language-lessons";
 import { addToast } from "$lib/stores/toast.svelte";
-import { normalizeAnswer } from "$lib/utils/answer-validation";
+import { normalizeLanguageAnswer } from "$lib/utils/answer-validation";
 
 interface Props {
 	items: LanguageItem[];
@@ -93,14 +93,14 @@ function getPlaceholder(item: LanguageItem): string {
 }
 
 function checkAnswer(item: LanguageItem, input: string): boolean {
-	const userAnswer = normalizeAnswer(input);
+	const userAnswer = normalizeLanguageAnswer(input);
 	if (userAnswer.length === 0) return false;
 
 	if (item.content_type === "kana") {
 		const accepted: string[] = [];
-		if (item.reading) accepted.push(normalizeAnswer(item.reading));
-		if (item.meaning) accepted.push(normalizeAnswer(item.meaning));
-		if (item.romaji) accepted.push(normalizeAnswer(item.romaji));
+		if (item.reading) accepted.push(normalizeLanguageAnswer(item.reading));
+		if (item.meaning) accepted.push(normalizeLanguageAnswer(item.meaning));
+		if (item.romaji) accepted.push(normalizeLanguageAnswer(item.romaji));
 		return accepted.some((a) => a === userAnswer);
 	}
 
@@ -108,14 +108,14 @@ function checkAnswer(item: LanguageItem, input: string): boolean {
 		const accepted: string[] = [];
 		if (item.meaning) {
 			for (const m of item.meaning.split(/[;,]/)) {
-				accepted.push(normalizeAnswer(m));
+				accepted.push(normalizeLanguageAnswer(m));
 			}
 		}
 		return accepted.some((a) => a === userAnswer || userAnswer.includes(a) || a.includes(userAnswer));
 	}
 
 	if (item.content_type === "sentence") {
-		const expected = normalizeAnswer(item.sentence_en ?? item.meaning ?? "");
+		const expected = normalizeLanguageAnswer(item.sentence_en ?? item.meaning ?? "");
 		return expected === userAnswer || userAnswer.includes(expected) || expected.includes(userAnswer);
 	}
 
@@ -123,11 +123,11 @@ function checkAnswer(item: LanguageItem, input: string): boolean {
 	const accepted: string[] = [];
 	if (item.meaning) {
 		for (const m of item.meaning.split(/[;,]/)) {
-			accepted.push(normalizeAnswer(m));
+			accepted.push(normalizeLanguageAnswer(m));
 		}
 	}
 	if (item.content_type === "conjugation" && item.reading) {
-		accepted.push(normalizeAnswer(item.reading));
+		accepted.push(normalizeLanguageAnswer(item.reading));
 	}
 	return accepted.some((a) => a === userAnswer);
 }

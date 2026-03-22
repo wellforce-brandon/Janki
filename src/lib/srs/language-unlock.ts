@@ -1,4 +1,5 @@
 import { getDb, safeQuery, type QueryResult } from "../db/database";
+import { safeParseJson } from "$lib/utils/common";
 import {
 	getLockedKanaItems,
 	getLockedVocabularyItems,
@@ -130,7 +131,7 @@ async function unlockSentences(): Promise<number> {
 			itemsWithPrereqs.push({ id: item.id, keys: [] });
 			continue;
 		}
-		const keys = JSON.parse(item.prerequisite_keys) as string[];
+		const keys = safeParseJson<string[]>(item.prerequisite_keys, []);
 		itemsWithPrereqs.push({ id: item.id, keys });
 		for (const k of keys) allKeys.add(k);
 	}
@@ -168,7 +169,7 @@ async function unlockConjugations(): Promise<number> {
 			itemsWithPrereqs.push({ id: item.id, keys: [] });
 			continue;
 		}
-		const keys = JSON.parse(item.prerequisite_keys) as string[];
+		const keys = safeParseJson<string[]>(item.prerequisite_keys, []);
 		itemsWithPrereqs.push({ id: item.id, keys });
 		for (const k of keys) allKeys.add(k);
 	}
@@ -194,11 +195,14 @@ async function unlockConjugations(): Promise<number> {
 
 /** Get set of kanji characters at Guru+ (srs_stage >= 5) in kanji_levels */
 async function getGuruPlusKanji(): Promise<Set<string>> {
-	const db = await getDb();
-	const rows = await db.select<{ character: string }[]>(
-		"SELECT character FROM kanji_levels WHERE item_type = 'kanji' AND srs_stage >= 5",
-	);
-	return new Set(rows.map((r) => r.character));
+	const result = await safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ character: string }[]>(
+			"SELECT character FROM kanji_levels WHERE item_type = 'kanji' AND srs_stage >= 5",
+		);
+		return new Set(rows.map((r) => r.character));
+	});
+	return result.ok ? result.data : new Set();
 }
 
 /** Check if the JLPT gate is open for a given level (>80% of previous level at Guru+) */

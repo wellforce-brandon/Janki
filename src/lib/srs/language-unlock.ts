@@ -1,7 +1,6 @@
 import { getDb, safeQuery, type QueryResult } from "../db/database";
 import { safeParseJson } from "$lib/utils/common";
 import {
-	getLockedKanaItems,
 	getLockedVocabularyItems,
 	getLockedGrammarItems,
 	getLockedSentenceItems,
@@ -9,6 +8,10 @@ import {
 	getItemKeyStages,
 	getJlptLevelProgress,
 	unlockLanguageItems,
+	getNextLockedKanaGroup,
+	getLockedKanaByGroup,
+	getKanaGroupProgress,
+	getPreviousKanaGroup,
 } from "../db/queries/language";
 
 // Regex to detect kanji (CJK Unified Ideographs)
@@ -48,8 +51,44 @@ export async function checkAndUnlockItems(): Promise<QueryResult<number>> {
 	});
 }
 
+/** Gate threshold: 80% of previous group at Apprentice 4+ to unlock next */
+const KANA_GATE_THRESHOLD = 0.8;
+
 async function unlockKana(): Promise<number> {
-	const result = await getLockedKanaItems();
+	// Find the next locked kana group (lowest lesson_order with locked items)
+	const nextGroup = await getNextLockedKanaGroup();
+	if (!nextGroup.ok || !nextGroup.data) return 0;
+
+	const { lesson_group, lesson_order } = nextGroup.data;
+
+	// Group order 1 (hiragana vowels) always unlocks immediately
+	if (lesson_order === 1) {
+		return await unlockKanaGroup(lesson_group);
+	}
+
+	// Check if previous group meets the gate threshold
+	const prevGroupResult = await getPreviousKanaGroup(lesson_order);
+	if (!prevGroupResult.ok || !prevGroupResult.data) {
+		// No previous group found -- unlock (safety fallback)
+		return await unlockKanaGroup(lesson_group);
+	}
+
+	const progress = await getKanaGroupProgress(prevGroupResult.data);
+	if (!progress.ok) return 0;
+
+	const { total, at_apprentice4_plus } = progress.data;
+	if (total === 0) return await unlockKanaGroup(lesson_group);
+
+	const ratio = at_apprentice4_plus / total;
+	if (ratio >= KANA_GATE_THRESHOLD) {
+		return await unlockKanaGroup(lesson_group);
+	}
+
+	return 0;
+}
+
+async function unlockKanaGroup(lessonGroup: string): Promise<number> {
+	const result = await getLockedKanaByGroup(lessonGroup);
 	if (!result.ok || result.data.length === 0) return 0;
 
 	const ids = result.data.map((r) => r.id);

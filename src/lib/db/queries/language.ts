@@ -47,6 +47,8 @@ export interface LanguageItem {
 	incorrect_count: number;
 	lesson_completed_at: string | null;
 	prerequisite_keys: string | null;
+	lesson_group: string | null;
+	lesson_order: number | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -331,6 +333,7 @@ export async function getAvailableLessons(
 			`SELECT * FROM language_items WHERE ${where}
 			ORDER BY
 				CASE content_type WHEN 'kana' THEN 0 WHEN 'vocabulary' THEN 1 WHEN 'grammar' THEN 2 WHEN 'conjugation' THEN 3 WHEN 'sentence' THEN 4 ELSE 5 END,
+				COALESCE(lesson_order, 999) ASC,
 				COALESCE(frequency_rank, 999999) ASC,
 				id ASC
 			LIMIT ?`,
@@ -565,5 +568,60 @@ export async function getJlptLevelProgress(jlptLevel: string): Promise<QueryResu
 			[jlptLevel],
 		);
 		return rows[0];
+	});
+}
+
+// --- Kana group progression queries ---
+
+/** Get the next locked kana lesson_group (lowest lesson_order with locked items) */
+export async function getNextLockedKanaGroup(): Promise<QueryResult<{ lesson_group: string; lesson_order: number } | null>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ lesson_group: string; lesson_order: number }[]>(
+			`SELECT DISTINCT lesson_group, lesson_order FROM language_items
+			WHERE content_type = 'kana' AND srs_stage = 0 AND lesson_group IS NOT NULL
+			ORDER BY lesson_order ASC
+			LIMIT 1`,
+		);
+		return rows.length > 0 ? rows[0] : null;
+	});
+}
+
+/** Get locked kana items for a specific lesson_group */
+export async function getLockedKanaByGroup(lessonGroup: string): Promise<QueryResult<{ id: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number }[]>(
+			"SELECT id FROM language_items WHERE content_type = 'kana' AND srs_stage = 0 AND lesson_group = ?",
+			[lessonGroup],
+		);
+	});
+}
+
+/** Get progress for a kana lesson_group: total items and how many are at Apprentice 4+ */
+export async function getKanaGroupProgress(lessonGroup: string): Promise<QueryResult<{ total: number; at_apprentice4_plus: number }>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ total: number; at_apprentice4_plus: number }[]>(
+			`SELECT COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 4 THEN 1 END) as at_apprentice4_plus
+			FROM language_items WHERE content_type = 'kana' AND lesson_group = ?`,
+			[lessonGroup],
+		);
+		return rows[0];
+	});
+}
+
+/** Get the lesson_group just before a given lesson_order */
+export async function getPreviousKanaGroup(lessonOrder: number): Promise<QueryResult<string | null>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ lesson_group: string }[]>(
+			`SELECT DISTINCT lesson_group FROM language_items
+			WHERE content_type = 'kana' AND lesson_order = ? AND lesson_group IS NOT NULL
+			LIMIT 1`,
+			[lessonOrder - 1],
+		);
+		return rows.length > 0 ? rows[0].lesson_group : null;
 	});
 }

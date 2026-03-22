@@ -1,6 +1,7 @@
 import { getDb } from "../database";
 import type { QueryResult } from "../database";
 import { safeQuery } from "../database";
+import { getKanaGroupInfo } from "$lib/data/kana-groups";
 
 interface LanguageItem {
 	content_type: string;
@@ -74,6 +75,17 @@ function insertItem(
 	item: LanguageItem,
 	contentType: string,
 ): { sql: string; params: unknown[] } {
+	// Determine lesson group/order for kana items
+	let lessonGroup: string | null = null;
+	let lessonOrder: number | null = null;
+	if (contentType === "kana") {
+		const groupInfo = getKanaGroupInfo(item.romaji, item.primary_text);
+		if (groupInfo) {
+			lessonGroup = groupInfo.group;
+			lessonOrder = groupInfo.order;
+		}
+	}
+
 	const sql = `INSERT OR IGNORE INTO language_items (
 		content_type, item_key, primary_text, reading, meaning,
 		part_of_speech, pitch_accent, frequency_rank, audio_file,
@@ -83,8 +95,9 @@ function insertItem(
 		conjugation_forms, verb_group,
 		example_sentences, related_items, images, context_notes, source_decks,
 		jlpt_level, wk_level, tags,
-		prerequisite_keys
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+		prerequisite_keys,
+		lesson_group, lesson_order
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
 	const params = [
 		contentType,
@@ -115,6 +128,8 @@ function insertItem(
 		item.wk_level ?? null,
 		jsonOrNull(item.tags),
 		jsonOrNull(item.prerequisite_keys),
+		lessonGroup,
+		lessonOrder,
 	];
 
 	return { sql, params };

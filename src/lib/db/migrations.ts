@@ -408,4 +408,49 @@ export const migrations: Migration[] = [
 			DROP TABLE IF EXISTS language_fts;
 		`,
 	},
+	{
+		version: 12,
+		description: "Add lesson_group and lesson_order columns for structured kana progression",
+		up: [
+			"ALTER TABLE language_items ADD COLUMN lesson_group TEXT",
+			"ALTER TABLE language_items ADD COLUMN lesson_order INTEGER",
+			"CREATE INDEX idx_language_items_lesson_group ON language_items(lesson_group)",
+			"CREATE INDEX idx_language_items_lesson_order ON language_items(lesson_order)",
+			// Backfill hiragana seion rows (unicode 12352-12447 = 0x3040-0x309F)
+			"UPDATE language_items SET lesson_group = 'hiragana-vowels', lesson_order = 1 WHERE content_type = 'kana' AND romaji IN ('a','i','u','e','o') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-k', lesson_order = 2 WHERE content_type = 'kana' AND romaji IN ('ka','ki','ku','ke','ko') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-s', lesson_order = 3 WHERE content_type = 'kana' AND romaji IN ('sa','shi','su','se','so') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-t', lesson_order = 4 WHERE content_type = 'kana' AND romaji IN ('ta','chi','tsu','te','to') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-n', lesson_order = 5 WHERE content_type = 'kana' AND romaji IN ('na','ni','nu','ne','no') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-h', lesson_order = 6 WHERE content_type = 'kana' AND romaji IN ('ha','hi','fu','he','ho') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-m', lesson_order = 7 WHERE content_type = 'kana' AND romaji IN ('ma','mi','mu','me','mo') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-y', lesson_order = 8 WHERE content_type = 'kana' AND romaji IN ('ya','yu','yo') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-r', lesson_order = 9 WHERE content_type = 'kana' AND romaji IN ('ra','ri','ru','re','ro') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			"UPDATE language_items SET lesson_group = 'hiragana-w', lesson_order = 10 WHERE content_type = 'kana' AND romaji IN ('wa','wo','n') AND unicode(primary_text) BETWEEN 12352 AND 12447",
+			// Backfill katakana seion rows (unicode 12448-12543 = 0x30A0-0x30FF)
+			"UPDATE language_items SET lesson_group = 'katakana-vowels', lesson_order = 11 WHERE content_type = 'kana' AND romaji IN ('a','i','u','e','o') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-k', lesson_order = 12 WHERE content_type = 'kana' AND romaji IN ('ka','ki','ku','ke','ko') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-s', lesson_order = 13 WHERE content_type = 'kana' AND romaji IN ('sa','shi','su','se','so') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-t', lesson_order = 14 WHERE content_type = 'kana' AND romaji IN ('ta','chi','tsu','te','to') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-n', lesson_order = 15 WHERE content_type = 'kana' AND romaji IN ('na','ni','nu','ne','no') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-h', lesson_order = 16 WHERE content_type = 'kana' AND romaji IN ('ha','hi','fu','he','ho') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-m', lesson_order = 17 WHERE content_type = 'kana' AND romaji IN ('ma','mi','mu','me','mo') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-y', lesson_order = 18 WHERE content_type = 'kana' AND romaji IN ('ya','yu','yo') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-r', lesson_order = 19 WHERE content_type = 'kana' AND romaji IN ('ra','ri','ru','re','ro') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			"UPDATE language_items SET lesson_group = 'katakana-w', lesson_order = 20 WHERE content_type = 'kana' AND romaji IN ('wa','wo','n') AND unicode(primary_text) BETWEEN 12448 AND 12543",
+			// Backfill dakuten (both scripts)
+			"UPDATE language_items SET lesson_group = 'dakuten', lesson_order = 21 WHERE content_type = 'kana' AND romaji IN ('ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','dzi','dzu','de','do','ba','bi','bu','be','bo') AND lesson_group IS NULL",
+			// Backfill handakuten (both scripts)
+			"UPDATE language_items SET lesson_group = 'handakuten', lesson_order = 22 WHERE content_type = 'kana' AND romaji IN ('pa','pi','pu','pe','po') AND lesson_group IS NULL",
+			// Backfill yoon (both scripts)
+			"UPDATE language_items SET lesson_group = 'yoon', lesson_order = 23 WHERE content_type = 'kana' AND romaji IN ('kya','kyu','kyo','sha','shu','sho','cha','chu','cho','nya','nyu','nyo','hya','hyu','hyo','mya','myu','myo','rya','ryu','ryo','gya','gyu','gyo','ja','ju','jo','bya','byu','byo','pya','pyu','pyo') AND lesson_group IS NULL",
+			// Backfill extended (everything remaining)
+			"UPDATE language_items SET lesson_group = 'extended', lesson_order = 24 WHERE content_type = 'kana' AND lesson_group IS NULL",
+		],
+		down: `
+			DROP INDEX IF EXISTS idx_language_items_lesson_order;
+			DROP INDEX IF EXISTS idx_language_items_lesson_group;
+			UPDATE language_items SET lesson_group = NULL, lesson_order = NULL;
+		`,
+	},
 ];

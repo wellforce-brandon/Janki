@@ -2,6 +2,16 @@
 import Button from "$lib/components/ui/button/button.svelte";
 import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import { getLanguageItems, type LanguageItem } from "$lib/db/queries/language";
+import {
+	isHiragana,
+	isKatakana,
+	VOWELS,
+	GOJUON_ROWS,
+	DAKUTEN_ROWS,
+	HANDAKUTEN_ROWS,
+	YOON_COLS,
+	YOON_ROWS,
+} from "$lib/data/kana-groups";
 import { addToast } from "$lib/stores/toast.svelte";
 
 type KanaType = "all" | "hiragana" | "katakana";
@@ -21,26 +31,110 @@ async function loadKana() {
 	loading = false;
 }
 
-function isHiragana(char: string): boolean {
-	const code = char.charCodeAt(0);
-	return code >= 0x3040 && code <= 0x309F;
+// All romaji values that appear in the charts
+const CHARTED_ROMAJI = new Set<string>();
+for (const row of [...GOJUON_ROWS, ...DAKUTEN_ROWS, ...HANDAKUTEN_ROWS]) {
+	for (const r of row.romaji) {
+		if (r) CHARTED_ROMAJI.add(r);
+	}
+}
+for (const row of YOON_ROWS) {
+	for (const r of row.romaji) {
+		CHARTED_ROMAJI.add(r);
+	}
 }
 
-function isKatakana(char: string): boolean {
-	const code = char.charCodeAt(0);
-	return code >= 0x30A0 && code <= 0x30FF;
+type RomajiMap = Map<string, LanguageItem>;
+
+function buildRomajiMap(filteredItems: LanguageItem[]): RomajiMap {
+	const map = new Map<string, LanguageItem>();
+	for (const item of filteredItems) {
+		if (item.romaji) {
+			// For duplicates (e.g. ji appears in both z and d rows), keep first
+			if (!map.has(item.romaji)) {
+				map.set(item.romaji, item);
+			}
+		}
+	}
+	return map;
 }
 
-let displayItems = $derived.by(() => {
-	if (kanaType === "hiragana") return items.filter((k) => isHiragana(k.primary_text));
-	if (kanaType === "katakana") return items.filter((k) => isKatakana(k.primary_text));
-	return items;
-});
+function getUnchartedItems(filteredItems: LanguageItem[]): LanguageItem[] {
+	return filteredItems.filter((item) => !item.romaji || !CHARTED_ROMAJI.has(item.romaji));
+}
+
+let hiraganaItems = $derived(items.filter((k) => isHiragana(k.primary_text)));
+let katakanaItems = $derived(items.filter((k) => isKatakana(k.primary_text)));
+
+// Build maps per script
+let hiraganaMap = $derived(buildRomajiMap(hiraganaItems));
+let katakanaMap = $derived(buildRomajiMap(katakanaItems));
+let hiraganaExtra = $derived(getUnchartedItems(hiraganaItems));
+let katakanaExtra = $derived(getUnchartedItems(katakanaItems));
 
 $effect(() => {
 	loadKana();
 });
 </script>
+
+{#snippet kanaCell(item: LanguageItem | undefined)}
+	{#if item}
+		<div class="flex flex-col items-center justify-center rounded-lg border bg-card p-2 transition-colors hover:bg-accent">
+			<span class="text-xl font-bold sm:text-2xl">{item.primary_text}</span>
+			{#if item.romaji}
+				<span class="mt-0.5 text-[10px] text-muted-foreground sm:text-xs">{item.romaji}</span>
+			{/if}
+		</div>
+	{:else}
+		<div></div>
+	{/if}
+{/snippet}
+
+{#snippet chartSection(title: string, rows: { label: string; romaji: (string | null)[] }[], columns: string[], map: RomajiMap)}
+	<div class="space-y-1">
+		<h3 class="text-sm font-semibold text-muted-foreground">{title}</h3>
+		<!-- Column headers -->
+		<div class="grid gap-1.5" style="grid-template-columns: 2rem repeat({columns.length}, minmax(0, 1fr))">
+			<div></div>
+			{#each columns as col}
+				<div class="text-center text-xs font-medium text-muted-foreground">{col}</div>
+			{/each}
+		</div>
+		<!-- Rows -->
+		{#each rows as row}
+			<div class="grid gap-1.5" style="grid-template-columns: 2rem repeat({columns.length}, minmax(0, 1fr))">
+				<div class="flex items-center justify-center text-xs font-medium text-muted-foreground">{row.label}</div>
+				{#each row.romaji as romaji}
+					{@render kanaCell(romaji ? map.get(romaji) : undefined)}
+				{/each}
+			</div>
+		{/each}
+	</div>
+{/snippet}
+
+{#snippet extraSection(title: string, extraItems: LanguageItem[])}
+	{#if extraItems.length > 0}
+		<div class="space-y-1">
+			<h3 class="text-sm font-semibold text-muted-foreground">{title}</h3>
+			<div class="grid grid-cols-5 gap-1.5 sm:grid-cols-8 md:grid-cols-10">
+				{#each extraItems as item (item.id)}
+					{@render kanaCell(item)}
+				{/each}
+			</div>
+		</div>
+	{/if}
+{/snippet}
+
+{#snippet fullChart(label: string, map: RomajiMap, extraItems: LanguageItem[])}
+	<div class="space-y-6">
+		<h2 class="text-lg font-bold">{label}</h2>
+		{@render chartSection("Gojūon", GOJUON_ROWS, VOWELS, map)}
+		{@render chartSection("Dakuten", DAKUTEN_ROWS, VOWELS, map)}
+		{@render chartSection("Handakuten", HANDAKUTEN_ROWS, VOWELS, map)}
+		{@render chartSection("Yōon (Combinations)", YOON_ROWS, YOON_COLS, map)}
+		{@render extraSection("Extended Kana", extraItems)}
+	</div>
+{/snippet}
 
 <div class="mx-auto max-w-4xl space-y-6">
 	<div class="flex items-center justify-between">
@@ -56,16 +150,13 @@ $effect(() => {
 
 	{#if loading}
 		<SkeletonCards count={6} columns={3} />
+	{:else if kanaType === "hiragana"}
+		{@render fullChart("Hiragana", hiraganaMap, hiraganaExtra)}
+	{:else if kanaType === "katakana"}
+		{@render fullChart("Katakana", katakanaMap, katakanaExtra)}
 	{:else}
-		<div class="grid grid-cols-5 gap-2 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12">
-			{#each displayItems as item (item.id)}
-				<div class="flex flex-col items-center justify-center rounded-lg border bg-card p-3 transition-colors hover:bg-accent">
-					<span class="text-2xl font-bold">{item.primary_text}</span>
-					{#if item.romaji}
-						<span class="mt-1 text-xs text-muted-foreground">{item.romaji}</span>
-					{/if}
-				</div>
-			{/each}
-		</div>
+		{@render fullChart("Hiragana", hiraganaMap, hiraganaExtra)}
+		<hr class="border-border" />
+		{@render fullChart("Katakana", katakanaMap, katakanaExtra)}
 	{/if}
 </div>

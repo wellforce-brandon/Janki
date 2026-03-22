@@ -1,10 +1,13 @@
 <script lang="ts">
+import { getKanaScriptLabel } from "$lib/data/kana-groups";
+
 interface Props {
 	type: string;
+	primaryText?: string;
 	class?: string;
 }
 
-let { type, class: className = "" }: Props = $props();
+let { type, primaryText, class: className = "" }: Props = $props();
 
 const COLORS: Record<string, string> = {
 	kana: "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
@@ -17,8 +20,11 @@ const COLORS: Record<string, string> = {
 };
 
 let colorClass = $derived(COLORS[type] ?? "bg-muted text-muted-foreground");
+let displayLabel = $derived(
+	type === "kana" && primaryText ? getKanaScriptLabel(primaryText) : type,
+);
 </script>
 
 <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize {colorClass} {className}">
-	{type}
+	{displayLabel}
 </span>

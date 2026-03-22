@@ -1,6 +1,7 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
 import { type LanguageItem, updateLanguageItemSrs } from "$lib/db/queries/language";
+import { getKanaScriptLabel } from "$lib/data/kana-groups";
 import { reviewLanguageItem, type LanguageReviewResult } from "$lib/srs/language-srs";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
@@ -61,9 +62,11 @@ let remaining = $derived(queue.length - currentIndex);
 let progressPercent = $derived(Math.round((currentIndex / queue.length) * 100));
 
 /** Get display label for the content type */
-function getTypeLabel(type: string): string {
+function getTypeLabel(type: string, item?: LanguageItem): string {
+	if (type === "kana" && item) {
+		return getKanaScriptLabel(item.primary_text);
+	}
 	const labels: Record<string, string> = {
-		kana: "Kana",
 		vocabulary: "Vocabulary",
 		grammar: "Grammar",
 		sentence: "Sentence",
@@ -362,7 +365,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 		<!-- Counter + controls -->
 		<div class="flex items-center justify-between py-2 text-sm text-muted-foreground">
-			<span>{getTypeLabel(current.content_type)} Meaning</span>
+			<span>{getTypeLabel(current.content_type, current)} Meaning</span>
 			<div class="flex items-center gap-3">
 				{#if undoStack.length > 0}
 					<button

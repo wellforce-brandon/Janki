@@ -2,6 +2,7 @@
 import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import type { LanguageItem } from "$lib/db/queries/language";
+import { getKanaScriptLabel, getKanaGroupLabel } from "$lib/data/kana-groups";
 import { completeLessonBatch } from "$lib/srs/language-lessons";
 import { addToast } from "$lib/stores/toast.svelte";
 import { normalizeLanguageAnswer } from "$lib/utils/answer-validation";
@@ -58,9 +59,11 @@ let quizProgress = $derived(
 
 // --- Helpers ---
 
-function getTypeLabel(type: string): string {
+function getTypeLabel(type: string, item?: LanguageItem): string {
+	if (type === "kana" && item) {
+		return getKanaScriptLabel(item.primary_text);
+	}
 	const labels: Record<string, string> = {
-		kana: "Kana",
 		vocabulary: "Vocabulary",
 		grammar: "Grammar",
 		sentence: "Sentence",
@@ -323,7 +326,7 @@ function handleKeydown(e: KeyboardEvent) {
 				<div class="space-y-4">
 					<div>
 						<h4 class="text-sm font-medium text-muted-foreground">Type</h4>
-						<p class="mt-1 font-medium capitalize">{getTypeLabel(current.content_type)}</p>
+						<p class="mt-1 font-medium capitalize">{getTypeLabel(current.content_type, current)}</p>
 					</div>
 
 					{#if current.meaning}
@@ -486,7 +489,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 		<div class="flex items-center justify-between py-2 text-sm text-muted-foreground">
 			<div class="flex items-center gap-3">
-				<span>{getTypeLabel(currentQuiz.item.content_type)} Meaning</span>
+				<span>{getTypeLabel(currentQuiz.item.content_type, currentQuiz.item)} Meaning</span>
 				<button
 					type="button"
 					class="text-xs hover:text-foreground"

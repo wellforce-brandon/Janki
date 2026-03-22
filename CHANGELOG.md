@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.20.0.0] - 2026-03-22
+
+### Added
+
+- Structured kana lesson progression with 24 lesson groups following standard gojuon learning order
+- Hiragana seion taught first (vowels through W-row), then Katakana seion, then dakuten/handakuten/yoon
+- Progressive unlock gating: 80% of previous group must reach Apprentice 4+ before next group unlocks
+- Lesson picker now sub-groups kana by lesson group with labels like "Hiragana: Vowels", "Hiragana: K-row"
+- "Hiragana" and "Katakana" labels replace generic "Kana" in lesson sessions, review sessions, search results, and content type badges
+
+### Changed
+
+- Kana lesson ordering now uses lesson_order column instead of insertion order
+- Extracted shared kana chart constants (gojuon, dakuten, handakuten, yoon rows) into reusable module
+
 ## [0.19.1.0] - 2026-03-21
 
 ### Fixed

@@ -6,6 +6,7 @@ import {
 	getAvailableLessons,
 	type LanguageItem,
 } from "$lib/db/queries/language";
+import { getKanaGroupLabel, getKanaScriptLabel } from "$lib/data/kana-groups";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -16,25 +17,56 @@ let interleave = $state(true);
 
 const TYPE_ORDER = ["kana", "vocabulary", "grammar", "conjugation", "sentence"];
 
-interface TypeGroup {
+interface DisplayGroup {
+	key: string;
+	label: string;
 	type: string;
+	colorClass: string;
 	items: LanguageItem[];
 }
 
-let typeGroups = $derived.by((): TypeGroup[] => {
-	const map = new Map<string, LanguageItem[]>();
-	for (const item of allItems) {
-		const arr = map.get(item.content_type) ?? [];
-		arr.push(item);
-		map.set(item.content_type, arr);
-	}
-	const groups: TypeGroup[] = [];
+let displayGroups = $derived.by((): DisplayGroup[] => {
+	const groups: DisplayGroup[] = [];
+
 	for (const type of TYPE_ORDER) {
-		const items = map.get(type);
-		if (items && items.length > 0) {
-			groups.push({ type, items });
+		const items = allItems.filter((i) => i.content_type === type);
+		if (items.length === 0) continue;
+
+		if (type === "kana") {
+			// Sub-group kana by lesson_group, ordered by lesson_order
+			const lessonGroupMap = new Map<string, LanguageItem[]>();
+			for (const item of items) {
+				const groupKey = item.lesson_group ?? "unknown";
+				const arr = lessonGroupMap.get(groupKey) ?? [];
+				arr.push(item);
+				lessonGroupMap.set(groupKey, arr);
+			}
+			// Sort by lesson_order of first item in each group
+			const sortedEntries = [...lessonGroupMap.entries()].sort((a, b) => {
+				const orderA = a[1][0]?.lesson_order ?? 999;
+				const orderB = b[1][0]?.lesson_order ?? 999;
+				return orderA - orderB;
+			});
+			for (const [groupKey, groupItems] of sortedEntries) {
+				groups.push({
+					key: `kana-${groupKey}`,
+					label: getKanaGroupLabel(groupKey),
+					type: "kana",
+					colorClass: "bg-teal-500",
+					items: groupItems,
+				});
+			}
+		} else {
+			groups.push({
+				key: type,
+				label: getTypeLabel(type),
+				type,
+				colorClass: getTypeColor(type),
+				items,
+			});
 		}
 	}
+
 	return groups;
 });
 
@@ -55,6 +87,17 @@ function toggleItem(id: number) {
 	const next = new Set(selected);
 	if (next.has(id)) next.delete(id);
 	else next.add(id);
+	selected = next;
+}
+
+function selectGroup(group: DisplayGroup) {
+	const next = new Set(selected);
+	const allSelected = group.items.every((i) => next.has(i.id));
+	if (allSelected) {
+		for (const i of group.items) next.delete(i.id);
+	} else {
+		for (const i of group.items) next.add(i.id);
+	}
 	selected = next;
 }
 
@@ -81,33 +124,6 @@ function startSession() {
 	if (selectedItems.length === 0) return;
 	const ids = selectedItems.map((i) => i.id).join(",");
 	navigate("lang-lessons", { ids, source: "picker" });
-}
-
-function getSessionItems(): LanguageItem[] {
-	const items = [...selectedItems];
-	if (interleave) {
-		const byType = new Map<string, LanguageItem[]>();
-		for (const item of items) {
-			const arr = byType.get(item.content_type) ?? [];
-			arr.push(item);
-			byType.set(item.content_type, arr);
-		}
-		const result: LanguageItem[] = [];
-		let added = true;
-		while (added) {
-			added = false;
-			for (const type of TYPE_ORDER) {
-				const arr = byType.get(type);
-				if (arr && arr.length > 0) {
-					const item = arr.shift();
-					if (item) result.push(item);
-					added = true;
-				}
-			}
-		}
-		return result;
-	}
-	return items;
 }
 
 function getTypeLabel(type: string): string {
@@ -137,6 +153,9 @@ function getDisplayText(item: LanguageItem): string {
 }
 
 function getSubText(item: LanguageItem): string {
+	if (item.content_type === "kana") {
+		return item.romaji ?? "";
+	}
 	return item.meaning ?? item.reading ?? "";
 }
 
@@ -198,23 +217,24 @@ $effect(() => {
 			</div>
 		{/if}
 
-		<!-- Type groups -->
-		{#each typeGroups as group}
+		<!-- Display groups (kana sub-grouped by lesson_group, others as before) -->
+		{#each displayGroups as group (group.key)}
 			<div class="space-y-2">
 				<div class="flex items-center gap-2">
-					<h3 class="font-semibold">{getTypeLabel(group.type)}</h3>
-					<Button size="sm" variant="ghost" onclick={() => selectAllType(group.type)}>
+					<h3 class="font-semibold">{group.label}</h3>
+					<span class="text-xs text-muted-foreground">({group.items.length})</span>
+					<Button size="sm" variant="ghost" onclick={() => selectGroup(group)}>
 						{group.items.every((i) => selected.has(i.id)) ? "Deselect All" : "Select All"}
 					</Button>
 				</div>
 
 				<div class="flex flex-wrap gap-1.5">
-					{#each group.items as item}
+					{#each group.items as item (item.id)}
 						<button
 							type="button"
 							class="flex flex-col items-center rounded-md border px-2.5 py-1.5 text-sm transition-colors
 								{selected.has(item.id)
-									? getTypeColor(item.content_type) + ' text-white border-transparent'
+									? group.colorClass + ' text-white border-transparent'
 									: 'bg-card hover:bg-accent'}"
 							onclick={() => toggleItem(item.id)}
 							aria-label="{getDisplayText(item)} - {getSubText(item)}{selected.has(item.id) ? ' (selected)' : ''}"

@@ -6,6 +6,7 @@ import {
 	type LanguageItem,
 	searchLanguageItems,
 } from "$lib/db/queries/language";
+import { getKanaScriptLabel } from "$lib/data/kana-groups";
 import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { speakJapanese } from "$lib/tts/speech";
@@ -224,7 +225,7 @@ $effect(() => {
 									<div class="mt-0.5 text-xs text-muted-foreground">{@html highlightMatch(item.explanation, query)}</div>
 								{/if}
 								<div class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-									<span class="rounded bg-muted px-1.5 py-0.5 capitalize">{item.content_type}</span>
+									<span class="rounded bg-muted px-1.5 py-0.5 capitalize">{item.content_type === 'kana' ? getKanaScriptLabel(item.primary_text) : item.content_type}</span>
 									<span>&middot;</span>
 									<span>{srsLabel(item.srs_stage)}</span>
 									{#if item.jlpt_level}

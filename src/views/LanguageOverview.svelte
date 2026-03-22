@@ -173,7 +173,12 @@ $effect(() => {
 		</div>
 
 		<!-- SRS Stage Distribution -->
-		{#if srsDistribution.length > 0}
+		{#if !detailsLoaded && srsDistribution.length === 0}
+			<div class="space-y-3">
+				<div class="h-4 w-32 animate-pulse rounded bg-muted"></div>
+				<div class="h-32 animate-pulse rounded-lg border bg-muted/50"></div>
+			</div>
+		{:else if srsDistribution.length > 0}
 			<div class="space-y-3">
 				<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">SRS Distribution</h3>
 				<div class="rounded-lg border bg-card p-4">

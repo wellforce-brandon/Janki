@@ -522,6 +522,19 @@ export async function getRecentlyUnlockedItems(limit = 10): Promise<QueryResult<
 	});
 }
 
+/** Rebuild FTS5 search index from language_items table */
+export async function rebuildFtsIndex(): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute("DELETE FROM language_fts");
+		await db.execute(
+			`INSERT INTO language_fts(rowid, primary_text, reading, meaning, explanation)
+			SELECT id, primary_text, COALESCE(reading, ''), COALESCE(meaning, ''), COALESCE(explanation, '')
+			FROM language_items`,
+		);
+	});
+}
+
 /** Count items at Guru+ (srs_stage >= 5) for a given JLPT level */
 export async function getJlptLevelProgress(jlptLevel: string): Promise<QueryResult<{ total: number; guru_plus: number }>> {
 	return safeQuery(async () => {

@@ -1,0 +1,21 @@
+/** Normalize an answer for comparison: lowercase, trim, collapse whitespace, strip punctuation */
+export function normalizeAnswer(answer: string): string {
+	return answer
+		.toLowerCase()
+		.trim()
+		.replace(/\s+/g, " ")
+		.replace(/[.,!?;:'"()\[\]{}]/g, "");
+}
+
+/** Fuzzy match: checks if strings share enough words for longer answers (60%+ overlap for 3+ words) */
+export function fuzzyMatch(userAnswer: string, expected: string): boolean {
+	if (userAnswer === expected) return true;
+	if (userAnswer.includes(expected) || expected.includes(userAnswer)) return true;
+	const userWords = userAnswer.split(" ").filter(Boolean);
+	const expectedWords = expected.split(" ").filter(Boolean);
+	if (expectedWords.length >= 3) {
+		const matching = userWords.filter((w) => expectedWords.includes(w));
+		return matching.length >= Math.ceil(expectedWords.length * 0.6);
+	}
+	return false;
+}

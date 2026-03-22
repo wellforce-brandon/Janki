@@ -10,6 +10,7 @@ import {
 } from "$lib/stores/app-settings.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
+import { rebuildFtsIndex } from "$lib/db/queries/language";
 import { checkForUpdates } from "$lib/updater/check-update";
 
 let s = $derived(getSettings());
@@ -50,6 +51,24 @@ async function handleImport() {
 		}
 	} catch (e) {
 		addToast(`Restore failed: ${e instanceof Error ? e.message : String(e)}`, "error");
+	}
+}
+
+let rebuildingFts = $state(false);
+
+async function handleRebuildFts() {
+	rebuildingFts = true;
+	try {
+		const result = await rebuildFtsIndex();
+		if (result.ok) {
+			addToast("Search index rebuilt successfully", "success");
+		} else {
+			addToast(`Rebuild failed: ${result.error}`, "error");
+		}
+	} catch (e) {
+		addToast(`Rebuild failed: ${e instanceof Error ? e.message : String(e)}`, "error");
+	} finally {
+		rebuildingFts = false;
 	}
 }
 
@@ -293,6 +312,17 @@ async function handleResetDefaults() {
 			<Button variant="outline" onclick={handleExport}>Export Backup</Button>
 			<Button variant="outline" onclick={handleImport}>Restore from Backup</Button>
 		</div>
+	</section>
+
+	<!-- Search Index -->
+	<section class="space-y-3 rounded-lg border bg-card p-4">
+		<h3 class="font-medium">Search Index</h3>
+		<p class="text-sm text-muted-foreground">
+			Rebuild the full-text search index if search results seem incomplete or out of sync.
+		</p>
+		<Button variant="outline" onclick={handleRebuildFts} disabled={rebuildingFts}>
+			{rebuildingFts ? "Rebuilding..." : "Rebuild Search Index"}
+		</Button>
 	</section>
 
 	<!-- Updates -->

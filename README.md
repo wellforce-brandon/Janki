@@ -1,28 +1,51 @@
 # Janki
 
-Personal Windows desktop app for learning Japanese. Replaces Anki with a modern UI, FSRS-6 spaced repetition, and WaniKani-style kanji progression.
+Personal Windows desktop app for learning Japanese. Replaces Anki with a modern UI, WaniKani-style kanji progression, and a comprehensive language learning system.
 
 ## Features
 
-- **FSRS-6 SRS Engine** -- 20-30% fewer reviews than Anki's SM-2, with direct retention targeting
-- **Anki Deck Import** -- import .apkg files from AnkiWeb community decks
-- **WaniKani-Style Kanji** -- 60-level progression: radicals -> kanji -> vocab with SRS stages
+### Kanji System
+- **WaniKani-Style Progression** -- 60-level kanji system: radicals -> kanji -> vocabulary with SRS stages (Apprentice through Burned)
 - **Stroke Order** -- animated SVG stroke diagrams from KanjiVG
-- **Japanese TTS** -- pronunciation via Web Speech API (Windows neural voices)
+- **Level-Based Unlocks** -- items unlock as you progress through stages, gated by mastery
+- **Dual Reviews** -- meaning and reading reviewed separately with romaji-to-hiragana conversion
+
+### Language Learning
+- **Five Content Types** -- kana, vocabulary, grammar, sentences, and conjugations with ~33k items
+- **Structured Lessons** -- teaching phase with visual cards before quiz phase
+- **Lesson Picker** -- choose what to study by content type with available/completed counts
+- **Answer Validation** -- fuzzy matching for longer answers (60%+ word overlap)
+
+### SRS & Reviews
+- **FSRS-6 Engine** -- 20-30% fewer reviews than Anki's SM-2 (for deck-based cards)
+- **WaniKani-Style SRS** -- stages 0-9 with interval progression (4h to 4 months)
+- **Review Undo** -- Ctrl+Z to undo last answer with full SRS state rollback
+- **Keyboard Shortcuts** -- ? overlay showing all shortcuts, Alt+P for audio, Enter to submit
+- **Japanese TTS** -- pronunciation via Web Speech API with configurable rate/pitch
+
+### Search & Stats
+- **FTS5 Full-Text Search** -- instant search across all language items with ranked results
+- **Review Heatmap** -- combined kanji + language review activity calendar
+- **SRS Distribution** -- visual breakdown of items by SRS stage per content type
+- **Daily Charts** -- reviews per day, accuracy trends, time spent, content type breakdowns
+
+### General
+- **Anki Import** -- import .apkg files from AnkiWeb community decks
 - **Dark/Light Theme** -- toggle with system preference detection
-- **Keyboard-Driven** -- full keyboard shortcuts for reviews and navigation
-- **Local-First** -- all data stored in SQLite, no account or server needed
+- **Auto-Backup** -- daily backups on launch (last 7 kept), manual export/import
+- **Auto-Updater** -- checks for updates on launch via GitHub Releases
+- **Local-First** -- all data in SQLite, no account or server needed
 
 ## Tech Stack
 
 | Layer | Choice |
 |-------|--------|
 | Desktop shell | Tauri 2.x |
-| Frontend | Svelte 5 |
+| Frontend | Svelte 5 (runes) |
 | UI components | shadcn-svelte |
 | Styling | Tailwind CSS 4 |
 | Database | SQLite (tauri-plugin-sql) |
-| SRS algorithm | FSRS-6 (ts-fsrs) |
+| SRS algorithm | FSRS-6 (ts-fsrs) + WK-style |
 | Anki import | anki-reader |
 | Linter/Formatter | Biome 2.x |
 | Test runner | Vitest |
@@ -39,8 +62,8 @@ Personal Windows desktop app for learning Japanese. Replaces Anki with a modern 
 │  │  │ Views   │  │Components │  │  │
 │  │  │Dashboard│  │ FlashCard │  │  │
 │  │  │ Review  │  │ KanjiCard │  │  │
-│  │  │KanjiMap │  │StrokeOrder│  │  │
-│  │  │ Decks   │  │ DeckList  │  │  │
+│  │  │Language │  │StrokeOrder│  │  │
+│  │  │ Search  │  │ Lessons   │  │  │
 │  │  │ Stats   │  │  Charts   │  │  │
 │  │  └────┬────┘  └─────┬─────┘  │  │
 │  │       │              │        │  │
@@ -56,7 +79,7 @@ Personal Windows desktop app for learning Japanese. Replaces Anki with a modern 
 │  └───────────────────────────────┘  │
 └─────────────────────────────────────┘
          │
-    $APPDATA/janki/
+    $APPDATA/com.janki.desktop/
     ├── janki.db      (SQLite)
     ├── backups/      (daily auto-backup)
     └── logs/
@@ -84,25 +107,20 @@ pnpm tauri dev
 janki/
 ├── src/                    # Svelte frontend
 │   ├── lib/
-│   │   ├── components/     # UI components (review, kanji, deck, stats)
+│   │   ├── components/     # UI components (review, kanji, language, stats, layout)
 │   │   ├── stores/         # Svelte state management
-│   │   ├── db/             # Database layer (queries, migrations)
+│   │   ├── db/             # Database layer (queries, migrations, cache)
 │   │   ├── srs/            # FSRS-6 + WaniKani SRS engines
 │   │   ├── import/         # Anki .apkg parser
+│   │   ├── utils/          # Answer validation, Japanese text utilities
 │   │   └── tts/            # Text-to-speech
 │   └── views/              # Top-level page components
 ├── src-tauri/              # Tauri Rust backend
-├── data/                   # Static Japanese language data (JSON, SVG)
+├── public/data/            # Static language data (JSON)
+├── data/                   # Build-time data processing
 ├── tasks/                  # Development plans
 └── .claude/                # Claude Code configuration
 ```
-
-## Development Phases
-
-- **Phase 1 -- Foundation:** Project scaffold, layout, theme, SQLite schema
-- **Phase 2 -- Core:** SRS engine, Anki import, flashcard review, kanji progression
-- **Phase 3 -- Polish:** TTS, search, statistics, keyboard shortcuts, card editor
-- **Phase 4 -- Ship:** Auto-updater, system tray, backup/restore, grammar, reading practice
 
 ## Data Sources
 

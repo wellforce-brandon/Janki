@@ -5,6 +5,7 @@ import { reviewLanguageItem, type LanguageReviewResult } from "$lib/srs/language
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
 import { speakJapanese } from "$lib/tts/speech";
+import { normalizeAnswer, fuzzyMatch } from "$lib/utils/answer-validation";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
 
 interface Props {
@@ -61,6 +62,7 @@ interface UndoEntry {
 	prevIncorrectCount: number;
 	prevSrsStage: number;
 }
+const MAX_UNDO_DEPTH = 10;
 let undoStack = $state<UndoEntry[]>([]);
 
 let current = $derived(currentIndex < queue.length ? queue[currentIndex] : null);
@@ -97,27 +99,6 @@ function getTypeColor(type: string): string {
 	return colors[type] ?? "bg-gray-500";
 }
 
-/** Normalize an answer for comparison */
-function normalizeAnswer(answer: string): string {
-	return answer
-		.toLowerCase()
-		.trim()
-		.replace(/\s+/g, " ")
-		.replace(/[.,!?;:'"()\[\]{}]/g, "");
-}
-
-/** Fuzzy match: checks if strings share enough words for longer answers */
-function fuzzyMatch(userAnswer: string, expected: string): boolean {
-	if (userAnswer === expected) return true;
-	if (userAnswer.includes(expected) || expected.includes(userAnswer)) return true;
-	const userWords = userAnswer.split(" ").filter(Boolean);
-	const expectedWords = expected.split(" ").filter(Boolean);
-	if (expectedWords.length >= 3) {
-		const matching = userWords.filter((w) => expectedWords.includes(w));
-		return matching.length >= Math.ceil(expectedWords.length * 0.6);
-	}
-	return false;
-}
 
 /** Check if user's answer is correct */
 function checkAnswer(): boolean {
@@ -211,7 +192,7 @@ async function submitAnswer() {
 		showInfoPeek = true;
 
 		// Save undo entry
-		undoStack = [...undoStack, {
+		undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
 			index: currentIndex,
 			wasCorrect: true,
 			reviewResult: result,
@@ -232,7 +213,7 @@ async function submitAnswer() {
 		showInfoPeek = true;
 
 		// Save undo entry
-		undoStack = [...undoStack, {
+		undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
 			index: currentIndex,
 			wasCorrect: false,
 			reviewResult: result,

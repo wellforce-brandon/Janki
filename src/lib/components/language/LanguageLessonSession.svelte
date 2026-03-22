@@ -4,6 +4,7 @@ import Button from "$lib/components/ui/button/button.svelte";
 import type { LanguageItem } from "$lib/db/queries/language";
 import { completeLessonBatch } from "$lib/srs/language-lessons";
 import { addToast } from "$lib/stores/toast.svelte";
+import { normalizeAnswer } from "$lib/utils/answer-validation";
 
 interface Props {
 	items: LanguageItem[];
@@ -89,14 +90,6 @@ function getPlaceholder(item: LanguageItem): string {
 	if (item.content_type === "kana") return "Type the romaji...";
 	if (item.content_type === "sentence") return "Type the translation...";
 	return "Type the meaning...";
-}
-
-function normalizeAnswer(answer: string): string {
-	return answer
-		.toLowerCase()
-		.trim()
-		.replace(/\s+/g, " ")
-		.replace(/[.,!?;:'"()\[\]{}]/g, "");
 }
 
 function checkAnswer(item: LanguageItem, input: string): boolean {

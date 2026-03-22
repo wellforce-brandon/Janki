@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.19.0.1] - 2026-03-21
+
+### Added
+
+- Test suite for language SRS engine (stage transitions, drop formula, review processing)
+- Test suite for query cache (get/set/invalidate, TTL expiry, prefix invalidation)
+- Test suite for answer validation (normalizeAnswer, fuzzyMatch boundary cases)
+- FTS rebuild command in Settings for manual search index re-sync
+- Skeleton placeholder for lazy-loaded SRS distribution on Language Overview
+
+### Changed
+
+- Synced Tauri and Cargo versions to 0.19.0 (was 0.5.0)
+- Extracted answer normalization and fuzzy matching to shared utility module
+- Capped review session undo stack at 10 entries to bound memory usage
+- Updated README with current feature list and project structure
+
 ## [0.19.0.0] - 2026-03-21
 
 ### Added

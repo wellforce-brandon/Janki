@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.21.0.0] - 2026-03-22
+
+### Added
+
+- WaniKani-style LanguageItemBrowser view with JLPT tier accordions, sub-groups, and SRS-colored item tiles
+- LanguageItemDetail view with full item info, keyboard navigation, TTS, and WK cross-references
+- Browse page queries: getLanguageItemCountsByJlpt, getLanguageItemsByJlptAndRange, getAdjacentLanguageItem
+- SRS stage dot indicators (4-dot apprentice progression) on item tiles in LanguageItemBrowser
+- Guru+ mastery progress bar alongside unlock progress in JLPT tier headers
+- SRS color tinting on kana chart cells with click-to-detail navigation
+- SRS legend on kana page matching the item browser legend
+- lang-item-detail view routing in navigation store
+
+### Removed
+
+- LanguageVocabulary, LanguageGrammar, LanguageSentences, LanguageConjugation views (replaced by LanguageItemBrowser)
+
+### Changed
+
+- Sidebar vocabulary/grammar/sentences/conjugation entries now route to LanguageItemBrowser with content type parameter
+- Tailwind v4 theme tokens registered in app.css for custom color utility classes
+- Tauri config: enabled zoom hotkeys and webview zoom capability
+- Added DM Sans and Fira Code font dependencies
+
 ## [0.20.1.2] - 2026-03-22
 
 ### Fixed

@@ -12,6 +12,8 @@ import {
 	YOON_COLS,
 	YOON_ROWS,
 } from "$lib/data/kana-groups";
+import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
+import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 
 type KanaType = "all" | "hiragana" | "katakana";
@@ -63,6 +65,32 @@ function getUnchartedItems(filteredItems: LanguageItem[]): LanguageItem[] {
 	return filteredItems.filter((item) => !item.romaji || !CHARTED_ROMAJI.has(item.romaji));
 }
 
+function getSrsClasses(item: LanguageItem): string {
+	if (item.srs_stage === 0)
+		return "border-2 border-dashed border-muted-foreground/30 bg-transparent text-muted-foreground/50";
+	if (item.srs_stage === 9)
+		return "bg-zinc-700 dark:bg-zinc-600 text-zinc-300 border border-transparent";
+	if (!item.lesson_completed_at)
+		return "bg-pink-500/30 dark:bg-pink-400/30 text-pink-600 dark:text-pink-400 border border-pink-500/50";
+	if (item.srs_stage <= 4)
+		return "bg-pink-500 dark:bg-pink-600 text-white border border-transparent";
+	if (item.srs_stage <= 6)
+		return "bg-purple-500 dark:bg-purple-600 text-white border border-transparent";
+	if (item.srs_stage === 7)
+		return "bg-blue-500 dark:bg-blue-600 text-white border border-transparent";
+	if (item.srs_stage === 8)
+		return "bg-sky-500 dark:bg-sky-600 text-white border border-transparent";
+	return "bg-muted text-muted-foreground border border-transparent";
+}
+
+function openDetail(item: LanguageItem) {
+	navigate("lang-item-detail", {
+		id: String(item.id),
+		contentType: item.content_type,
+		jlptLevel: item.jlpt_level ?? "None",
+	});
+}
+
 let hiraganaItems = $derived(items.filter((k) => isHiragana(k.primary_text)));
 let katakanaItems = $derived(items.filter((k) => isKatakana(k.primary_text)));
 
@@ -79,12 +107,18 @@ $effect(() => {
 
 {#snippet kanaCell(item: LanguageItem | undefined)}
 	{#if item}
-		<div class="flex flex-col items-center justify-center rounded-lg border bg-card p-2 transition-colors hover:bg-accent">
+		<button
+			type="button"
+			class="flex flex-col items-center justify-center rounded-lg p-2 transition-all hover:brightness-110 cursor-pointer {getSrsClasses(item)}"
+			onclick={() => openDetail(item)}
+			title={STAGE_NAMES[item.srs_stage] ?? "Unknown"}
+			aria-label="{item.primary_text} ({item.romaji ?? ''}) - {STAGE_NAMES[item.srs_stage] ?? 'Unknown'}"
+		>
 			<span class="text-xl font-bold sm:text-2xl">{item.primary_text}</span>
 			{#if item.romaji}
-				<span class="mt-0.5 text-[10px] text-muted-foreground sm:text-xs">{item.romaji}</span>
+				<span class="mt-0.5 text-[10px] opacity-80 sm:text-xs">{item.romaji}</span>
 			{/if}
-		</div>
+		</button>
 	{:else}
 		<div></div>
 	{/if}
@@ -137,7 +171,7 @@ $effect(() => {
 {/snippet}
 
 <div class="mx-auto max-w-4xl space-y-6">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-wrap items-center justify-between gap-3">
 		<h2 class="text-2xl font-bold" tabindex="-1">Kana</h2>
 		<div class="flex items-center gap-3">
 			<div class="flex gap-2">
@@ -145,6 +179,38 @@ $effect(() => {
 				<Button variant={kanaType === "hiragana" ? "default" : "outline"} size="sm" onclick={() => (kanaType = "hiragana")}>Hiragana</Button>
 				<Button variant={kanaType === "katakana" ? "default" : "outline"} size="sm" onclick={() => (kanaType = "katakana")}>Katakana</Button>
 			</div>
+		</div>
+	</div>
+
+	<!-- SRS Legend -->
+	<div class="flex flex-wrap items-center gap-3 text-xs">
+		<div class="flex items-center gap-1.5">
+			<div class="h-4 w-4 rounded border-2 border-dashed border-current opacity-30"></div>
+			<span class="text-muted-foreground">Locked</span>
+		</div>
+		<div class="flex items-center gap-1.5">
+			<div class="h-4 w-4 rounded bg-pink-500/30 border border-pink-500/50"></div>
+			<span class="text-muted-foreground">In Lessons</span>
+		</div>
+		<div class="flex items-center gap-1.5">
+			<div class="h-4 w-4 rounded bg-pink-500"></div>
+			<span class="text-muted-foreground">Apprentice</span>
+		</div>
+		<div class="flex items-center gap-1.5">
+			<div class="h-4 w-4 rounded bg-purple-500"></div>
+			<span class="text-muted-foreground">Guru</span>
+		</div>
+		<div class="flex items-center gap-1.5">
+			<div class="h-4 w-4 rounded bg-blue-500"></div>
+			<span class="text-muted-foreground">Master</span>
+		</div>
+		<div class="flex items-center gap-1.5">
+			<div class="h-4 w-4 rounded bg-sky-500"></div>
+			<span class="text-muted-foreground">Enlightened</span>
+		</div>
+		<div class="flex items-center gap-1.5">
+			<div class="h-4 w-4 rounded bg-zinc-700 dark:bg-zinc-600"></div>
+			<span class="text-muted-foreground">Burned</span>
 		</div>
 	</div>
 

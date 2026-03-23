@@ -51,6 +51,93 @@
   --shadow-inner: inset 0 1.5px 3px 0 rgba(0,0,0,0.05);
 }
 
+/* Register color tokens for Tailwind v4 utility class generation.
+   Actual values are set in :root (light) and .dark below. */
+@theme inline {
+  /* Backgrounds */
+  --color-background: var(--color-background);
+  --color-card: var(--color-card);
+  --color-popover: var(--color-popover);
+  --color-surface-1: var(--color-surface-1);
+  --color-surface-2: var(--color-surface-2);
+  --color-surface-3: var(--color-surface-3);
+
+  /* Foreground / text */
+  --color-foreground: var(--color-foreground);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-popover-foreground: var(--color-popover-foreground);
+  --color-text-1: var(--color-text-1);
+  --color-text-2: var(--color-text-2);
+  --color-text-3: var(--color-text-3);
+
+  /* Identity */
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-destructive: var(--color-destructive);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+
+  /* Borders */
+  --color-border: var(--color-border);
+  --color-input: var(--color-input);
+  --color-ring: var(--color-ring);
+
+  /* Status */
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  /* Palette */
+  --color-blue: var(--color-blue);
+  --color-green: var(--color-green);
+  --color-yellow: var(--color-yellow);
+  --color-orange: var(--color-orange);
+  --color-red: var(--color-red);
+  --color-purple: var(--color-purple);
+  --color-pink: var(--color-pink);
+  --color-cyan: var(--color-cyan);
+
+  /* Links */
+  --color-link: var(--color-link);
+  --color-link-hover: var(--color-link-hover);
+
+  /* Badge */
+  --color-badge: var(--color-badge);
+  --color-badge-foreground: var(--color-badge-foreground);
+
+  /* Disabled */
+  --color-disabled: var(--color-disabled);
+  --color-disabled-foreground: var(--color-disabled-foreground);
+
+  /* Form */
+  --color-placeholder: var(--color-placeholder);
+
+  /* Selection */
+  --color-selection: var(--color-selection);
+  --color-selection-foreground: var(--color-selection-foreground);
+
+  /* Overlay & dividers */
+  --color-overlay: var(--color-overlay);
+  --color-divider: var(--color-divider);
+
+  /* Tooltip */
+  --color-tooltip: var(--color-tooltip);
+  --color-tooltip-foreground: var(--color-tooltip-foreground);
+
+  /* Sidebar */
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-foreground: var(--color-sidebar-foreground);
+  --color-sidebar-active: var(--color-sidebar-active);
+  --color-sidebar-hover: var(--color-sidebar-hover);
+  --color-sidebar-active-foreground: var(--color-sidebar-active-foreground);
+}
+
 /* ==================== Light Mode (default) ==================== */
 
 :root {

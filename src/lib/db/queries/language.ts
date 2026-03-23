@@ -718,3 +718,120 @@ export async function hasLockedItemsForJlptLevel(
 		return rows.length > 0;
 	});
 }
+
+// --- Browse page queries ---
+
+export interface JlptGroupCount {
+	jlpt_level: string;
+	total: number;
+	unlocked: number;
+	guru_plus: number;
+}
+
+/** Counts per JLPT level for a content type (for tier progress display) */
+export async function getLanguageItemCountsByJlpt(
+	contentType: ContentType,
+): Promise<QueryResult<JlptGroupCount[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<JlptGroupCount[]>(
+			`SELECT
+				COALESCE(jlpt_level, 'None') as jlpt_level,
+				COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage > 0 THEN 1 END) as unlocked,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
+			FROM language_items
+			WHERE content_type = ?
+			GROUP BY COALESCE(jlpt_level, 'None')
+			ORDER BY
+				CASE COALESCE(jlpt_level, 'None')
+					WHEN 'N5' THEN 1 WHEN 'N4' THEN 2 WHEN 'N3' THEN 3
+					WHEN 'N2' THEN 4 WHEN 'N1' THEN 5 ELSE 6
+				END`,
+			[contentType],
+		);
+	});
+}
+
+export interface JlptSubGroup {
+	groupIndex: number;
+	items: LanguageItem[];
+	unlocked: number;
+	total: number;
+}
+
+/** Get items for a JLPT level and content type, chunked into sub-groups of ~50 */
+export async function getLanguageItemsByJlptAndRange(
+	contentType: ContentType,
+	jlptLevel: string,
+): Promise<QueryResult<JlptSubGroup[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const levelClause = jlptLevel === "None" ? "jlpt_level IS NULL" : "jlpt_level = ?";
+		const params: (string | number)[] = jlptLevel === "None" ? [contentType] : [contentType, jlptLevel];
+
+		const items = await db.select<LanguageItem[]>(
+			`SELECT * FROM language_items
+			WHERE content_type = ? AND ${levelClause}
+			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC`,
+			params,
+		);
+
+		// Chunk into sub-groups of 50
+		const GROUP_SIZE = 50;
+		const groups: JlptSubGroup[] = [];
+		for (let i = 0; i < items.length; i += GROUP_SIZE) {
+			const chunk = items.slice(i, i + GROUP_SIZE);
+			groups.push({
+				groupIndex: Math.floor(i / GROUP_SIZE),
+				items: chunk,
+				total: chunk.length,
+				unlocked: chunk.filter((item) => item.srs_stage > 0).length,
+			});
+		}
+		return groups;
+	});
+}
+
+/** Get adjacent language items for keyboard navigation in detail view */
+export async function getAdjacentLanguageItem(
+	contentType: string,
+	jlptLevel: string | null,
+	currentId: number,
+): Promise<QueryResult<{ prev: LanguageItem | null; next: LanguageItem | null }>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const levelClause = jlptLevel === null ? "jlpt_level IS NULL" : "jlpt_level = ?";
+		const levelParams = jlptLevel === null ? [] : [jlptLevel];
+
+		// Get current item's sort position
+		const currentRows = await db.select<{ freq: number; item_id: number }[]>(
+			"SELECT COALESCE(frequency_rank, 999999) as freq, id as item_id FROM language_items WHERE id = ?",
+			[currentId],
+		);
+		const currentFreq = currentRows[0]?.freq ?? 999999;
+
+		// Previous: same type + level, ordered before current by frequency then id
+		const prevRows = await db.select<LanguageItem[]>(
+			`SELECT * FROM language_items
+			WHERE content_type = ? AND ${levelClause}
+			AND (COALESCE(frequency_rank, 999999) < ? OR (COALESCE(frequency_rank, 999999) = ? AND id < ?))
+			ORDER BY COALESCE(frequency_rank, 999999) DESC, id DESC LIMIT 1`,
+			[contentType, ...levelParams, currentFreq, currentFreq, currentId],
+		);
+
+		// Next: same type + level, ordered after current by frequency then id
+		const nextRows = await db.select<LanguageItem[]>(
+			`SELECT * FROM language_items
+			WHERE content_type = ? AND ${levelClause}
+			AND (COALESCE(frequency_rank, 999999) > ? OR (COALESCE(frequency_rank, 999999) = ? AND id > ?))
+			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC LIMIT 1`,
+			[contentType, ...levelParams, currentFreq, currentFreq, currentId],
+		);
+
+		return {
+			prev: prevRows[0] ?? null,
+			next: nextRows[0] ?? null,
+		};
+	});
+}

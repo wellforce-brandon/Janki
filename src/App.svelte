@@ -17,15 +17,13 @@ import KanjiDetail from "./views/KanjiDetail.svelte";
 import KanjiRadicals from "./views/KanjiRadicals.svelte";
 import KanjiReview from "./views/KanjiReview.svelte";
 import KanjiVocabulary from "./views/KanjiVocabulary.svelte";
-import LanguageConjugation from "./views/LanguageConjugation.svelte";
-import LanguageGrammar from "./views/LanguageGrammar.svelte";
+import LanguageItemBrowser from "./views/LanguageItemBrowser.svelte";
+import LanguageItemDetail from "./views/LanguageItemDetail.svelte";
 import LanguageKana from "./views/LanguageKana.svelte";
 import LanguageOverview from "./views/LanguageOverview.svelte";
 import LanguageLessonPicker from "./views/LanguageLessonPicker.svelte";
 import LanguageLessons from "./views/LanguageLessons.svelte";
 import LanguageReview from "./views/LanguageReview.svelte";
-import LanguageSentences from "./views/LanguageSentences.svelte";
-import LanguageVocabulary from "./views/LanguageVocabulary.svelte";
 import Search from "./views/Search.svelte";
 import Settings from "./views/Settings.svelte";
 import Stats from "./views/Stats.svelte";
@@ -83,15 +81,21 @@ function handleKeydown(e: KeyboardEvent) {
 			{:else if currentView() === "lang-overview"}
 				<LanguageOverview />
 			{:else if currentView() === "lang-vocabulary"}
-				<LanguageVocabulary />
+				<LanguageItemBrowser contentType="vocabulary" title="Vocabulary" />
 			{:else if currentView() === "lang-grammar"}
-				<LanguageGrammar />
+				<LanguageItemBrowser contentType="grammar" title="Grammar" />
 			{:else if currentView() === "lang-sentences"}
-				<LanguageSentences />
+				<LanguageItemBrowser contentType="sentence" title="Sentences" />
 			{:else if currentView() === "lang-kana"}
 				<LanguageKana />
 			{:else if currentView() === "lang-conjugation"}
-				<LanguageConjugation />
+				<LanguageItemBrowser contentType="conjugation" title="Conjugation" />
+			{:else if currentView() === "lang-item-detail"}
+				<LanguageItemDetail
+					itemId={Number(viewParams().id)}
+					contentType={viewParams().contentType}
+					jlptLevel={viewParams().jlptLevel}
+				/>
 			{:else if currentView() === "lang-review"}
 				<LanguageReview />
 			{:else if currentView() === "lang-lessons"}

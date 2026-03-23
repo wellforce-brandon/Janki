@@ -186,4 +186,25 @@ This is a large feature. Split into phases that can be implemented in separate s
 
 ## Lessons Learned / Gotchas
 
-(To be filled after implementation)
+### 1. Migration vs. Seed Ordering (HIGH)
+**Problem:** Migration v15's vocabulary topic UPDATEs depend on `jlpt_level = 'N5'`, but migrations run BEFORE `seedLanguageData()` in the startup sequence (`getDb()` -> migrations -> seed). On first launch, the language_items table is empty when v15 runs, so all vocab UPDATEs match 0 rows. The migration commits (schema_version=15) and never re-runs, leaving vocab items permanently without topic groups.
+
+**Wrong pattern:** Putting data-dependent UPDATEs in a migration that runs before the data exists.
+
+**Fix:** Added `applyVocabTopicOrdering()` as a post-seed fixup in `main.ts`, gated by a settings flag (`vocab_topics_v1`) so it runs once after seeding completes. For any future migrations that need to UPDATE seeded data, the pattern is: put the UPDATE logic in a post-seed fixup function, not in a migration.
+
+**Severity:** HIGH -- silently fails with no error, all N5 vocab items remain ungrouped.
+
+### 2. Browser UI Must Match Data Model (MEDIUM)
+**Problem:** Phase 4 added `lesson_group` / `lesson_order` columns and populated them via migration, but the LanguageItemBrowser component still used flat 50-item chunking (`getLanguageItemsByJlptAndRange`) without any lesson_group awareness. The pedagogical structure existed in the DB but was invisible to users.
+
+**Fix:** Updated the query to ORDER BY `lesson_order` first, group items by `lesson_group` into named sections (with human-readable labels), and fall back to numeric chunks for ungrouped items. Both the query function and the browser component needed changes.
+
+**Severity:** MEDIUM -- no data loss, but the core UX feature of Phase 4 (topic-based learning order) was not surfaced.
+
+### 3. Expected Data Gaps Are Normal (LOW)
+- 848 grammar items have no `context_notes` or `frequency_rank`, so they receive no group. These are imported items without structured Tae Kim metadata.
+- 2054 sentences have no `frequency_rank`, so they receive no JLPT level. These are imported sentences without Core 2k/6k frequency data.
+- 190 of 2462 N5 vocab items match the 15 topic patterns. The remaining ~2272 are general vocabulary without matching part_of_speech or meaning patterns.
+
+These gaps are by design -- the topic queries are intentionally narrow to avoid false positives.

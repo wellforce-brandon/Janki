@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.23.0.0] - 2026-03-23
+
+### Added
+
+- Post-seed vocab topic ordering fixup to handle migration-before-seed timing issue
+- Part-of-speech assignment for 1,543 vocabulary items with NULL PoS (extracted from embedded JMdict data)
+- 17 expanded N5 vocabulary topic groups: greetings, question words, food, body, school, house, transport, nature, clothes, colors, animals, work, location, time, common verbs, descriptors, general
+- Grammar group assignment for 848 ungrouped items (pattern cards, quiz questions, example sentences)
+- JLPT N5 tagging for 2,054 Tae Kim anime grammar course sentences
+- Lesson-group-based sub-group display in LanguageItemBrowser (named sections instead of numeric chunks)
+
+### Fixed
+
+- Migration v15 vocab topic UPDATEs were no-ops due to running before seed data existed
+- LanguageItemBrowser ignored lesson_group data, showing flat 50-item chunks instead of pedagogical groups
+
 ## [0.22.0.0] - 2026-03-23
 
 ### Added

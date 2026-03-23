@@ -7,7 +7,14 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { autoBackup } from "$lib/backup/backup";
 import { getDb } from "$lib/db/database";
 import { seedKanjiData, backfillEnrichedData } from "$lib/db/seed/kanji-data";
-import { seedLanguageData } from "$lib/db/seed/language-data";
+import {
+	seedLanguageData,
+	applyVocabPartOfSpeech,
+	applyVocabTopicOrdering,
+	applyVocabTopicOrderingV2,
+	applyGrammarGroupOrdering,
+	applySentenceJlptTagging,
+} from "$lib/db/seed/language-data";
 import { loadSettings, getSettings } from "$lib/stores/app-settings.svelte";
 import { checkForUpdates } from "$lib/updater/check-update";
 import App from "./App.svelte";
@@ -18,6 +25,11 @@ async function init() {
 		await seedKanjiData();
 		await backfillEnrichedData();
 		await seedLanguageData();
+		await applyVocabPartOfSpeech();
+		await applyVocabTopicOrdering();
+		await applyVocabTopicOrderingV2();
+		await applyGrammarGroupOrdering();
+		await applySentenceJlptTagging();
 	} catch (e) {
 		console.error("[SEED FAILED]", e);
 	}

@@ -761,12 +761,64 @@ export async function getLanguageItemCountsByJlpt(
 
 export interface JlptSubGroup {
 	groupIndex: number;
+	groupKey: string | null;
+	groupLabel: string;
 	items: LanguageItem[];
 	unlocked: number;
 	total: number;
 }
 
-/** Get items for a JLPT level and content type, chunked into sub-groups of ~50 */
+const GROUP_LABELS: Record<string, string> = {
+	// Grammar (Tae Kim sections)
+	"grammar-copula": "Copula / State-of-Being",
+	"grammar-particles": "Basic Particles",
+	"grammar-adjectives": "Adjectives",
+	"grammar-verb-basics": "Verb Basics",
+	"grammar-negative-verbs": "Negative Verbs",
+	"grammar-past-tense": "Past Tense",
+	"grammar-verb-particles": "Particles with Verbs",
+	"grammar-transitivity": "Transitive / Intransitive",
+	"grammar-clauses": "Subordinate Clauses",
+	"grammar-noun-particles": "Noun-Related Particles",
+	"grammar-adverbs-gobi": "Adverbs & Sentence-Enders",
+	"grammar-supplemental": "Supplemental",
+	// N5 Vocabulary topics
+	"vocab-pronouns": "Pronouns",
+	"vocab-numbers": "Numbers",
+	"vocab-days": "Days of the Week",
+	"vocab-months": "Months",
+	"vocab-hours": "Hours",
+	"vocab-minutes": "Minutes",
+	"vocab-day-numbers": "Day Numbers",
+	"vocab-hundreds": "Hundreds",
+	"vocab-thousands": "Thousands",
+	"vocab-year-students": "Year Students",
+	"vocab-age": "Age Counters",
+	"vocab-people-counters": "People Counters",
+	"vocab-seasons": "Seasons",
+	"vocab-family": "Family",
+	"vocab-places": "Countries & Places",
+	// Expanded vocabulary topics
+	"vocab-greetings": "Greetings & Expressions",
+	"vocab-question-words": "Question Words",
+	"vocab-food": "Food & Drink",
+	"vocab-body": "Body & Health",
+	"vocab-school": "School & Education",
+	"vocab-house": "House & Home",
+	"vocab-transport": "Transportation",
+	"vocab-nature": "Nature & Weather",
+	"vocab-clothes": "Clothing & Accessories",
+	"vocab-colors": "Colors",
+	"vocab-animals": "Animals",
+	"vocab-work": "Work & Office",
+	"vocab-location": "Places & Directions",
+	"vocab-time": "Time Expressions",
+	"vocab-actions": "Common Verbs",
+	"vocab-descriptors": "Descriptors",
+	"vocab-general": "General",
+};
+
+/** Get items for a JLPT level, grouped by lesson_group then chunked */
 export async function getLanguageItemsByJlptAndRange(
 	contentType: ContentType,
 	jlptLevel: string,
@@ -779,21 +831,50 @@ export async function getLanguageItemsByJlptAndRange(
 		const items = await db.select<LanguageItem[]>(
 			`SELECT * FROM language_items
 			WHERE content_type = ? AND ${levelClause}
-			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC`,
+			ORDER BY COALESCE(lesson_order, 9999) ASC,
+				COALESCE(frequency_rank, 999999) ASC, id ASC`,
 			params,
 		);
 
-		// Chunk into sub-groups of 50
-		const GROUP_SIZE = 50;
+		// Group by lesson_group, preserving order
+		const grouped = new Map<string | null, LanguageItem[]>();
+		for (const item of items) {
+			const key = item.lesson_group ?? null;
+			if (!grouped.has(key)) grouped.set(key, []);
+			grouped.get(key)!.push(item);
+		}
+
 		const groups: JlptSubGroup[] = [];
-		for (let i = 0; i < items.length; i += GROUP_SIZE) {
-			const chunk = items.slice(i, i + GROUP_SIZE);
-			groups.push({
-				groupIndex: Math.floor(i / GROUP_SIZE),
-				items: chunk,
-				total: chunk.length,
-				unlocked: chunk.filter((item) => item.srs_stage > 0).length,
-			});
+		let idx = 0;
+		const GROUP_SIZE = 50;
+
+		for (const [key, groupItems] of grouped) {
+			if (key !== null) {
+				// Named group: keep as one section
+				groups.push({
+					groupIndex: idx++,
+					groupKey: key,
+					groupLabel: GROUP_LABELS[key] ?? key,
+					items: groupItems,
+					total: groupItems.length,
+					unlocked: groupItems.filter((i) => i.srs_stage > 0).length,
+				});
+			} else {
+				// Ungrouped: chunk by 50
+				for (let i = 0; i < groupItems.length; i += GROUP_SIZE) {
+					const chunk = groupItems.slice(i, i + GROUP_SIZE);
+					const start = i + 1;
+					const end = i + chunk.length;
+					groups.push({
+						groupIndex: idx++,
+						groupKey: null,
+						groupLabel: `Items ${start}-${end}`,
+						items: chunk,
+						total: chunk.length,
+						unlocked: chunk.filter((item) => item.srs_stage > 0).length,
+					});
+				}
+			}
 		}
 		return groups;
 	});

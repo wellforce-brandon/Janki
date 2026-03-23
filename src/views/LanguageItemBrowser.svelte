@@ -237,15 +237,13 @@ $effect(() => {
 									{#if tierData.length > 1}
 										<div class="mb-4 flex flex-wrap gap-1">
 											{#each tierData as group}
-												{@const start = group.groupIndex * 50 + 1}
-												{@const end = start + group.total - 1}
 												<button
 													type="button"
-													class="rounded px-2 py-1 text-xs font-medium transition-colors hover:bg-accent text-foreground"
+													class="rounded px-2 py-1 text-xs font-medium transition-colors hover:bg-accent text-foreground {group.groupKey ? 'border border-muted-foreground/20' : ''}"
 													onclick={() => jumpToGroup(group.groupIndex)}
-													aria-label="Jump to items {start}-{end}"
+													aria-label="Jump to {group.groupLabel}"
 												>
-													{start}-{end}
+													{group.groupLabel}
 												</button>
 											{/each}
 										</div>
@@ -254,12 +252,10 @@ $effect(() => {
 									<!-- Sub-groups -->
 									<div class="space-y-6">
 										{#each tierData as group}
-											{@const start = group.groupIndex * 50 + 1}
-											{@const end = start + group.total - 1}
 											<section id="subgroup-{group.groupIndex}" class="space-y-3">
 												<div class="flex items-center justify-between">
-													<h3 class="text-sm font-semibold text-muted-foreground">
-														Items {start}-{end}
+													<h3 class="text-sm font-semibold {group.groupKey ? 'text-foreground' : 'text-muted-foreground'}">
+														{group.groupLabel}
 													</h3>
 													<div class="flex items-center gap-2">
 														<div class="h-1.5 w-16 overflow-hidden rounded-full bg-muted">

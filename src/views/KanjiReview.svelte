@@ -3,6 +3,7 @@ import type { ReviewSummary } from "$lib/components/kanji/KanjiReviewSession.sve
 import KanjiReviewSession from "$lib/components/kanji/KanjiReviewSession.svelte";
 import LevelUpCelebration from "$lib/components/kanji/LevelUpCelebration.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
+import { formatTime } from "$lib/utils/common";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
 import { getDueKanjiReviews, getUserLevel, type KanjiLevelItem } from "$lib/db/queries/kanji";
@@ -60,13 +61,6 @@ async function handleComplete(result: ReviewSummary) {
 	await checkAndUnlockItems();
 
 	await loadDueItems();
-}
-
-function formatTime(ms: number): string {
-	const seconds = Math.floor(ms / 1000);
-	const minutes = Math.floor(seconds / 60);
-	const secs = seconds % 60;
-	return `${minutes}:${String(secs).padStart(2, "0")}`;
 }
 
 $effect(() => {

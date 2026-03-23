@@ -102,4 +102,12 @@ describe("romajiToHiragana", () => {
 		expect(romajiToHiragana("gakkou")).toBe("がっこう");
 		expect(romajiToHiragana("jouzu")).toBe("じょうず");
 	});
+
+	it("should convert nn at end of input to んん", () => {
+		expect(romajiToHiragana("nn")).toBe("んん");
+	});
+
+	it("should convert nna to んな", () => {
+		expect(romajiToHiragana("nna")).toBe("んな");
+	});
 });

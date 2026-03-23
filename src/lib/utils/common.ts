@@ -14,6 +14,13 @@ export function toSqliteDateTime(date: Date): string {
 		.replace(/\.\d{3}Z$/, "");
 }
 
+export function formatTime(ms: number): string {
+	const seconds = Math.floor(ms / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const secs = seconds % 60;
+	return `${minutes}:${String(secs).padStart(2, "0")}`;
+}
+
 export function fisherYatesShuffle<T>(arr: T[]): T[] {
 	const shuffled = [...arr];
 	for (let i = shuffled.length - 1; i > 0; i--) {

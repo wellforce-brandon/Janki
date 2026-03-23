@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.23.1.0] - 2026-03-23
+
+### Fixed
+
+- Kanji seed first-review time computed manually instead of using canonical `computeFirstReviewTime`
+- KanjiLessonSession duplicated JSON parse logic already in kanji-validation.ts
+- Language review undo bypassed SRS layer (skipped stats decrement, review log deletion, cache invalidation)
+- KANJI_REGEX duplicated between language-unlock.ts and japanese.ts
+- Non-standard `NOT lr.correct` boolean checks in stats queries
+- importBackup crashed on fresh install when no DB file existed yet
+- Fuzzy answer matching threshold too lenient (60% substring overlap, now 75%)
+- sqlPlaceholders accepted zero count silently (now throws)
+- parseMeanings duplicated safeParseJson logic
+- formatTime duplicated across KanjiReview and LanguageReview views
+
+### Added
+
+- 21 unit tests for kanji-validation.ts (parseJsonArray, getAcceptedMeanings, getAcceptedReadings, isKunReadingForKanji)
+- 2 unit tests for romaji-to-hiragana "nn" edge cases
+- Transaction wrappers for all kanji seed insert loops
+- undoLanguageReview function in SRS layer with proper stats/log/cache handling
+- Documentation comments for srs-common off-by-one guard and PitchAccentDisplay style exception
+
 ## [0.23.0.0] - 2026-03-23
 
 ### Added

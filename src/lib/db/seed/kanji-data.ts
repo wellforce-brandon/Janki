@@ -1,5 +1,5 @@
 import { getDb } from "../database";
-import { isKanjiSeeded, markKanjiSeeded } from "../queries/kanji";
+import { isKanjiSeeded, markKanjiSeeded, computeFirstReviewTime } from "../queries/kanji";
 
 interface WkMeaning {
 	meaning: string;
@@ -112,6 +112,8 @@ export async function seedKanjiData(): Promise<void> {
 	);
 
 	// Insert radicals
+	await db.execute("BEGIN");
+	try {
 	for (const r of radicals) {
 		const meanings = r.meanings.map((m) => m.meaning);
 		const character = r.character || r.slug;
@@ -131,8 +133,15 @@ export async function seedKanjiData(): Promise<void> {
 			],
 		);
 	}
+	await db.execute("COMMIT");
+	} catch (e) {
+		await db.execute("ROLLBACK").catch(() => {});
+		throw e;
+	}
 
 	// Insert kanji
+	await db.execute("BEGIN");
+	try {
 	for (const k of kanji) {
 		const meanings = k.meanings.map((m) => m.meaning);
 		const onReadings = k.readings
@@ -169,8 +178,15 @@ export async function seedKanjiData(): Promise<void> {
 			],
 		);
 	}
+	await db.execute("COMMIT");
+	} catch (e) {
+		await db.execute("ROLLBACK").catch(() => {});
+		throw e;
+	}
 
 	// Insert vocabulary with component dependencies
+	await db.execute("BEGIN");
+	try {
 	for (const v of vocab) {
 		const meanings = v.meanings.map((m) => m.meaning);
 		const acceptedReadings = v.readings.filter((r) => r.accepted).map((r) => r.reading);
@@ -204,16 +220,14 @@ export async function seedKanjiData(): Promise<void> {
 			],
 		);
 	}
+	await db.execute("COMMIT");
+	} catch (e) {
+		await db.execute("ROLLBACK").catch(() => {});
+		throw e;
+	}
 
-	// Level 1 radicals start unlocked (accelerated: 2h for levels 1-2, rounded to top of hour)
-	const next = new Date();
-	next.setTime(next.getTime() + 2 * 60 * 60 * 1000);
-	next.setMinutes(0, 0, 0);
-	if (next.getTime() <= Date.now()) next.setTime(next.getTime() + 3600000);
-	const firstReview = next
-		.toISOString()
-		.replace("T", " ")
-		.replace(/\.\d{3}Z$/, "");
+	// Level 1 radicals start unlocked
+	const firstReview = computeFirstReviewTime(1);
 	await db.execute(
 		`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = ?
 		WHERE level = 1 AND item_type = 'radical'`,
@@ -280,6 +294,9 @@ export async function backfillEnrichedData(): Promise<void> {
 		return;
 	}
 
+	// Backfill all item types in a single transaction
+	await db.execute("BEGIN");
+	try {
 	// Backfill radicals: character_images
 	for (const r of radicals) {
 		if (r.character_images?.length > 0) {
@@ -319,6 +336,11 @@ export async function backfillEnrichedData(): Promise<void> {
 				v.id,
 			],
 		);
+	}
+	await db.execute("COMMIT");
+	} catch (e) {
+		await db.execute("ROLLBACK").catch(() => {});
+		throw e;
 	}
 
 	await db.execute(

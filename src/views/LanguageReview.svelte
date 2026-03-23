@@ -15,6 +15,7 @@ import {
 import { checkAndUnlockItems } from "$lib/srs/language-unlock";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
+import { formatTime } from "$lib/utils/common";
 
 let loading = $state(true);
 let dueItems = $state<LanguageItem[]>([]);
@@ -23,13 +24,6 @@ let lessonCount = $state(0);
 let sessionActive = $state(false);
 let summary = $state<ReviewSummary | null>(null);
 let selectedType = $state<string>("all");
-
-function formatTime(ms: number): string {
-	const seconds = Math.floor(ms / 1000);
-	const minutes = Math.floor(seconds / 60);
-	const secs = seconds % 60;
-	return `${minutes}:${String(secs).padStart(2, "0")}`;
-}
 
 async function loadDueItems() {
 	loading = true;

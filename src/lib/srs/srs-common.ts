@@ -38,6 +38,8 @@ export function calculateNextReview(
 	const next = new Date();
 	next.setTime(next.getTime() + hours * 60 * 60 * 1000);
 	next.setMinutes(0, 0, 0);
+	// After zeroing minutes/seconds, the result lands at the top of the current
+	// hour which may be in the past. Add 1h to ensure the review is always future.
 	if (next.getTime() <= Date.now()) {
 		next.setTime(next.getTime() + 3600000);
 	}

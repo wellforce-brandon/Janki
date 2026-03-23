@@ -1,9 +1,8 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
-import { type LanguageItem, updateLanguageItemSrs } from "$lib/db/queries/language";
+import { type LanguageItem } from "$lib/db/queries/language";
 import { getTypeLabel, getTypeColor } from "$lib/utils/content-type";
-import { invalidateCache } from "$lib/db/query-cache";
-import { reviewLanguageItem, type LanguageReviewResult } from "$lib/srs/language-srs";
+import { reviewLanguageItem, undoLanguageReview, type LanguageReviewResult } from "$lib/srs/language-srs";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
 import { speakJapanese } from "$lib/tts/speech";
@@ -48,6 +47,7 @@ let totalCorrect = $state(0);
 interface UndoEntry {
 	index: number;
 	wasCorrect: boolean;
+	durationMs: number;
 	reviewResult: LanguageReviewResult;
 	item: LanguageItem;
 	prevCorrectCount: number;
@@ -162,6 +162,7 @@ async function submitAnswer() {
 			undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
 				index: currentIndex,
 				wasCorrect: true,
+				durationMs,
 				reviewResult: result,
 				item: current,
 				prevCorrectCount: current.correct_count,
@@ -183,6 +184,7 @@ async function submitAnswer() {
 			undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
 				index: currentIndex,
 				wasCorrect: false,
+				durationMs,
 				reviewResult: result,
 				item: current,
 				prevCorrectCount: current.correct_count,
@@ -238,16 +240,18 @@ async function undoLast() {
 	const entry = undoStack[undoStack.length - 1];
 	undoStack = undoStack.slice(0, -1);
 
-	// Revert SRS state
-	await updateLanguageItemSrs(
+	// Revert SRS state, stats, and review log via the SRS layer
+	await undoLanguageReview(
 		entry.item.id,
 		entry.prevSrsStage,
 		entry.prevNextReview,
 		entry.prevCorrectCount,
 		entry.prevIncorrectCount,
+		entry.wasCorrect,
+		entry.durationMs,
 	);
 
-	// Revert counters
+	// Revert local counters
 	totalReviewed--;
 	if (entry.wasCorrect) totalCorrect--;
 
@@ -260,7 +264,6 @@ async function undoLast() {
 	showInfoPeek = false;
 	itemStartTime = Date.now();
 
-	invalidateCache();
 	addToast("Answer undone", "info", 2000);
 }
 

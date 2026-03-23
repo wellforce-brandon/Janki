@@ -130,8 +130,8 @@ export async function getStatsByContentType(days: number): Promise<QueryResult<C
 			`SELECT
 				li.content_type,
 				COUNT(*) as reviews_count,
-				SUM(CASE WHEN lr.correct THEN 1 ELSE 0 END) as correct_count,
-				SUM(CASE WHEN NOT lr.correct THEN 1 ELSE 0 END) as incorrect_count,
+				SUM(CASE WHEN lr.correct = 1 THEN 1 ELSE 0 END) as correct_count,
+				SUM(CASE WHEN lr.correct = 0 THEN 1 ELSE 0 END) as incorrect_count,
 				SUM(lr.duration_ms) as time_spent_ms
 			FROM language_review_log lr
 			JOIN language_items li ON li.id = lr.item_id

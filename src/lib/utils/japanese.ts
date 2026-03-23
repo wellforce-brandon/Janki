@@ -1,5 +1,6 @@
 // Kanji detection: CJK Unified Ideographs range
 const KANJI_REGEX = /[\u4E00-\u9FAF]/;
+export const KANJI_REGEX_GLOBAL = /[\u4E00-\u9FAF]/g;
 const HIRAGANA_REGEX = /[\u3040-\u309F]/;
 const KATAKANA_REGEX = /[\u30A0-\u30FF]/;
 

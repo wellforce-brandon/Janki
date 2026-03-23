@@ -6,6 +6,7 @@ import { sanitizeMnemonicHtml } from "$lib/utils/sanitize";
 import { addToast } from "$lib/stores/toast.svelte";
 import { fisherYatesShuffle, getTypeColor } from "$lib/utils/kanji";
 import {
+	parseJsonArray,
 	getAcceptedMeanings,
 	getAcceptedReadings,
 	getCorrectDisplay,
@@ -117,40 +118,18 @@ function buildQuizQueue() {
 }
 
 function getMeanings(item: KanjiLevelItem): string[] {
-	try {
-		return JSON.parse(item.meanings) as string[];
-	} catch {
-		return [item.meanings];
-	}
+	return parseJsonArray(item.meanings);
 }
 
 function getReadingsDisplay(item: KanjiLevelItem): { on: string[]; kun: string[] } {
-	const on: string[] = [];
-	const kun: string[] = [];
-	if (item.readings_on) {
-		try {
-			on.push(...(JSON.parse(item.readings_on) as string[]));
-		} catch {
-			on.push(item.readings_on);
-		}
-	}
-	if (item.readings_kun) {
-		try {
-			kun.push(...(JSON.parse(item.readings_kun) as string[]));
-		} catch {
-			kun.push(item.readings_kun);
-		}
-	}
-	return { on, kun };
+	return {
+		on: parseJsonArray(item.readings_on),
+		kun: parseJsonArray(item.readings_kun),
+	};
 }
 
 function getUserSynonyms(item: KanjiLevelItem): string[] {
-	if (!item.user_synonyms) return [];
-	try {
-		return JSON.parse(item.user_synonyms) as string[];
-	} catch {
-		return [];
-	}
+	return parseJsonArray(item.user_synonyms);
 }
 
 async function saveNotes() {

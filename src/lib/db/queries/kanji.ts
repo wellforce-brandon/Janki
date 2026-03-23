@@ -2,7 +2,7 @@ import { getDb, type QueryResult, safeQuery, sqlPlaceholders } from "../database
 import { safeParseJson } from "$lib/utils/common";
 import { calculateNextReview, STANDARD_INTERVALS, ACCELERATED_INTERVALS } from "$lib/srs/srs-common";
 
-function computeFirstReviewTime(level: number): string {
+export function computeFirstReviewTime(level: number): string {
 	const intervals = level <= 2 ? ACCELERATED_INTERVALS : STANDARD_INTERVALS;
 	return calculateNextReview(1, intervals) ?? "";
 }

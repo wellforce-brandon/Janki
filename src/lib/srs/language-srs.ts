@@ -2,6 +2,7 @@ import {
 	getLanguageItemById,
 	updateLanguageItemSrs,
 	logLanguageReview,
+	deleteLatestLanguageReview,
 } from "../db/queries/language";
 import { invalidateCache } from "../db/query-cache";
 import { updateDailyStats } from "../db/queries/stats";
@@ -60,4 +61,32 @@ export async function reviewLanguageItem(
 	invalidateCache("contentTypeCounts");
 
 	return { newStage, nextReview };
+}
+
+/**
+ * Undo the last review of a language item.
+ * Reverts SRS state, daily stats, and review log.
+ */
+export async function undoLanguageReview(
+	itemId: number,
+	prevStage: number,
+	prevNextReview: string | null,
+	prevCorrectCount: number,
+	prevIncorrectCount: number,
+	wasCorrect: boolean,
+	durationMs: number,
+): Promise<void> {
+	await updateLanguageItemSrs(
+		itemId,
+		prevStage,
+		prevNextReview,
+		prevCorrectCount,
+		prevIncorrectCount,
+	);
+
+	await deleteLatestLanguageReview(itemId);
+
+	await updateDailyStats(wasCorrect, false, -durationMs);
+
+	invalidateCache("contentTypeCounts");
 }

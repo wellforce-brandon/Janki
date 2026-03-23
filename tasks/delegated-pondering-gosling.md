@@ -1,199 +1,122 @@
-# Fill Data Gaps: Grammar Groups, Vocab Topics, Sentence JLPT Tags
+# Code Review Fixes: 3 Critical, 7 Warnings, 9 Suggestions
 
 ## Context
 
-Phase 4 (shiny-wobbling-quill) added pedagogical ordering via migration v15, but verification revealed three gaps:
-- **848 grammar items** have no lesson_group (practice cards, example sentences, quiz questions)
-- **2272 N5 vocab items** are ungrouped (only 190 of 2462 matched the original 15 narrow topics)
-- **1543 of those vocab items** also have NULL part_of_speech
-- **2054 sentences** from the Tae Kim anime course have no JLPT level
+Full code review of the Janki codebase identified 19 findings. After verification, Warning 5 (level-up race) is a false alarm (design is correct). The remaining 18 findings are real and should be fixed. Organized by file to minimize touches.
 
-The goal is zero ungrouped items -- every item should belong to a named topic group for coherent learning progression.
+## Fix List
+
+### Fix 1: `src/lib/db/seed/kanji-data.ts` (Critical 1, Warning 6, Suggestion 17)
+
+**Critical 1 (line 208-221):** Replace manual first-review date math with `computeFirstReviewTime(1)` from `$lib/db/queries/kanji`. Import it at the top. Delete the 6 lines of manual Date manipulation.
+
+**Warning 6 + Suggestion 17 (lines 115-205):** Wrap each insert loop (radicals, kanji, vocab) in `BEGIN`/`COMMIT`/`ROLLBACK` transactions. Same pattern as `language-data.ts` seed function. Also wrap the backfill function's insert loop (lines 284-321).
+
+### Fix 2: `src/lib/components/kanji/KanjiLessonSession.svelte` (Critical 2)
+
+**Lines 119-154:** Delete `getMeanings`, `getReadingsDisplay`, `getUserSynonyms` functions. Replace with imports:
+- `parseJsonArray` from `$lib/utils/kanji-validation`
+- Use `parseJsonArray(item.meanings)` instead of `getMeanings(item)`
+- Use `{ on: parseJsonArray(item.readings_on), kun: parseJsonArray(item.readings_kun) }` for readings
+- Use `parseJsonArray(item.user_synonyms)` for synonyms
+
+### Fix 3: `src/lib/components/language/LanguageReviewSession.svelte` (Critical 3)
+
+**Lines 235-265:** Create `undoLanguageReview()` in `$lib/srs/language-srs.ts` that:
+1. Reverts SRS state via `updateLanguageItemSrs`
+2. Decrements daily stats via `updateDailyStats` (negative duration)
+3. Deletes the forward review log entry (add `deleteLatestLanguageReview(itemId)` to `$lib/db/queries/language.ts`)
+4. Invalidates cache with `invalidateCache("contentTypeCounts")`
+
+Add `durationMs` to the UndoEntry interface so it can be stored when the forward review happens. Update the component to call `undoLanguageReview()` instead of `updateLanguageItemSrs` directly. Remove the direct import of `updateLanguageItemSrs`.
+
+### Fix 4: `src/lib/srs/language-unlock.ts` (Warning 4)
+
+**Line 24:** Delete the local `KANJI_REGEX`. Export a global-flag version from `src/lib/utils/japanese.ts` (add `export const KANJI_REGEX_GLOBAL = /[\u4E00-\u9FAF]/g;`). Import and use it in language-unlock.ts.
+
+### Fix 5: `src/lib/db/queries/stats.ts` (Warning 7)
+
+Replace all `CASE WHEN NOT lr.correct` with `CASE WHEN lr.correct = 0` and all `CASE WHEN lr.correct` with `CASE WHEN lr.correct = 1` for explicit integer comparison. Check all occurrences in the file.
+
+### Fix 6: `src/lib/backup/backup.ts` (Warning 8)
+
+**Line 54:** Add `await exists(dbPath)` check before the pre-restore copy. Skip the safety backup if no DB exists yet (first launch). Import `exists` from `@tauri-apps/plugin-fs` (already imported in the file for autoBackup).
+
+### Fix 7: `src/lib/utils/answer-validation.ts` (Warning 9)
+
+**Lines 14-20:** Add a comment documenting the intended tolerance policy. Tighten substring threshold from 0.6 to 0.75 to reduce false acceptances. This means a user must type at least 75% of the answer length for substring matching to accept.
+
+### Fix 8: `src/views/Stats.svelte` (Warning 10)
+
+**Lines 301, 315, 342:** Replace inline `style="background: {color}"` with a utility function that maps color hex values to Tailwind bg classes. Create a helper `getColorClass(hex: string): string` that returns the closest Tailwind class. For the dynamic width bar (line 342), keep the `style="width: {barWidth}%"` (Tailwind can't do dynamic widths) but replace the background color with a Tailwind class.
+
+### Fix 9: `src/lib/utils/kanji.ts` (Suggestion 11)
+
+**Lines 18-24:** Replace `parseMeanings` implementation with `safeParseJson<string[]>(json, [json])` from `$lib/utils/common`. Keep the function name as a convenience wrapper for call sites.
+
+### Fix 10: `src/lib/db/database.ts` (Suggestion 13)
+
+**Lines 20-21:** Add a guard to `sqlPlaceholders`: if `count <= 0`, throw an Error. This makes the contract explicit and prevents invalid SQL.
+
+### Fix 11: `src/lib/utils/common.ts` + two views (Suggestion 15)
+
+Extract `formatTime(ms: number): string` to `src/lib/utils/common.ts`. Remove the duplicate from `src/views/KanjiReview.svelte` and `src/views/LanguageReview.svelte`. Import from common.
+
+### Fix 12: `src/lib/srs/srs-common.ts` (Suggestion 14)
+
+**Lines 37-44:** Add a comment explaining the off-by-one guard: "After zeroing minutes/seconds, the result may be in the past (top of current hour). Add 1 hour to ensure the review is always in the future."
+
+### Fix 13: `src/lib/components/language/PitchAccentDisplay.svelte` (Suggestion 16)
+
+**Line 22:** Add a comment above the `<style>` block explaining the exception: "Style block required: Tailwind can't target OJAD pitch table HTML injected via {@html}."
+
+### Fix 14: `src/lib/utils/japanese.ts` (Suggestion 12)
+
+Add unit tests for `simpleFurigana` edge cases in a new or existing test file. Test the known limitation where the same kana appears in both reading and trailing kana. Add a guard in the function to return whole-word furigana when a segment produces an empty reading.
+
+### Fix 15: `src/lib/utils/romaji-to-hiragana.ts` (Suggestion 18)
+
+Add a test case for `"nn"` at end of input producing `んん`. Verify and document this is correct behavior.
+
+### Fix 16: Missing test coverage (Suggestion 19)
+
+Add test files for:
+- `src/lib/utils/kanji-validation.test.ts` -- test `getAcceptedMeanings`, `getAcceptedReadings`, `parseJsonArray`, `isKunReadingForKanji`
+- `src/lib/srs/language-unlock.test.ts` -- test unlock gating logic (mock DB calls)
+- `src/lib/backup/backup.test.ts` -- test backup path logic (mock Tauri FS)
+
+These are the highest-risk untested modules.
 
 ## Files to Modify
 
-1. `src/lib/db/seed/language-data.ts` -- add 4 new fixup functions
-2. `src/lib/db/queries/language.ts` -- add new group keys to GROUP_LABELS map
-3. `src/main.ts` -- wire new fixup functions into init sequence
-
-## Step 1: Vocab Part-of-Speech Assignment
-
-**Function:** `applyVocabPartOfSpeech()` gated by `vocab_pos_v1`
-**Must run BEFORE topic ordering** (topics 1-15 depend on part_of_speech).
-
-1543 items with NULL part_of_speech break down as:
-- 935 have "Common noun" in meaning -> `noun`
-- 120 have meaning starting with "to " -> `verb`
-- 82 have "Adverb" in meaning -> `adverb`
-- 12 have "Counter" in meaning -> `counter`
-- 9 have "Expression" in meaning -> `expression`
-- 8 have "Godan verb" in meaning -> `verb`
-- 7 have "Pronoun" in meaning -> `pronoun`
-- 1 has "Ichidan verb" in meaning -> `verb`
-- ~576 with no embedded PoS hints -- analyze each and route:
-  - Items with "(na-adj)" in meaning -> `な adjective`
-  - Items with meaning matching "to ..." pattern -> `verb`
-  - Remaining -> `noun` (safe default; these are compound nouns, place names, academic terms)
-
-SQL UPDATE order (most specific first, all with `AND part_of_speech IS NULL`):
-1. Godan/Ichidan verbs (from embedded JMdict data)
-2. "to " prefix verbs
-3. Adverbs (embedded "Adverb")
-4. Counters (embedded "Counter")
-5. Expressions (embedded "Expression")
-6. Pronouns (embedded "Pronoun")
-7. Na-adjectives (meaning contains "(na-adj)")
-8. Common nouns (embedded "Common noun")
-9. Default remaining -> `noun`
-
-## Step 2: Expanded Vocab Topic Groups
-
-**Function:** `applyVocabTopicOrderingV2()` gated by `vocab_topics_v2`
-**Runs AFTER Step 1 and after existing `applyVocabTopicOrdering()` (v1).**
-
-Existing 15 topics cover 190 items. Add ~15 semantic topics to cover the remaining ~2082 N5 items. Each UPDATE uses `AND lesson_group IS NULL` so existing assignments are preserved.
-
-| Order | Key | Label | Matching strategy (on meaning field) |
-|-------|-----|-------|--------------------------------------|
-| 16 | vocab-greetings | Greetings & Expressions | PoS = expression, OR meaning matches hello/goodbye/thanks/sorry/excuse/please/welcome patterns |
-| 17 | vocab-question-words | Question Words | meaning matches who/what/where/when/why/how/which patterns AND short primary_text |
-| 18 | vocab-food | Food & Drink | meaning keywords: rice, tea, meat, fish, egg, vegetable, fruit, water, milk, coffee, bread, lunch, dinner, breakfast, meal, eat, drink, cook, food, steak, soup, cake, sugar, salt, etc. |
-| 19 | vocab-body | Body & Health | meaning keywords: hand, foot, eye, head, face, mouth, ear, nose, tooth, hair, finger, heart, stomach, sick, medicine, hospital, doctor, etc. |
-| 20 | vocab-school | School & Education | meaning keywords: school, student, teacher, class, study, learn, test, exam, university, lesson, homework, textbook, library, etc. |
-| 21 | vocab-house | House & Home | meaning keywords: house, home, room, door, window, kitchen, bed, table, chair, floor, wall, garden, apartment, etc. |
-| 22 | vocab-transport | Transportation | meaning keywords: car, bus, train, airplane, bicycle, station, airport, road, drive, ticket, etc. |
-| 23 | vocab-nature | Nature & Weather | meaning keywords: rain, snow, wind, cloud, sky, sun, moon, star, mountain, river, sea, tree, flower, weather, hot, cold, warm, etc. |
-| 24 | vocab-clothes | Clothing & Accessories | meaning keywords: clothes, shirt, shoe, hat, wear, coat, dress, skirt, pants, bag, umbrella, glasses, etc. |
-| 25 | vocab-colors | Colors | meaning matches exact color words: red, blue, green, yellow, white, black, brown, pink, purple, orange, color, etc. |
-| 26 | vocab-animals | Animals | meaning keywords: dog, cat, bird, fish, cow, horse, rabbit, bear, insect, animal, etc. |
-| 27 | vocab-work | Work & Office | meaning keywords: work, job, office, company, meeting, business, employee, money, bank, etc. |
-| 28 | vocab-location | Places & Directions | meaning keywords: north, south, east, west, left, right, front, back, above, below, inside, outside, near, far, map, park, hospital, station, store, shop, etc. |
-| 29 | vocab-time | Time Expressions | meaning keywords: today, tomorrow, yesterday, morning, afternoon, evening, night, now, later, always, sometimes, week, month, year, early, late, etc. |
-| 30 | vocab-actions | Common Verbs | PoS contains 'verb' AND lesson_group IS NULL (verbs that didn't match any semantic topic) |
-| 31 | vocab-descriptors | Descriptors | PoS contains 'adjective' or 'adverb' AND lesson_group IS NULL |
-| 32 | vocab-general | General | Catch-all: lesson_group IS NULL (everything remaining) |
-
-**Keyword matching approach:** Use `LOWER(meaning) LIKE '%keyword%'` with multiple OR conditions per topic. Run topics in the order shown (most specific semantic categories first, then PoS-based catch-alls, then general catch-all). The `AND lesson_group IS NULL` on each statement means first match wins.
-
-**Critical:** The meaning field is multi-line for some items. Use `LIKE '%keyword%'` which searches the full text. For short keyword matches that risk false positives (e.g., "to" matching "tomato"), use word boundary tricks: `meaning LIKE '% to %'` or `LOWER(TRIM(meaning)) LIKE 'to %'`.
-
-## Step 3: Grammar Group Assignment
-
-**Function:** `applyGrammarGroupOrdering()` gated by `grammar_groups_v1`
-
-### 3a: N5 Grammar Pattern Cards (603 items)
-Source: Full_Japanese_Study_Deck. These have `primary_text` with the grammar form (e.g., "~か", "~たい") and `meaning` with English explanation.
-
-Match in priority order (most specific grammar concept first):
-
-1. **grammar-transitivity** (8): meaning contains "transitive", "intransitive"
-2. **grammar-clauses** (9): meaning contains "relative clause", "nominalization", "subordinate", "explanatory"
-3. **grammar-adverbs-gobi** (11): meaning contains "adverb", "sentence end", "exclamation", or primary_text matches sentence-enders (~ね, ~よ, ~わ, ~ぞ, ~ぜ)
-4. **grammar-noun-particles** (10): primary_text matches ~の, ~こと, ~もの, or meaning contains "noun modification"
-5. **grammar-past-tense** (6): primary_text contains ~た or ~だった, or meaning contains "past tense"
-6. **grammar-negative-verbs** (5): primary_text contains ~ない or ~ず, or meaning contains "negative", "negat"
-7. **grammar-verb-particles** (7): primary_text matches compound verb particles (~てから, ~ために, ~ながら, ~ように, ~ところ)
-8. **grammar-verb-basics** (4): meaning contains "verb", "conjugat", "te-form", "masu", or primary_text contains ~ます, ~て, ~ている
-9. **grammar-adjectives** (3): meaning contains "adjective", or primary_text pattern matches い/な adjective forms
-10. **grammar-particles** (2): primary_text is a single particle pattern (~は, ~が, ~を, ~に, ~で, ~と, ~か, ~へ, ~から, ~まで, ~も)
-11. **grammar-copula** (1): primary_text contains ~だ or ~です, or meaning contains "copula", "state of being"
-12. **grammar-supplemental** (12): catch-all for remaining
-
-### 3b: Tae Kim Quiz Questions (64 items)
-Source: Tae_Kims_Grammar_Guide. These are English Q&A. Match on English keywords in `primary_text`:
-
-- "copula" / "state of being" / "です" -> grammar-copula
-- "particle" / "は" / "が" / "を" -> grammar-particles
-- "adjective" / "i-adjective" / "na-adjective" -> grammar-adjectives
-- "conjugat" / "verb" / "ru-verb" / "u-verb" -> grammar-verb-basics
-- "negative" / "negate" -> grammar-negative-verbs
-- "past" / "past tense" -> grammar-past-tense
-- "transitive" / "intransitive" -> grammar-transitivity
-- "relative clause" -> grammar-clauses
-- "adverb" -> grammar-adverbs-gobi
-- Remaining -> grammar-supplemental
-
-### 3c: Tae Kim Example Sentences (181 items)
-Source: TAE_KIM_complete_guide_deck_Athos. Japanese text only, no meaning. Match via Japanese grammar markers in `primary_text`:
-
-1. Sentences containing させ -> grammar-verb-particles (causative)
-2. Sentences containing られ/された -> grammar-transitivity (passive)
-3. Sentences containing ば/たら/なら -> grammar-clauses (conditionals)
-4. Sentences containing ている/ていた -> grammar-verb-basics (progressive)
-5. Sentences ending in ない/ません/なかった -> grammar-negative-verbs
-6. Sentences ending in た/ました/だった -> grammar-past-tense
-7. Sentences with は/が/を/に/で prominently -> grammar-particles
-8. Sentences ending in だ/です -> grammar-copula
-9. Remaining -> grammar-supplemental
-
-## Step 4: Sentence JLPT Tagging
-
-**Function:** `applySentenceJlptTagging()` gated by `sentence_jlpt_v1`
-
-All 2054 untagged sentences are from the Tae Kim anime course. Data analysis shows:
-- Average 9.7 chars (existing N5 averages 25.3 chars)
-- 60% are 10 chars or fewer -- single grammar point illustrations
-- Grammar patterns are overwhelmingly N5 (copula, basic particles, simple tense)
-- The Tae Kim course is a beginner's course; even its later sections teach foundational grammar
-
-**Decision: Tag all 2054 as N5.** These are scaffolding examples for beginners. A single UPDATE:
-```sql
-UPDATE language_items SET jlpt_level = 'N5'
-WHERE content_type = 'sentence' AND jlpt_level IS NULL
-```
-
-## Step 5: GROUP_LABELS Map
-
-Add to `GROUP_LABELS` in `src/lib/db/queries/language.ts`:
-```
-"vocab-greetings": "Greetings & Expressions"
-"vocab-question-words": "Question Words"
-"vocab-food": "Food & Drink"
-"vocab-body": "Body & Health"
-"vocab-school": "School & Education"
-"vocab-house": "House & Home"
-"vocab-transport": "Transportation"
-"vocab-nature": "Nature & Weather"
-"vocab-clothes": "Clothing & Accessories"
-"vocab-colors": "Colors"
-"vocab-animals": "Animals"
-"vocab-work": "Work & Office"
-"vocab-location": "Places & Directions"
-"vocab-time": "Time Expressions"
-"vocab-actions": "Common Verbs"
-"vocab-descriptors": "Descriptors"
-"vocab-general": "General"
-```
-
-## Step 6: Wire Into main.ts
-
-Update init() call order:
-```typescript
-await seedLanguageData();
-await applyVocabPartOfSpeech();        // Step 1: PoS first
-await applyVocabTopicOrdering();       // Existing v1 (15 topics)
-await applyVocabTopicOrderingV2();     // Step 2: expanded topics
-await applyGrammarGroupOrdering();     // Step 3: grammar groups
-await applySentenceJlptTagging();      // Step 4: sentence JLPT
-```
+| File | Fixes |
+|------|-------|
+| `src/lib/db/seed/kanji-data.ts` | 1 (Critical 1 + Warning 6 + Suggestion 17) |
+| `src/lib/components/kanji/KanjiLessonSession.svelte` | 2 (Critical 2) |
+| `src/lib/components/language/LanguageReviewSession.svelte` | 3 (Critical 3) |
+| `src/lib/srs/language-srs.ts` | 3 (new undoLanguageReview function) |
+| `src/lib/db/queries/language.ts` | 3 (new deleteLatestLanguageReview) |
+| `src/lib/srs/language-unlock.ts` | 4 (remove local KANJI_REGEX) |
+| `src/lib/utils/japanese.ts` | 4 (export KANJI_REGEX_GLOBAL) |
+| `src/lib/db/queries/stats.ts` | 5 |
+| `src/lib/backup/backup.ts` | 6 |
+| `src/lib/utils/answer-validation.ts` | 7 |
+| `src/views/Stats.svelte` | 8 |
+| `src/lib/utils/kanji.ts` | 9 |
+| `src/lib/db/database.ts` | 10 |
+| `src/lib/utils/common.ts` | 11 |
+| `src/views/KanjiReview.svelte` | 11 |
+| `src/views/LanguageReview.svelte` | 11 |
+| `src/lib/srs/srs-common.ts` | 12 |
+| `src/lib/components/language/PitchAccentDisplay.svelte` | 13 |
+| `src/lib/utils/japanese.ts` (tests) | 14 |
+| `src/lib/utils/romaji-to-hiragana.ts` (tests) | 15 |
+| New test files (3) | 16 |
 
 ## Verification
 
-1. Run the app (`npm run tauri dev`) and check console for fixup messages
-2. Query database to confirm zero ungrouped items:
-   ```sql
-   SELECT content_type, COUNT(*) FROM language_items
-   WHERE lesson_group IS NULL AND content_type IN ('grammar', 'vocabulary')
-   AND jlpt_level = 'N5' GROUP BY content_type;
-   -- Should return 0 rows
-
-   SELECT COUNT(*) FROM language_items WHERE content_type='sentence' AND jlpt_level IS NULL;
-   -- Should return 0
-
-   SELECT COUNT(*) FROM language_items WHERE content_type='vocabulary' AND part_of_speech IS NULL;
-   -- Should return 0
-   ```
-3. Navigate to Grammar (Ctrl+5), Vocabulary (Ctrl+7), Sentences (Ctrl+6) browser views
-4. Verify each JLPT tier shows named topic groups instead of numeric ranges
-5. Spot-check: open a "Food & Drink" vocab item -- confirm it's food-related
-6. Spot-check: open a grammar-particles item -- confirm it's about particles
+1. Run `npx vitest run` to verify all existing tests pass and new tests work
+2. Launch the app (`npm run tauri dev`), complete a kanji review and undo it, complete a language review and undo it
+3. Verify daily stats decrement correctly on undo
+4. Verify kanji seed still works (delete DB, restart app)
+5. Test backup import on a fresh install (no existing DB)

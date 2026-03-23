@@ -273,6 +273,20 @@ export async function logLanguageReview(
 	});
 }
 
+export async function deleteLatestLanguageReview(
+	itemId: number,
+): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute(
+			`DELETE FROM language_review_log WHERE id = (
+				SELECT id FROM language_review_log WHERE item_id = ? ORDER BY id DESC LIMIT 1
+			)`,
+			[itemId],
+		);
+	});
+}
+
 export async function getDueLanguageItems(
 	contentType?: ContentType,
 	limit = 200,

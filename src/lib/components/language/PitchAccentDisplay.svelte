@@ -19,6 +19,7 @@ let hasContent = $derived(sanitized.trim().length > 0);
 	</div>
 {/if}
 
+<!-- Style block required: Tailwind can't target OJAD pitch table HTML injected via {@html} -->
 <style>
 	.pitch-accent :global(table) {
 		border-collapse: collapse;

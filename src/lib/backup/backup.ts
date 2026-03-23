@@ -48,10 +48,12 @@ export async function importBackup(): Promise<boolean> {
 	if (!selected) return false;
 
 	const dbPath = await getDbPath();
-	// Back up current DB before replacing
-	const backupDir = await getBackupDir();
-	const safeName = await join(backupDir, `pre-restore-${formatBackupName()}`);
-	await copyFile(dbPath, safeName);
+	// Back up current DB before replacing (skip if no DB exists yet)
+	if (await exists(dbPath)) {
+		const backupDir = await getBackupDir();
+		const safeName = await join(backupDir, `pre-restore-${formatBackupName()}`);
+		await copyFile(dbPath, safeName);
+	}
 
 	// Close active DB connection before replacing the file
 	await closeDb();

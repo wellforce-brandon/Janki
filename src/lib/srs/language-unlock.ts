@@ -19,9 +19,7 @@ import {
 	getPreviousGrammarGroup,
 } from "../db/queries/language";
 import { getSettings } from "../stores/app-settings.svelte";
-
-// Regex to detect kanji (CJK Unified Ideographs)
-const KANJI_REGEX = /[\u4e00-\u9faf]/g;
+import { KANJI_REGEX_GLOBAL } from "../utils/japanese";
 
 /** JLPT levels in progression order, null = untagged (last) */
 const JLPT_LEVELS: (string | null)[] = ["N5", "N4", "N3", "N2", "N1", null];
@@ -147,7 +145,7 @@ async function unlockVocabulary(): Promise<number> {
 		for (const item of batchResult.data) {
 			if (toUnlock.length >= remaining) break;
 
-			const kanjiInWord = item.primary_text.match(KANJI_REGEX);
+			const kanjiInWord = item.primary_text.match(KANJI_REGEX_GLOBAL);
 			if (!kanjiInWord || kanjiInWord.length === 0) {
 				toUnlock.push(item.id);
 			} else {

@@ -1,7 +1,7 @@
 import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 import { romajiToHiragana } from "./romaji-to-hiragana";
 
-function parseJsonArray(json: string | null): string[] {
+export function parseJsonArray(json: string | null): string[] {
 	if (!json) return [];
 	try {
 		return JSON.parse(json) as string[];

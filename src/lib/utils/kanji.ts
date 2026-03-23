@@ -16,11 +16,7 @@ export function getTypeColor(itemType: string): string {
 }
 
 export function parseMeanings(json: string): string[] {
-	try {
-		return JSON.parse(json) as string[];
-	} catch {
-		return [json];
-	}
+	return safeParseJson<string[]>(json, [json]);
 }
 
 export interface ContextSentence {

@@ -18,6 +18,7 @@ export async function safeQuery<T>(fn: () => Promise<T>): Promise<QueryResult<T>
 }
 
 export function sqlPlaceholders(count: number): string {
+	if (count <= 0) throw new Error(`sqlPlaceholders: count must be > 0, got ${count}`);
 	return Array(count).fill("?").join(",");
 }
 

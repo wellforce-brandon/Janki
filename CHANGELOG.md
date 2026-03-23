@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.22.0.0] - 2026-03-23
+
+### Added
+
+- Pedagogical ordering for grammar: 11 Tae Kim section groups with dependency-chain progression gating
+- Grammar group unlock system: 80% of previous group at Apprentice 4+ gates next group (same pattern as kana)
+- Topic-based ordering for N5 vocabulary: 15 topic groups (pronouns, numbers, days, months, hours, minutes, day numbers, hundreds, thousands, year students, age counters, people counters, seasons, family, places)
+- JLPT level tagging for 8,000+ sentences based on Core 2k/6k frequency ranges
+- Conjugation lesson ordering: items with full conjugation form data prioritized over incomplete items
+- JLPT-ordered sentence unlock with level gating (previously flat frequency ordering)
+
+### Changed
+
+- Grammar unlock now uses two-phase system: structured group progression first, then ungrouped items with JLPT ordering
+- Vocabulary unlock ordering now respects topic groups (lesson_order) before frequency rank
+- Conjugation and sentence batch queries now include lesson_order in sort priority
+- getLockedGrammarBatch excludes grouped items (handled separately by group progression)
+
 ## [0.21.0.0] - 2026-03-22
 
 ### Added

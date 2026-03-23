@@ -601,7 +601,7 @@ export async function getPendingLessonCount(contentType: ContentType): Promise<Q
 	});
 }
 
-/** Get a batch of locked vocabulary items for a JLPT level, ordered by frequency */
+/** Get a batch of locked vocabulary items for a JLPT level, ordered by topic then frequency */
 export async function getLockedVocabularyBatch(
 	jlptLevel: string | null,
 	limit: number,
@@ -613,14 +613,15 @@ export async function getLockedVocabularyBatch(
 		return db.select<{ id: number; primary_text: string }[]>(
 			`SELECT id, primary_text FROM language_items
 			WHERE content_type = 'vocabulary' AND srs_stage = 0 AND ${levelClause}
-			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
+			ORDER BY COALESCE(lesson_order, 999) ASC, COALESCE(frequency_rank, 999999) ASC, id ASC
 			LIMIT ?`,
 			params,
 		);
 	});
 }
 
-/** Get a batch of locked grammar items for a JLPT level, ordered by frequency */
+/** Get a batch of locked grammar items for a JLPT level, ordered by lesson_order then frequency.
+ *  Excludes items with lesson_group (those are handled by group-based progression). */
 export async function getLockedGrammarBatch(
 	jlptLevel: string | null,
 	limit: number,
@@ -631,7 +632,7 @@ export async function getLockedGrammarBatch(
 		const params = jlptLevel === null ? [limit] : [jlptLevel, limit];
 		return db.select<{ id: number }[]>(
 			`SELECT id FROM language_items
-			WHERE content_type = 'grammar' AND srs_stage = 0 AND ${levelClause}
+			WHERE content_type = 'grammar' AND srs_stage = 0 AND lesson_group IS NULL AND ${levelClause}
 			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
 			LIMIT ?`,
 			params,
@@ -639,28 +640,33 @@ export async function getLockedGrammarBatch(
 	});
 }
 
-/** Get a batch of locked sentences ordered by frequency (corrupted values cleaned by migration) */
-export async function getLockedSentenceBatch(limit: number): Promise<QueryResult<{ id: number }[]>> {
+/** Get a batch of locked sentences for a JLPT level, ordered by frequency */
+export async function getLockedSentenceBatch(
+	jlptLevel: string | null,
+	limit: number,
+): Promise<QueryResult<{ id: number }[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
+		const levelClause = jlptLevel === null ? "jlpt_level IS NULL" : "jlpt_level = ?";
+		const params = jlptLevel === null ? [limit] : [jlptLevel, limit];
 		return db.select<{ id: number }[]>(
 			`SELECT id FROM language_items
-			WHERE content_type = 'sentence' AND srs_stage = 0
+			WHERE content_type = 'sentence' AND srs_stage = 0 AND ${levelClause}
 			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
 			LIMIT ?`,
-			[limit],
+			params,
 		);
 	});
 }
 
-/** Get a batch of locked conjugation items ordered by frequency/id */
+/** Get a batch of locked conjugation items ordered by lesson_order then frequency/id */
 export async function getLockedConjugationBatch(limit: number): Promise<QueryResult<{ id: number }[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<{ id: number }[]>(
 			`SELECT id FROM language_items
 			WHERE content_type = 'conjugation' AND srs_stage = 0
-			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
+			ORDER BY COALESCE(lesson_order, 999) ASC, COALESCE(frequency_rank, 999999) ASC, id ASC
 			LIMIT ?`,
 			[limit],
 		);
@@ -833,5 +839,66 @@ export async function getAdjacentLanguageItem(
 			prev: prevRows[0] ?? null,
 			next: nextRows[0] ?? null,
 		};
+	});
+}
+
+// --- Grammar group progression queries ---
+
+/** Get the next locked grammar lesson_group (lowest lesson_order with locked items) */
+export async function getNextLockedGrammarGroup(): Promise<QueryResult<{ lesson_group: string; lesson_order: number } | null>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ lesson_group: string; lesson_order: number }[]>(
+			`SELECT DISTINCT lesson_group, lesson_order FROM language_items
+			WHERE content_type = 'grammar' AND srs_stage = 0 AND lesson_group IS NOT NULL
+			ORDER BY lesson_order ASC
+			LIMIT 1`,
+		);
+		return rows.length > 0 ? rows[0] : null;
+	});
+}
+
+/** Get locked grammar items for a specific lesson_group, ordered by frequency */
+export async function getLockedGrammarByGroup(
+	lessonGroup: string,
+	limit: number,
+): Promise<QueryResult<{ id: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number }[]>(
+			`SELECT id FROM language_items
+			WHERE content_type = 'grammar' AND srs_stage = 0 AND lesson_group = ?
+			ORDER BY COALESCE(frequency_rank, 999999) ASC, id ASC
+			LIMIT ?`,
+			[lessonGroup, limit],
+		);
+	});
+}
+
+/** Get progress for a grammar lesson_group: total items and how many at Apprentice 4+ */
+export async function getGrammarGroupProgress(lessonGroup: string): Promise<QueryResult<{ total: number; at_apprentice4_plus: number }>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ total: number; at_apprentice4_plus: number }[]>(
+			`SELECT COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 4 THEN 1 END) as at_apprentice4_plus
+			FROM language_items WHERE content_type = 'grammar' AND lesson_group = ?`,
+			[lessonGroup],
+		);
+		return rows[0] ?? { total: 0, at_apprentice4_plus: 0 };
+	});
+}
+
+/** Get the grammar lesson_group just before a given lesson_order */
+export async function getPreviousGrammarGroup(lessonOrder: number): Promise<QueryResult<string | null>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ lesson_group: string }[]>(
+			`SELECT DISTINCT lesson_group FROM language_items
+			WHERE content_type = 'grammar' AND lesson_order = ? AND lesson_group IS NOT NULL
+			LIMIT 1`,
+			[lessonOrder - 1],
+		);
+		return rows.length > 0 ? rows[0].lesson_group : null;
 	});
 }

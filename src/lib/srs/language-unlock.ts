@@ -13,6 +13,10 @@ import {
 	getLockedConjugationBatch,
 	getJlptLevelProgressByType,
 	getContentTypeMilestone,
+	getNextLockedGrammarGroup,
+	getLockedGrammarByGroup,
+	getGrammarGroupProgress,
+	getPreviousGrammarGroup,
 } from "../db/queries/language";
 import { getSettings } from "../stores/app-settings.svelte";
 
@@ -164,6 +168,9 @@ async function unlockVocabulary(): Promise<number> {
 
 // --- Grammar ---
 
+/** Threshold for grammar group gating: 80% of previous group at Apprentice 4+ */
+const GRAMMAR_GATE_THRESHOLD = 0.8;
+
 async function unlockGrammar(): Promise<number> {
 	const pendingResult = await getPendingLessonCount("grammar");
 	if (!pendingResult.ok) { console.warn("[unlock] grammar pending count failed:", pendingResult.error); return 0; }
@@ -174,6 +181,17 @@ async function unlockGrammar(): Promise<number> {
 	let remaining = cap - pendingResult.data;
 	let totalUnlocked = 0;
 
+	// Phase 1: Structured group progression (Tae Kim sections)
+	// While grouped items exist, only unlock through group progression
+	const nextGroup = await getNextLockedGrammarGroup();
+	if (nextGroup.ok && nextGroup.data) {
+		const groupUnlocked = await unlockGrammarByGroup(nextGroup.data, remaining);
+		totalUnlocked += groupUnlocked;
+		// Don't fall through to ungrouped -- keep focus on current group
+		return totalUnlocked;
+	}
+
+	// Phase 2: All groups exhausted -- ungrouped items, JLPT-ordered
 	for (const level of JLPT_LEVELS) {
 		if (remaining <= 0) break;
 
@@ -196,6 +214,44 @@ async function unlockGrammar(): Promise<number> {
 	return totalUnlocked;
 }
 
+async function unlockGrammarByGroup(
+	groupInfo: { lesson_group: string; lesson_order: number },
+	cap: number,
+): Promise<number> {
+	const { lesson_group, lesson_order } = groupInfo;
+
+	// First group (copula) unlocks immediately
+	if (lesson_order <= 1) {
+		return await doUnlockGrammarGroup(lesson_group, cap);
+	}
+
+	// Check previous group has 80% at Apprentice 4+
+	const prevGroup = await getPreviousGrammarGroup(lesson_order);
+	if (!prevGroup.ok || !prevGroup.data) {
+		// No previous group found -- unlock anyway
+		return await doUnlockGrammarGroup(lesson_group, cap);
+	}
+
+	const progress = await getGrammarGroupProgress(prevGroup.data);
+	if (!progress.ok) return 0;
+
+	const { total, at_apprentice4_plus } = progress.data;
+	if (total === 0 || at_apprentice4_plus / total >= GRAMMAR_GATE_THRESHOLD) {
+		return await doUnlockGrammarGroup(lesson_group, cap);
+	}
+
+	return 0; // Gate not met -- learner needs to progress current group first
+}
+
+async function doUnlockGrammarGroup(lessonGroup: string, cap: number): Promise<number> {
+	const result = await getLockedGrammarByGroup(lessonGroup, cap);
+	if (!result.ok || result.data.length === 0) return 0;
+
+	const ids = result.data.map((r) => r.id);
+	await unlockLanguageItems(ids);
+	return ids.length;
+}
+
 // --- Sentences ---
 
 async function unlockSentences(): Promise<number> {
@@ -213,13 +269,30 @@ async function unlockSentences(): Promise<number> {
 	const cap = getSettings().sentenceLessonCap;
 	if (pendingResult.data >= cap) return 0;
 
-	const needed = cap - pendingResult.data;
-	const batchResult = await getLockedSentenceBatch(needed);
-	if (!batchResult.ok || batchResult.data.length === 0) return 0;
+	let remaining = cap - pendingResult.data;
+	let totalUnlocked = 0;
 
-	const toUnlock = batchResult.data.map((i) => i.id);
-	await unlockLanguageItems(toUnlock);
-	return toUnlock.length;
+	// Unlock sentences in JLPT order (N5 first, then N4, etc.)
+	for (const level of JLPT_LEVELS) {
+		if (remaining <= 0) break;
+
+		if (level !== null && level !== "N5") {
+			const gateOpen = await isJlptGateOpenForType(level, "sentence");
+			if (!gateOpen) break;
+		}
+
+		const batchResult = await getLockedSentenceBatch(level, remaining);
+		if (!batchResult.ok || batchResult.data.length === 0) continue;
+
+		const toUnlock = batchResult.data.slice(0, remaining).map((i) => i.id);
+		if (toUnlock.length > 0) {
+			await unlockLanguageItems(toUnlock);
+			totalUnlocked += toUnlock.length;
+			remaining -= toUnlock.length;
+		}
+	}
+
+	return totalUnlocked;
 }
 
 // --- Conjugation ---

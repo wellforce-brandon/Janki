@@ -477,4 +477,206 @@ export const migrations: Migration[] = [
 		],
 		down: `SELECT 1`,
 	},
+	{
+		version: 15,
+		description: "Pedagogical ordering: grammar groups, conjugation order, sentence JLPT tags",
+		up: [
+			// --- Grammar: assign lesson_group and lesson_order based on Tae Kim sections ---
+			// context_notes pattern: "NNN Section - Topic: Subtopic"
+			// Extract leading 3-digit number and map to dependency-chain groups
+
+			// Group 1: Copula / State-of-being (lessons 001-008)
+			`UPDATE language_items SET lesson_group = 'grammar-copula', lesson_order = 1
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 1 AND 8`,
+
+			// Group 2: Basic particles (lessons 009-017)
+			`UPDATE language_items SET lesson_group = 'grammar-particles', lesson_order = 2
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 9 AND 17`,
+
+			// Group 3: Adjectives (lessons 018-038)
+			`UPDATE language_items SET lesson_group = 'grammar-adjectives', lesson_order = 3
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 18 AND 38`,
+
+			// Group 4: Verb basics (lessons 039-045)
+			`UPDATE language_items SET lesson_group = 'grammar-verb-basics', lesson_order = 4
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 39 AND 45`,
+
+			// Group 5: Negative verbs (lessons 046-051)
+			`UPDATE language_items SET lesson_group = 'grammar-negative-verbs', lesson_order = 5
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 46 AND 51`,
+
+			// Group 6: Past tense (lessons 052-063)
+			`UPDATE language_items SET lesson_group = 'grammar-past-tense', lesson_order = 6
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 52 AND 63`,
+
+			// Group 7: Particles used with verbs (lessons 064-094)
+			`UPDATE language_items SET lesson_group = 'grammar-verb-particles', lesson_order = 7
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 64 AND 94`,
+
+			// Group 8: Transitive/Intransitive verbs (lessons 095-101)
+			`UPDATE language_items SET lesson_group = 'grammar-transitivity', lesson_order = 8
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 95 AND 101`,
+
+			// Group 9: Subordinate clauses (lessons 102-109)
+			`UPDATE language_items SET lesson_group = 'grammar-clauses', lesson_order = 9
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 102 AND 109`,
+
+			// Group 10: Noun-related particles (lessons 110-137)
+			`UPDATE language_items SET lesson_group = 'grammar-noun-particles', lesson_order = 10
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 110 AND 137`,
+
+			// Group 11: Adverbs and sentence-ending particles (lessons 138-149)
+			`UPDATE language_items SET lesson_group = 'grammar-adverbs-gobi', lesson_order = 11
+			WHERE content_type = 'grammar' AND context_notes IS NOT NULL
+			AND CAST(SUBSTR(LTRIM(context_notes), 1, 3) AS INTEGER) BETWEEN 138 AND 149`,
+
+			// Grammar items without Tae Kim context_notes: assign to frequency-ordered group
+			// These items have frequency_rank from other sources but no section info
+			`UPDATE language_items SET lesson_group = 'grammar-supplemental', lesson_order = 12
+			WHERE content_type = 'grammar' AND lesson_group IS NULL AND frequency_rank IS NOT NULL`,
+
+			// --- Conjugation: assign lesson_order (items with full forms first) ---
+			// Items with conjugation_forms have complete paradigm data (better teaching material)
+			`UPDATE language_items SET lesson_order = 1
+			WHERE content_type = 'conjugation' AND conjugation_forms IS NOT NULL`,
+
+			// Items with only verb_group (classification without full forms)
+			`UPDATE language_items SET lesson_order = 2
+			WHERE content_type = 'conjugation' AND conjugation_forms IS NULL`,
+
+			// --- Sentences: assign JLPT level from Core 2k/6k frequency ranges ---
+			`UPDATE language_items SET jlpt_level = 'N5'
+			WHERE content_type = 'sentence' AND jlpt_level IS NULL
+			AND frequency_rank IS NOT NULL AND frequency_rank <= 800`,
+
+			`UPDATE language_items SET jlpt_level = 'N4'
+			WHERE content_type = 'sentence' AND jlpt_level IS NULL
+			AND frequency_rank IS NOT NULL AND frequency_rank BETWEEN 801 AND 1500`,
+
+			`UPDATE language_items SET jlpt_level = 'N3'
+			WHERE content_type = 'sentence' AND jlpt_level IS NULL
+			AND frequency_rank IS NOT NULL AND frequency_rank BETWEEN 1501 AND 4000`,
+
+			`UPDATE language_items SET jlpt_level = 'N2'
+			WHERE content_type = 'sentence' AND jlpt_level IS NULL
+			AND frequency_rank IS NOT NULL AND frequency_rank BETWEEN 4001 AND 6000`,
+
+			`UPDATE language_items SET jlpt_level = 'N1'
+			WHERE content_type = 'sentence' AND jlpt_level IS NULL
+			AND frequency_rank IS NOT NULL AND frequency_rank > 6000`,
+
+			// --- N5 Vocabulary: topic-based ordering for coherent learning sets ---
+			// Items in the same topic are learned together instead of scattered across WK levels.
+			// Within each topic, items still sort by frequency_rank (WK level) + kanji gating.
+
+			// Topic 1: Pronouns and demonstratives (foundational references)
+			`UPDATE language_items SET lesson_group = 'vocab-pronouns', lesson_order = 1
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND LOWER(part_of_speech) LIKE '%pronoun%'`,
+
+			// Topic 2: Numbers (numerals as a cohesive set)
+			`UPDATE language_items SET lesson_group = 'vocab-numbers', lesson_order = 2
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND LOWER(part_of_speech) LIKE '%numeral%'`,
+
+			// Topic 3: Days of the week
+			`UPDATE language_items SET lesson_group = 'vocab-days', lesson_order = 3
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND TRIM(meaning) IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')`,
+
+			// Topic 4: Months of the year
+			`UPDATE language_items SET lesson_group = 'vocab-months', lesson_order = 4
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND TRIM(meaning) IN ('January','February','March','April','May','June','July','August','September','October','November','December')`,
+
+			// Topic 5: Hours (o'clock)
+			`UPDATE language_items SET lesson_group = 'vocab-hours', lesson_order = 5
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND LOWER(meaning) LIKE '%o''clock%'`,
+
+			// Topic 6: Minutes
+			`UPDATE language_items SET lesson_group = 'vocab-minutes', lesson_order = 6
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND LOWER(meaning) LIKE '%minute%'`,
+
+			// Topic 7: Day numbers (First Day, Day Two, etc.)
+			`UPDATE language_items SET lesson_group = 'vocab-day-numbers', lesson_order = 7
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND (meaning LIKE '%First Day%' OR meaning LIKE '%Day One%'
+				OR meaning LIKE '%Second Day%' OR meaning LIKE '%Day Two%'
+				OR meaning LIKE '%Third Day%' OR meaning LIKE '%Day Three%'
+				OR meaning LIKE '%Fourth Day%' OR meaning LIKE '%Day Four%'
+				OR meaning LIKE '%Fifth Day%' OR meaning LIKE '%Day Five%'
+				OR meaning LIKE '%Sixth Day%' OR meaning LIKE '%Day Six%'
+				OR meaning LIKE '%Seventh Day%' OR meaning LIKE '%Day Seven%'
+				OR meaning LIKE '%Eighth Day%' OR meaning LIKE '%Day Eight%'
+				OR meaning LIKE '%Ninth Day%' OR meaning LIKE '%Day Nine%'
+				OR meaning LIKE '%Tenth Day%' OR meaning LIKE '%Day Ten%'
+				OR meaning LIKE '%day 1%' OR meaning LIKE '%day 11%')`,
+
+			// Topic 8: Hundreds (100-900)
+			`UPDATE language_items SET lesson_group = 'vocab-hundreds', lesson_order = 8
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND meaning LIKE '%Hundred%'`,
+
+			// Topic 9: Thousands (1000, 2000, etc.)
+			`UPDATE language_items SET lesson_group = 'vocab-thousands', lesson_order = 9
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND (meaning LIKE '%Thousand%' OR meaning LIKE '%thousand%')`,
+
+			// Topic 10: Year students (1st year through 6th year)
+			`UPDATE language_items SET lesson_group = 'vocab-year-students', lesson_order = 10
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND LOWER(meaning) LIKE '%year student%'`,
+
+			// Topic 11: Age counters (X years old)
+			`UPDATE language_items SET lesson_group = 'vocab-age', lesson_order = 11
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND LOWER(meaning) LIKE '%year%old%'`,
+
+			// Topic 12: People counters (X Persons)
+			`UPDATE language_items SET lesson_group = 'vocab-people-counters', lesson_order = 12
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND (meaning LIKE '%Persons%' OR (meaning LIKE '%People%' AND meaning LIKE '%Person%'))`,
+
+			// Topic 13: Seasons
+			`UPDATE language_items SET lesson_group = 'vocab-seasons', lesson_order = 13
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND LOWER(TRIM(meaning)) IN ('spring','summer','fall','winter','autumn')`,
+
+			// Topic 14: Family terms (using Japanese text for precision)
+			`UPDATE language_items SET lesson_group = 'vocab-family', lesson_order = 14
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND (item_key IN ('vocab:家族','vocab:兄弟','vocab:両親')
+				OR item_key LIKE 'vocab:お父%' OR item_key LIKE 'vocab:お母%'
+				OR item_key LIKE 'vocab:お兄%' OR item_key LIKE 'vocab:お姉%'
+				OR item_key LIKE 'vocab:おじい%' OR item_key LIKE 'vocab:おばあ%'
+				OR item_key LIKE 'vocab:赤ちゃん%'
+				OR LOWER(TRIM(meaning)) IN ('family','older brother','older sister',
+					'younger brother','younger sister','child, kid',
+					'grandfather','grandmother','daughter','husband','wife','baby','baby (colloquial)')
+				OR meaning LIKE '(speaker''s) father%' OR meaning LIKE '(speaker''s) mother%')`,
+
+			// Topic 15: Countries and places (proper nouns)
+			`UPDATE language_items SET lesson_group = 'vocab-places', lesson_order = 15
+			WHERE content_type = 'vocabulary' AND jlpt_level = 'N5' AND lesson_group IS NULL
+			AND LOWER(part_of_speech) LIKE '%proper noun%'`,
+		],
+		down: `
+			UPDATE language_items SET lesson_group = NULL, lesson_order = NULL
+			WHERE content_type IN ('grammar', 'conjugation', 'vocabulary');
+			UPDATE language_items SET jlpt_level = NULL
+			WHERE content_type = 'sentence' AND jlpt_level IN ('N5','N4','N3','N2','N1');
+		`,
+	},
 ];

@@ -1,98 +1,188 @@
-# Full Visual Pass -- Sidebar + UI Polish
+# Language Section Redesign -- WaniKani-Style Browse + Pedagogical Ordering
 
 ## Context
 
-The sidebar section headers ("Language", "Kanji") are tiny (11px, 60% opacity), making them nearly invisible. The active nav item uses a heavy solid primary background that's jarring. The app has a well-defined color theme (BoardPandas Design Studio export) with sidebar-specific tokens that are currently unused. This plan applies modern Linear/shadcn patterns while retaining the existing theme feel.
+The language section needs two major changes:
+1. **Architecture:** Replace flat list/accordion pages with WaniKani-style browsable item stubs organized by difficulty, with SRS state indicators and detail pages
+2. **Ordering:** Items should follow a research-backed learning progression, not arbitrary frequency sorting
 
-**User preferences:** Linear/shadcn-style headers, filled background + left border for active items, full visual pass, keep current theme.
+The user hasn't started learning yet, so this is a clean-slate redesign.
 
-## Research Summary
+## Research-Backed Learning Progression
 
-Modern apps (Linear, Notion, shadcn) use:
-- Section headers: 12-13px, medium weight, muted color, generous spacing between groups
-- Active items: subtle filled background (10-15% opacity of brand color) + 3px left accent border
-- Dark mode: soft grays not pure black, 3+ surface levels, text at 75% white max
-- Sidebar-specific color tokens for background, hover, active states
+### N5 Curriculum Order (based on Genki, BunPro, Tofugu, Tae Kim)
 
-## Sidebar Changes
+**Phase 0: Kana (weeks 1-2)**
+- Already implemented with 24 lesson groups, progressive unlock
+- No changes needed
 
-### File: `src/lib/components/layout/Sidebar.svelte`
+**Phase 1: First 100 words + basic grammar (weeks 3-5)**
+- Topic-bootstrapped vocabulary: greetings, pronouns, numbers 1-100, time words, days, core nouns (family, food, places, school)
+- Grammar: copula (です/だ) -> basic particles (は/が/を/に) -> demonstratives (これ/それ/あれ)
+- This is Genki Ch1-2 / BunPro L1 territory
 
-**1. Use sidebar color tokens** (already defined in app.css but unused):
-- Sidebar bg: `bg-sidebar` instead of `bg-card`
-- Text: `text-sidebar-foreground` instead of `text-muted-foreground`
-- Active: `bg-sidebar-active text-sidebar-active-foreground` + 3px left border in primary
-- Hover: `bg-sidebar-hover` instead of `bg-accent`
+**Phase 2: Verbs + adjectives (weeks 5-8)**
+- Frequency-ordered N5 vocabulary, gated behind kanji knowledge
+- Grammar: verb polite forms (ます) -> adjectives (い/な) -> existence (ある/いる) -> plain form
+- BunPro L2-4 territory
 
-**2. Section headers** (line 153):
-- Current: `text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60`
-- New: `text-xs font-medium uppercase tracking-wider text-sidebar-foreground/50`
-- Add `mt-2 mb-2` for breathing room between sections
-- Add `gap-6` between section groups (up from `gap-4`)
+**Phase 3: Te-form and beyond (weeks 8-12)**
+- Te-form is the major inflection point -- everything after depends on it
+- Grammar: te-form -> ている/てから/てください -> past forms -> たい -> たことがある -> permission/obligation
+- Sentence cards begin here (threshold: 50+ vocab, 10+ grammar at Apprentice 4+)
+- BunPro L5-8 territory
 
-**3. Active nav item** (line 167-170):
-- Current: `bg-primary text-primary-foreground` (solid red/dark background)
-- New: `bg-sidebar-active text-sidebar-active-foreground border-l-3 border-primary` (subtle tinted bg + left accent border)
-- The dark mode sidebar tokens already define: `sidebar-active: rgba(232, 51, 74, 0.12)`, `sidebar-active-foreground: #e8334a`
+**Phase 4: N5 completion (weeks 12-16)**
+- Remaining N5 grammar: comparison, giving/receiving, experience, obligation
+- BunPro L9-10 territory
+- Conjugation practice begins here (dictionary -> masu -> te -> ta forms)
 
-**4. Inactive items:**
-- Current: `text-muted-foreground hover:bg-accent hover:text-accent-foreground`
-- New: `text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground`
+### Grammar Dependency Chain
 
-**5. Shortcuts text:**
-- Make slightly more visible: `opacity-40` -> `opacity-30` (subtler, less distracting)
+```
+copula (です/だ)
+  -> particles (は/が/を/に/で/へ/の/と/か/も)
+    -> verb polite forms (ます/ません/ました)
+      -> adjectives (い-adj, な-adj conjugation)
+        -> existence (ある/いる)
+          -> plain/dictionary form
+            -> past forms (た/だ)
+              -> te-form (THE major unlock point)
+                -> ている/てから/てください/てもいい/てはいけない
+                  -> たい/たことがある/たり~たりする
+                    -> permission/obligation forms
+```
 
-**6. Bottom section separator:**
-- Add a subtle divider line before the Stats/Search/Settings group
+### Conjugation Teaching Order
 
-## Full Visual Pass -- Other Views
+```
+1. dictionary form (learn verb groups: ichidan/godan/irregular)
+2. masu-form (polite present)
+3. nai-form (negative)
+4. te-form (connective -- biggest leap)
+5. ta-form (past plain)
+6. potential form (N4)
+7. volitional form (N4)
+8. conditional forms: tara/ba/to/nara (N4)
+9. passive (N4)
+10. causative (N4)
+11. causative-passive (N4)
+```
 
-### File: `src/app.css`
+### Cross-Level Progression
 
-**7. Add border-l-3 utility** (Tailwind doesn't have `border-l-3` by default):
-- Add `border-l-3` as a custom utility or use `border-l-[3px]` inline
+| Level | Vocab | Grammar | Kanji Gate | Time |
+|---|---|---|---|---|
+| N5 | ~800 words | ~80 points | WK 1-10 | 3-4 months |
+| N4 | +700 words | +100 points | WK 11-20 | 3-4 months |
+| N3 | +1,500 words | +170 points | WK 21-35 | 6 months |
+| N2 | +3,000 words | +200 points | WK 36-50 | 6-12 months |
+| N1 | +6,000 words | +300 points | WK 51-60 | 12+ months |
 
-### File: `src/views/LanguageOverview.svelte` + `src/views/Dashboard.svelte` (if exists)
+Gate: 80% of previous level at Guru+ before next level opens (already implemented).
 
-**8. Page section headers consistency:**
-- Ensure all h3 section headers use `text-sm font-semibold uppercase tracking-wider text-muted-foreground`
-- Check spacing between sections is consistent (use `space-y-6` or `space-y-8`)
+## Current Data Audit
 
-### File: `src/lib/components/language/LanguageOverviewCard.svelte`
+| Content Type | Items | JLPT Tagged | Freq Ranked | Ordering Data |
+|---|---|---|---|---|
+| Vocabulary | 23,477 | 82% | 81% | JLPT + frequency_rank |
+| Grammar | 648 (N5) + 518 | 68% | 17% | context_notes has Tae Kim lesson numbers (004-138) |
+| Sentences | 8,104 | <1% | 74% valid | frequency_rank (Core 2k/6k order) |
+| Conjugation | 95 | 100% N5 | 0% | verb_group field, no form ordering |
+| Kana | 372 | 38% | 0% | lesson_group + lesson_order (done) |
 
-**9. Card hover states:**
-- Add `hover:border-primary/30 transition-colors` for interactive cards
-- Ensure cards have consistent border + bg-card pattern
+**Key gaps:**
+- Grammar has no explicit prerequisite_keys (dependency chain not encoded)
+- Conjugation has no form ordering (all forms mixed together)
+- No WK level on vocabulary items
+- Sentences have no grammar-point association
 
-### File: Various views
+## Architecture: Browse Pages
 
-**10. Button hierarchy audit:**
-- Primary actions (Start Lessons, Start Review): `variant="default"` (primary color)
-- Secondary actions (Back, Cancel): `variant="outline"` or `variant="ghost"`
-- Verify no orphaned button styles
+### New Views
 
-### File: `src/views/Settings.svelte`
+**LanguageItemBrowser** (replaces Vocabulary, Grammar, Sentences, Conjugation pages)
+- JLPT tier accordion: N5 (expanded) -> N4 -> N3 -> N2 -> N1 -> Untagged
+- Within each tier: sub-groups of ~50 items by frequency rank
+- Grid of item stubs showing: primary_text, reading, meaning (truncated), SRS stage indicator
+- SRS colors match kanji pattern (locked=muted, apprentice=pink, guru=purple, master=blue, enlightened=amber, burned=green)
+- Locked items show muted/dashed styling
 
-**11. Settings section spacing:**
-- Ensure consistent gap between settings sections
-- Verify all input labels use same muted-foreground pattern
+**LanguageItemDetail** (new)
+- Full item info: meaning, reading, pitch accent, example sentences, audio, conjugation forms
+- SRS stage + next review time
+- WK cross-references (for kanji-containing vocab)
+- Keyboard nav (left/right arrows) between adjacent items
+- Back button to browser
+
+**LanguageKana** (enhance existing)
+- Keep gojuon chart
+- Add SRS state color tinting on each cell
+- Make cells clickable to LanguageItemDetail
+
+### Navigation
+
+Sidebar entries (Vocabulary, Grammar, Sentences, Conjugation) route to LanguageItemBrowser with the content type as a parameter. Add `lang-item-detail` view for the detail page.
+
+## Implementation Phases
+
+This is a large feature. Split into phases that can be implemented in separate sessions.
+
+### Phase 1: Foundation (data + queries)
+1. Add migration v14 to reset language items (already written, pending commit)
+2. Add `getLanguageItemsByJlptAndRange()` query
+3. Add `getLanguageItemCountsByJlpt()` query for tier progress
+4. Add `getAdjacentLanguageItem()` query for detail nav
+5. Extract grammar lesson ordering from context_notes into lesson_order field
+
+### Phase 2: Browse UI
+6. Create LanguageItemBrowser.svelte (JLPT tiers + sub-groups + item grid)
+7. Create LanguageItemDetail.svelte (full item info + keyboard nav)
+8. Add `lang-item-detail` to navigation store
+9. Wire routing: sidebar entries -> LanguageItemBrowser
+
+### Phase 3: Replace + Polish
+10. Replace LanguageVocabulary.svelte with LanguageItemBrowser(vocabulary)
+11. Replace LanguageGrammar.svelte with LanguageItemBrowser(grammar)
+12. Replace LanguageSentences.svelte with LanguageItemBrowser(sentence)
+13. Replace LanguageConjugation.svelte with LanguageItemBrowser(conjugation)
+14. Enhance LanguageKana.svelte with SRS state + click-to-detail
+15. SRS stage colors/indicators on item stubs
+16. Tier progress bars
+
+### Phase 4: Pedagogical Ordering (future session)
+17. Populate grammar prerequisite_keys from the dependency chain
+18. Add conjugation form ordering (lesson_order for conjugation items)
+19. Add grammar-point tags to sentences for better gating
+20. Consider adding topic-based ordering for first 100 N5 vocab
 
 ## Critical Files
 
-| File | Changes |
+| File | Action |
 |---|---|
-| `src/lib/components/layout/Sidebar.svelte` | Main sidebar restyle (1-6) |
-| `src/app.css` | Optional utility if needed (7) |
-| `src/views/LanguageOverview.svelte` | Section header consistency (8) |
-| `src/lib/components/language/LanguageOverviewCard.svelte` | Card hover (9) |
+| `src/views/LanguageItemBrowser.svelte` | NEW |
+| `src/views/LanguageItemDetail.svelte` | NEW |
+| `src/lib/db/queries/language.ts` | Add 3 new queries |
+| `src/lib/stores/navigation.svelte.ts` | Add lang-item-detail view |
+| `src/lib/db/migrations.ts` | v14 reset (already done) |
+| `src/views/LanguageVocabulary.svelte` | REPLACE |
+| `src/views/LanguageGrammar.svelte` | REPLACE |
+| `src/views/LanguageSentences.svelte` | REPLACE |
+| `src/views/LanguageConjugation.svelte` | REPLACE |
+| `src/views/LanguageKana.svelte` | ENHANCE |
+| `src/App.svelte` | Wire new view routing |
 
 ## Verification
 
-1. `npx vite build` -- compiles
-2. Visual: Dark mode sidebar -- section headers readable, active item has left border + tinted bg
-3. Visual: Light mode sidebar -- same patterns with light theme tokens
-4. Visual: Dashboard/Overview pages -- consistent heading hierarchy
-5. Visual: Settings page -- consistent section spacing
+1. Navigate to Vocabulary -> see N5 tier expanded with sub-groups of items
+2. Items show SRS state (locked items muted, learned items colored)
+3. Click item -> detail page with full info
+4. Arrow keys navigate between items
+5. Back button returns to browser
+6. Same for Grammar, Sentences, Conjugation
+7. Kana chart cells show SRS colors and are clickable
+8. Lessons/Reviews still work independently
+9. Dashboard shows correct counts after reset migration
 
 ## Lessons Learned / Gotchas
 

@@ -466,4 +466,15 @@ export const migrations: Migration[] = [
 			DROP INDEX IF EXISTS idx_language_items_unlock_batch;
 		`,
 	},
+	{
+		version: 14,
+		description: "Reset language items to locked state for clean progressive unlock",
+		up: [
+			// Reset all language items to locked (pre-cap mass unlock left them all at srs_stage=1)
+			"UPDATE language_items SET srs_stage = 0, unlocked_at = NULL, next_review = NULL, lesson_completed_at = NULL, correct_count = 0, incorrect_count = 0",
+			// Clear language review log since no valid reviews exist
+			"DELETE FROM language_review_log",
+		],
+		down: `SELECT 1`,
+	},
 ];

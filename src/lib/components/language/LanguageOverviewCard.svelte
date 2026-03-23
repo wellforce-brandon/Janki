@@ -12,7 +12,7 @@ let { count, onclick }: Props = $props();
 
 <button
 	type="button"
-	class="flex w-full flex-col gap-2 rounded-lg border bg-card p-4 text-left transition-colors hover:bg-accent hover:text-accent-foreground"
+	class="flex w-full flex-col gap-2 rounded-lg border bg-card p-4 text-left transition-colors hover:border-primary/30 hover:bg-accent hover:text-accent-foreground"
 	{onclick}
 >
 	<div class="flex items-center justify-between">

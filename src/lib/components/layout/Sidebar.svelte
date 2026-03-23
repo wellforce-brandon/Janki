@@ -142,17 +142,19 @@ function handleTierClick(item: NavItem, tierIndex: number) {
 }
 </script>
 
-<nav class="flex h-full w-60 flex-col border-r border-border bg-card p-4">
-	<div class="mb-6 px-2 text-xl font-bold tracking-tight">
+<nav class="flex h-full w-60 flex-col border-r border-border bg-sidebar p-4">
+	<div class="mb-6 px-2 text-xl font-bold tracking-tight text-sidebar-foreground">
 		<span class="text-primary">J</span>anki
 	</div>
-	<div class="flex flex-1 flex-col gap-4">
-		{#each sections as section}
+	<div class="flex flex-1 flex-col gap-6">
+		{#each sections as section, sectionIndex}
 			<div>
 				{#if section.label}
-					<div class="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+					<div class="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-sidebar-foreground/50">
 						{section.label}
 					</div>
+				{:else if sectionIndex === sections.length - 1}
+					<div class="mb-2 border-t border-border/50"></div>
 				{/if}
 				<ul class="flex flex-col gap-0.5">
 					{#each section.items as item}
@@ -164,16 +166,16 @@ function handleTierClick(item: NavItem, tierIndex: number) {
 							>
 								<button
 									onclick={() => navigate(item.id)}
-									class="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors
+									class="flex w-full items-center justify-between px-3 py-2 text-sm transition-colors
 										{isActive(item)
-											? 'bg-primary text-primary-foreground'
-											: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}"
+											? 'bg-sidebar-active text-sidebar-active-foreground border-l-[3px] border-primary rounded-r-md'
+											: 'text-sidebar-foreground/70 hover:bg-sidebar-hover hover:text-sidebar-foreground border-l-[3px] border-transparent rounded-r-md'}"
 								>
 									<span>{item.label}</span>
 									{#if item.flyout}
-										<span class="text-xs opacity-40">&rsaquo;</span>
+										<span class="text-xs opacity-30">&rsaquo;</span>
 									{:else if item.shortcut}
-										<span class="text-xs opacity-50">{item.shortcut}</span>
+										<span class="text-xs opacity-30">{item.shortcut}</span>
 									{/if}
 								</button>
 

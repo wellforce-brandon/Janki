@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.20.1.1] - 2026-03-22
+
+### Changed
+
+- Sidebar restyled with dedicated theme tokens (bg-sidebar, sidebar-active, sidebar-hover)
+- Active nav item uses subtle tinted background + 3px left accent border instead of solid primary fill
+- Section headers enlarged from 11px to text-xs with improved contrast
+- Section groups spaced with gap-6 for visual breathing room
+- Bottom nav group (Stats/Search/Settings) separated by subtle divider line
+- Overview cards show primary-tinted border on hover
+
 ## [0.20.1.0] - 2026-03-22
 
 ### Added

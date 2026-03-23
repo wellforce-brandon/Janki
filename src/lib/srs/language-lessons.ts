@@ -1,7 +1,10 @@
 import {
 	getAvailableLessons,
 	getAvailableLessonCount,
+	getLanguageItemById,
 	markLessonsBatchCompleted,
+	unlockLevelVocabIfKanaReviewed,
+	unlockSentencesWithMetPrerequisites,
 	type ContentType,
 	type LanguageItem,
 } from "../db/queries/language";
@@ -52,5 +55,22 @@ export async function completeLessonBatch(
 		return { ok: false, error: "Failed to calculate next review time" };
 	}
 
-	return markLessonsBatchCompleted(itemIds, nextReview);
+	const result = await markLessonsBatchCompleted(itemIds, nextReview);
+
+	// After completing kana lessons, check if vocab should unlock in that level
+	if (result.ok) {
+		const levelsToCheck = new Set<number>();
+		for (const id of itemIds) {
+			const itemResult = await getLanguageItemById(id);
+			if (itemResult.ok && itemResult.data?.content_type === "kana" && itemResult.data.language_level) {
+				levelsToCheck.add(itemResult.data.language_level);
+			}
+		}
+		for (const level of levelsToCheck) {
+			unlockLevelVocabIfKanaReviewed(level).catch(console.error);
+			unlockSentencesWithMetPrerequisites(level).catch(console.error);
+		}
+	}
+
+	return result;
 }

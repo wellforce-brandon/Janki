@@ -679,4 +679,17 @@ export const migrations: Migration[] = [
 			WHERE content_type = 'sentence' AND jlpt_level IN ('N5','N4','N3','N2','N1');
 		`,
 	},
+	{
+		version: 16,
+		description: "Add language_level column for WaniKani-style level progression",
+		up: [
+			"ALTER TABLE language_items ADD COLUMN language_level INTEGER",
+			"CREATE INDEX idx_language_items_language_level ON language_items(language_level)",
+			"CREATE INDEX idx_language_items_level_type ON language_items(language_level, content_type)",
+		],
+		down: `
+			DROP INDEX IF EXISTS idx_language_items_level_type;
+			DROP INDEX IF EXISTS idx_language_items_language_level;
+		`,
+	},
 ];

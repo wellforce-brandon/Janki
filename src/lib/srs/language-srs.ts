@@ -3,6 +3,9 @@ import {
 	updateLanguageItemSrs,
 	logLanguageReview,
 	deleteLatestLanguageReview,
+	checkAndUnlockLanguageLevel,
+	unlockLevelVocabIfKanaReviewed,
+	unlockSentencesWithMetPrerequisites,
 } from "../db/queries/language";
 import { invalidateCache } from "../db/query-cache";
 import { updateDailyStats } from "../db/queries/stats";
@@ -59,6 +62,21 @@ export async function reviewLanguageItem(
 
 	// Invalidate cached counts since SRS state changed
 	invalidateCache("contentTypeCounts");
+
+	// Check if this promotion should unlock the next language level
+	if (correct && newStage >= 5 && item.language_level) {
+		checkAndUnlockLanguageLevel(item.language_level).catch(console.error);
+	}
+
+	// Check if kana gate is met for vocab unlock in this level
+	if (item.language_level && item.content_type === "kana") {
+		unlockLevelVocabIfKanaReviewed(item.language_level).catch(console.error);
+	}
+
+	// Check if any sentences can unlock (their kanji prerequisites may now be met)
+	if (item.language_level) {
+		unlockSentencesWithMetPrerequisites(item.language_level).catch(console.error);
+	}
 
 	return { newStage, nextReview };
 }

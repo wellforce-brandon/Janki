@@ -42,6 +42,16 @@ let showShortcuts = $state(false);
 
 let totalReviewed = $state(0);
 let totalCorrect = $state(0);
+let activeTimers: ReturnType<typeof setTimeout>[] = [];
+
+function safeTimeout(fn: () => void, ms: number) {
+	const id = setTimeout(fn, ms);
+	activeTimers.push(id);
+	return id;
+}
+
+// Clear all timers on component destroy
+$effect(() => () => activeTimers.forEach(clearTimeout));
 
 // Undo state
 interface UndoEntry {
@@ -171,7 +181,7 @@ async function submitAnswer() {
 				prevNextReview,
 			}];
 
-			setTimeout(() => advanceToNext(), 1200);
+			safeTimeout(() => advanceToNext(), 1200);
 		} else {
 			feedbackState = "incorrect";
 			correctAnswer = getCorrectAnswerDisplay(current);

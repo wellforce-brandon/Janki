@@ -24,15 +24,20 @@ function navigateToItem(target: KanjiLevelItem) {
 	navigate("kanji-detail", { id: String(target.id), character: target.character });
 }
 
+let fetchId = 0;
+
 async function loadItem(id: number) {
+	const myId = ++fetchId;
 	loading = true;
 	prevItem = null;
 	nextItem = null;
 	const result = await getKanjiItemById(id);
+	if (myId !== fetchId) return;
 	if (result.ok) {
 		item = result.data;
 		if (item) {
 			const adjResult = await getAdjacentKanji(item.level, item.id, item.item_type);
+			if (myId !== fetchId) return;
 			if (adjResult.ok) {
 				prevItem = adjResult.data.prev;
 				nextItem = adjResult.data.next;

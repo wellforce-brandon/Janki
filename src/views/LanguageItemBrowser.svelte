@@ -1,16 +1,14 @@
 <script lang="ts">
 import LoadingState from "$lib/components/ui/loading-state.svelte";
 import {
-	getLanguageItemsByJlptAndRange,
-	getLanguageItemCountsByJlpt,
+	getLanguageItemsByTypeAndTier,
 	type ContentType,
-	type JlptGroupCount,
-	type JlptSubGroup,
+	type LanguageItemsByLevel,
 	type LanguageItem,
 } from "$lib/db/queries/language";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { getStageDots } from "$lib/utils/kanji";
-import { navigate } from "$lib/stores/navigation.svelte";
+import { navigate, viewParams } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 
 interface Props {
@@ -20,69 +18,44 @@ interface Props {
 
 let { contentType, title }: Props = $props();
 
-const JLPT_ORDER = ["N5", "N4", "N3", "N2", "N1", "None"];
-const JLPT_LABELS: Record<string, string> = {
-	N5: "N5 -- Beginner",
-	N4: "N4 -- Elementary",
-	N3: "N3 -- Intermediate",
-	N2: "N2 -- Upper Intermediate",
-	N1: "N1 -- Advanced",
-	None: "Untagged",
-};
+const TIERS = [
+	{ label: "1-10", start: 1, end: 10 },
+	{ label: "11-20", start: 11, end: 20 },
+	{ label: "21-30", start: 21, end: 30 },
+	{ label: "31-40", start: 31, end: 40 },
+	{ label: "41-50", start: 41, end: 50 },
+	{ label: "51-60", start: 51, end: 60 },
+];
 
+let currentTier = $state(0);
 let loading = $state(true);
-let tierCounts = $state<JlptGroupCount[]>([]);
-let expandedTier = $state<string | null>(null);
-let tierData = $state<JlptSubGroup[]>([]);
-let tierLoading = $state(false);
+let levelData = $state<LanguageItemsByLevel[]>([]);
 
-async function load() {
+let tier = $derived(TIERS[currentTier]);
+let initialTier = $derived(Number(viewParams().tier) || 0);
+
+async function loadTier(tierIndex: number) {
 	loading = true;
-	const result = await getLanguageItemCountsByJlpt(contentType);
+	currentTier = tierIndex;
+	const t = TIERS[tierIndex];
+	const result = await getLanguageItemsByTypeAndTier(contentType, t.start, t.end);
 	if (result.ok) {
-		tierCounts = result.data;
-		// Auto-expand first tier with items
-		if (tierCounts.length > 0) {
-			await expandTier(tierCounts[0].jlpt_level);
-		}
+		levelData = result.data;
 	} else {
-		addToast(`Failed to load ${title.toLowerCase()} counts`, "error");
+		addToast(`Failed to load ${title.toLowerCase()}`, "error");
 	}
 	loading = false;
 }
 
-async function expandTier(jlptLevel: string) {
-	if (expandedTier === jlptLevel) {
-		expandedTier = null;
-		tierData = [];
-		return;
-	}
-	expandedTier = jlptLevel;
-	tierLoading = true;
-	const result = await getLanguageItemsByJlptAndRange(contentType, jlptLevel);
-	if (result.ok) {
-		tierData = result.data;
-	} else {
-		addToast(`Failed to load ${jlptLevel} items`, "error");
-		tierData = [];
-	}
-	tierLoading = false;
+function jumpToLevel(level: number) {
+	requestAnimationFrame(() => {
+		const el = document.getElementById(`lang-level-section-${level}`);
+		if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+	});
 }
 
-function getTierCount(jlptLevel: string): JlptGroupCount | undefined {
-	return tierCounts.find((t) => t.jlpt_level === jlptLevel);
-}
-
-function getTierPct(tier: JlptGroupCount): number {
-	return tier.total > 0 ? Math.round((tier.unlocked / tier.total) * 100) : 0;
-}
-
-function getGuruPct(tier: JlptGroupCount): number {
-	return tier.total > 0 ? Math.round((tier.guru_plus / tier.total) * 100) : 0;
-}
-
-function getGroupPct(group: JlptSubGroup): number {
-	return group.total > 0 ? Math.round((group.unlocked / group.total) * 100) : 0;
+function getLevelPct(level: LanguageItemsByLevel): number {
+	return level.total > 0 ? Math.round((level.unlocked / level.total) * 100) : 0;
 }
 
 function getSrsClasses(item: LanguageItem): string {
@@ -103,13 +76,8 @@ function getSrsClasses(item: LanguageItem): string {
 	return "bg-muted text-muted-foreground border border-transparent";
 }
 
-function getSrsTooltip(item: LanguageItem): string {
-	return STAGE_NAMES[item.srs_stage] ?? "Unknown";
-}
-
 function getMeaningDisplay(item: LanguageItem): string {
 	if (!item.meaning) return "";
-	// Truncate long meanings
 	return item.meaning.length > 30 ? item.meaning.slice(0, 28) + "..." : item.meaning;
 }
 
@@ -117,30 +85,29 @@ function openDetail(item: LanguageItem) {
 	navigate("lang-item-detail", {
 		id: String(item.id),
 		contentType: item.content_type,
-		jlptLevel: item.jlpt_level ?? "None",
-	});
-}
-
-function jumpToGroup(groupIndex: number) {
-	requestAnimationFrame(() => {
-		const el = document.getElementById(`subgroup-${groupIndex}`);
-		if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+		fromLevel: String(item.language_level ?? ""),
 	});
 }
 
 $effect(() => {
-	load();
+	loadTier(initialTier);
 });
 </script>
 
 <div class="space-y-5">
+	<!-- Header with title + legend -->
 	<div class="flex flex-wrap items-center justify-between gap-3">
-		<h2 class="text-2xl font-bold" tabindex="-1">{title}</h2>
+		<h2 class="text-2xl font-bold" tabindex="-1">
+			{title}
+			<span class="text-base font-normal text-muted-foreground">
+				Levels {tier.start}-{tier.end}
+			</span>
+		</h2>
 
 		<!-- Legend -->
 		<div class="flex flex-wrap items-center gap-3 text-xs">
 			<div class="flex items-center gap-1.5">
-				<div class="h-4 w-4 rounded border-2 border-dashed border-current opacity-30"></div>
+				<div class="h-4 w-4 rounded border-2 border-dashed border-current opacity-50"></div>
 				<span class="text-muted-foreground">Locked</span>
 			</div>
 			<div class="flex items-center gap-1.5">
@@ -149,19 +116,7 @@ $effect(() => {
 			</div>
 			<div class="flex items-center gap-1.5">
 				<div class="h-4 w-4 rounded bg-pink-500"></div>
-				<span class="text-muted-foreground">Apprentice</span>
-			</div>
-			<div class="flex items-center gap-1.5">
-				<div class="h-4 w-4 rounded bg-purple-500"></div>
-				<span class="text-muted-foreground">Guru</span>
-			</div>
-			<div class="flex items-center gap-1.5">
-				<div class="h-4 w-4 rounded bg-blue-500"></div>
-				<span class="text-muted-foreground">Master</span>
-			</div>
-			<div class="flex items-center gap-1.5">
-				<div class="h-4 w-4 rounded bg-sky-500"></div>
-				<span class="text-muted-foreground">Enlightened</span>
+				<span class="text-muted-foreground">In Reviews</span>
 			</div>
 			<div class="flex items-center gap-1.5">
 				<div class="h-4 w-4 rounded bg-zinc-700 dark:bg-zinc-600"></div>
@@ -170,147 +125,113 @@ $effect(() => {
 		</div>
 	</div>
 
+	<!-- Tier pagination tabs -->
+	<div class="flex gap-1 rounded-lg border bg-muted/50 p-0.5">
+		{#each TIERS as t, i}
+			<button
+				type="button"
+				class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {currentTier === i ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+				onclick={() => loadTier(i)}
+				aria-label="Show levels {t.start} to {t.end}"
+			>
+				{t.label}
+			</button>
+		{/each}
+	</div>
+
+	<!-- Level sub-tabs -->
+	{#if !loading && levelData.length > 0}
+		<div class="flex flex-wrap gap-1">
+			{#each { length: tier.end - tier.start + 1 } as _, i}
+				{@const lvl = tier.start + i}
+				{@const hasItems = levelData.some((d) => d.level === lvl)}
+				<button
+					type="button"
+					class="rounded px-2 py-1 text-xs font-medium transition-colors {hasItems ? 'hover:bg-accent text-foreground' : 'text-muted-foreground/40 cursor-default'}"
+					onclick={() => hasItems && jumpToLevel(lvl)}
+					disabled={!hasItems}
+					aria-label="Jump to level {lvl}"
+				>
+					{lvl}
+				</button>
+			{/each}
+		</div>
+	{/if}
+
+	<!-- Content -->
 	{#if loading}
 		<LoadingState message="Loading {title.toLowerCase()}..." />
-	{:else if tierCounts.length === 0}
+	{:else if levelData.length === 0}
 		<div class="rounded-lg border bg-card p-8 text-center">
-			<p class="text-muted-foreground">No {title.toLowerCase()} items found.</p>
+			<p class="text-muted-foreground">No {title.toLowerCase()} found for levels {tier.start}-{tier.end}.</p>
 		</div>
 	{:else}
-		<!-- JLPT tier accordions -->
-		<div class="space-y-3">
-			{#each JLPT_ORDER as jlpt}
-				{@const tier = getTierCount(jlpt)}
-				{#if tier}
-					<div class="rounded-lg border bg-card">
-						<!-- Tier header -->
-						<button
-							type="button"
-							class="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-accent/50"
-							onclick={() => expandTier(jlpt)}
-							aria-expanded={expandedTier === jlpt}
-						>
-							<div class="flex items-center gap-3">
-								<span class="text-lg font-semibold">{JLPT_LABELS[jlpt] ?? jlpt}</span>
-								<span class="text-sm text-muted-foreground">
-									{tier.total.toLocaleString()} items
-								</span>
+		<div class="space-y-8">
+			{#each levelData as level}
+				<section id="lang-level-section-{level.level}" class="space-y-3">
+					<div class="flex items-center justify-between">
+						<h3 class="text-lg font-semibold">
+							Level {level.level}
+							<span class="text-sm font-normal text-muted-foreground">
+								({level.unlocked}/{level.total} unlocked)
+							</span>
+						</h3>
+						<div class="flex items-center gap-2">
+							<div class="h-2 w-24 overflow-hidden rounded-full bg-muted">
+								<div
+									class="h-full rounded-full bg-green-500 transition-all"
+									style="width: {getLevelPct(level)}%"
+								></div>
 							</div>
-							<div class="flex items-center gap-3">
-								<div class="flex flex-col gap-1">
-									<div class="flex items-center gap-2">
-										<span class="w-12 text-right text-[10px] text-muted-foreground">Unlock</span>
-										<div class="h-2 w-24 overflow-hidden rounded-full bg-muted">
-											<div
-												class="h-full rounded-full bg-green-500 transition-all"
-												style="width: {getTierPct(tier)}%"
-											></div>
-										</div>
-										<span class="text-xs text-muted-foreground">{getTierPct(tier)}%</span>
-									</div>
-									<div class="flex items-center gap-2">
-										<span class="w-12 text-right text-[10px] text-muted-foreground">Guru+</span>
-										<div class="h-2 w-24 overflow-hidden rounded-full bg-muted">
-											<div
-												class="h-full rounded-full bg-purple-500 transition-all"
-												style="width: {getGuruPct(tier)}%"
-											></div>
-										</div>
-										<span class="text-xs text-muted-foreground">{getGuruPct(tier)}%</span>
-									</div>
-								</div>
-								<span class="text-muted-foreground">
-									{expandedTier === jlpt ? "−" : "+"}
+							<span class="text-xs text-muted-foreground">{getLevelPct(level)}%</span>
+						</div>
+					</div>
+
+					<!-- Sub-group tags (if any) -->
+					{#if level.subGroups.length > 1}
+						<div class="flex flex-wrap gap-1">
+							{#each level.subGroups as group}
+								<span class="rounded-full border border-muted-foreground/20 px-2.5 py-0.5 text-xs text-muted-foreground">
+									{group.label}
 								</span>
-							</div>
-						</button>
+							{/each}
+						</div>
+					{/if}
 
-						<!-- Expanded tier content -->
-						{#if expandedTier === jlpt}
-							<div class="border-t px-4 pb-4 pt-3">
-								{#if tierLoading}
-									<LoadingState message="Loading items..." />
-								{:else if tierData.length === 0}
-									<p class="text-sm text-muted-foreground">No items in this tier.</p>
-								{:else}
-									<!-- Sub-group quick-jump tabs -->
-									{#if tierData.length > 1}
-										<div class="mb-4 flex flex-wrap gap-1">
-											{#each tierData as group}
-												<button
-													type="button"
-													class="rounded px-2 py-1 text-xs font-medium transition-colors hover:bg-accent text-foreground {group.groupKey ? 'border border-muted-foreground/20' : ''}"
-													onclick={() => jumpToGroup(group.groupIndex)}
-													aria-label="Jump to {group.groupLabel}"
-												>
-													{group.groupLabel}
-												</button>
-											{/each}
-										</div>
-									{/if}
-
-									<!-- Sub-groups -->
-									<div class="space-y-6">
-										{#each tierData as group}
-											<section id="subgroup-{group.groupIndex}" class="space-y-3">
-												<div class="flex items-center justify-between">
-													<h3 class="text-sm font-semibold {group.groupKey ? 'text-foreground' : 'text-muted-foreground'}">
-														{group.groupLabel}
-													</h3>
-													<div class="flex items-center gap-2">
-														<div class="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
-															<div
-																class="h-full rounded-full bg-green-500 transition-all"
-																style="width: {getGroupPct(group)}%"
-															></div>
-														</div>
-														<span class="text-xs text-muted-foreground">
-															{group.unlocked}/{group.total}
-														</span>
-													</div>
-												</div>
-
-												<div class="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
-													{#each group.items as item (item.id)}
-														<button
-															type="button"
-															class="flex flex-col items-center rounded-lg p-2 transition-all hover:brightness-110 {getSrsClasses(item)}"
-															onclick={() => openDetail(item)}
-															title={getSrsTooltip(item)}
-															aria-label="{item.primary_text} - {getMeaningDisplay(item)} ({getSrsTooltip(item)})"
-														>
-															<span class="text-base font-bold leading-tight">
-																{item.primary_text}
-															</span>
-															{#if item.reading}
-																<span class="mt-0.5 truncate text-[10px] leading-tight opacity-80 max-w-full">
-																	{item.reading}
-																</span>
-															{/if}
-															<span class="mt-0.5 max-w-full truncate text-[10px] leading-tight opacity-70">
-																{getMeaningDisplay(item)}
-															</span>
-															{#if item.srs_stage >= 1 && item.srs_stage <= 4}
-																{@const dots = getStageDots(item.srs_stage)}
-																<div class="mt-1 flex gap-0.5">
-																	{#each { length: dots.total } as _, i}
-																		<div
-																			class="h-1.5 w-1.5 rounded-full {i < dots.filled ? 'bg-white/80' : 'bg-white/25'}"
-																		></div>
-																	{/each}
-																</div>
-															{/if}
-														</button>
-													{/each}
-												</div>
-											</section>
+					<div class="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
+						{#each level.items as item (item.id)}
+							<button
+								type="button"
+								class="flex flex-col items-center rounded-lg p-2 transition-all hover:brightness-110 {getSrsClasses(item)}"
+								onclick={() => openDetail(item)}
+								title={STAGE_NAMES[item.srs_stage] ?? "Unknown"}
+								aria-label="{item.primary_text} - {getMeaningDisplay(item)} ({STAGE_NAMES[item.srs_stage] ?? 'Unknown'})"
+							>
+								<span class="text-base font-bold leading-tight">
+									{item.primary_text}
+								</span>
+								{#if item.reading}
+									<span class="mt-0.5 truncate text-[10px] leading-tight opacity-80 max-w-full">
+										{item.reading}
+									</span>
+								{/if}
+								<span class="mt-0.5 max-w-full truncate text-[10px] leading-tight opacity-70">
+									{getMeaningDisplay(item)}
+								</span>
+								{#if item.srs_stage >= 1 && item.srs_stage <= 4}
+									{@const dots = getStageDots(item.srs_stage)}
+									<div class="mt-1 flex gap-0.5">
+										{#each { length: dots.total } as _, di}
+											<div
+												class="h-1.5 w-1.5 rounded-full {di < dots.filled ? 'bg-white/80' : 'bg-white/25'}"
+											></div>
 										{/each}
 									</div>
 								{/if}
-							</div>
-						{/if}
+							</button>
+						{/each}
 					</div>
-				{/if}
+				</section>
 			{/each}
 		</div>
 	{/if}

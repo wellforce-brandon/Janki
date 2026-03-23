@@ -24,9 +24,10 @@ interface Props {
 	itemId: number;
 	contentType?: string;
 	jlptLevel?: string;
+	fromLevel?: string;
 }
 
-let { itemId, contentType, jlptLevel }: Props = $props();
+let { itemId, contentType, jlptLevel, fromLevel }: Props = $props();
 
 let item = $state<LanguageItem | null>(null);
 let loading = $state(true);
@@ -35,6 +36,7 @@ let nextItem = $state<LanguageItem | null>(null);
 let wkRefs = $state<WkCrossReference[]>([]);
 
 function getParentView(): string {
+	if (fromLevel) return "lang-level";
 	switch (item?.content_type ?? contentType) {
 		case "vocabulary": return "lang-vocabulary";
 		case "grammar": return "lang-grammar";
@@ -42,6 +44,11 @@ function getParentView(): string {
 		case "conjugation": return "lang-conjugation";
 		default: return "lang-overview";
 	}
+}
+
+function getParentParams(): Record<string, string> {
+	if (fromLevel) return { level: fromLevel };
+	return {};
 }
 
 function navigateToItem(target: LanguageItem) {
@@ -52,39 +59,53 @@ function navigateToItem(target: LanguageItem) {
 	});
 }
 
+let fetchId = 0;
+
 async function loadItem(id: number) {
+	const myId = ++fetchId;
 	loading = true;
+	item = null;
 	prevItem = null;
 	nextItem = null;
 	wkRefs = [];
 
-	const result = await getLanguageItemById(id);
-	if (result.ok) {
-		item = result.data;
-		if (item) {
-			// Load adjacent items for keyboard nav
-			const adjResult = await getAdjacentLanguageItem(
-				item.content_type,
-				item.jlpt_level,
-				item.id,
-			);
-			if (adjResult.ok) {
-				prevItem = adjResult.data.prev;
-				nextItem = adjResult.data.next;
-			}
+	try {
+		const result = await getLanguageItemById(id);
+		if (myId !== fetchId) { console.warn("[detail] fetchId mismatch after getItem", myId, fetchId); return; }
+		if (result.ok) {
+			item = result.data;
+			if (item) {
+				// Load adjacent items for keyboard nav (non-blocking)
+				getAdjacentLanguageItem(
+					item.content_type,
+					item.jlpt_level,
+					item.id,
+				).then((adjResult) => {
+					if (myId !== fetchId) return;
+					if (adjResult.ok) {
+						prevItem = adjResult.data.prev;
+						nextItem = adjResult.data.next;
+					}
+				}).catch(console.error);
 
-			// Load WK cross-references for kanji in the primary text
-			const kanji: string[] = [];
-			for (const char of item.primary_text) {
-				const code = char.codePointAt(0) ?? 0;
-				if (code >= 0x4E00 && code <= 0x9FFF) kanji.push(char);
+				// Load WK cross-references (non-blocking)
+				const kanji = new Set<string>();
+				for (const char of item.primary_text) {
+					const code = char.codePointAt(0) ?? 0;
+					if (code >= 0x4E00 && code <= 0x9FFF) kanji.add(char);
+				}
+				if (kanji.size > 0) {
+					findWkCrossReferences([...kanji]).then((wkResult) => {
+						if (myId !== fetchId) return;
+						if (wkResult.ok) wkRefs = wkResult.data;
+					}).catch(console.error);
+				}
 			}
-			if (kanji.length > 0) {
-				const wkResult = await findWkCrossReferences(kanji);
-				if (wkResult.ok) wkRefs = wkResult.data;
-			}
+		} else {
+			item = null;
 		}
-	} else {
+	} catch (e) {
+		console.error("[LanguageItemDetail] Failed to load item:", e);
 		item = null;
 	}
 	loading = false;
@@ -131,8 +152,8 @@ $effect(() => {
 <div class="mx-auto max-w-2xl space-y-6">
 	<!-- Navigation bar -->
 	<div class="flex items-center gap-2">
-		<Button variant="ghost" onclick={() => navigate(getParentView())}>
-			&larr; Back
+		<Button variant="ghost" onclick={() => navigate(getParentView(), getParentParams())}>
+			&larr; {fromLevel ? `Level ${fromLevel}` : "Back"}
 		</Button>
 		<div class="ml-auto flex gap-1">
 			{#if prevItem}
@@ -165,7 +186,7 @@ $effect(() => {
 			title="Item not found"
 			description="This item doesn't exist or may have been removed."
 			actionLabel="Back"
-			onaction={() => navigate(getParentView())}
+			onaction={() => navigate(getParentView(), getParentParams())}
 		/>
 	{:else}
 		<!-- Header -->
@@ -195,6 +216,11 @@ $effect(() => {
 					{#if item.jlpt_level}
 						<span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
 							{item.jlpt_level}
+						</span>
+					{/if}
+					{#if item.language_level}
+						<span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+							Lv {item.language_level}
 						</span>
 					{/if}
 				</div>

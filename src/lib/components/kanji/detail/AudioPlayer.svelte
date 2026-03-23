@@ -10,9 +10,21 @@ let { audios }: Props = $props();
 
 let playingUrl = $state<string | null>(null);
 let audioError = $state(false);
+let activeAudio: HTMLAudioElement | null = null;
+
+// Cleanup audio on component destroy
+$effect(() => {
+	return () => {
+		if (activeAudio) {
+			activeAudio.pause();
+			activeAudio.src = "";
+			activeAudio = null;
+		}
+	};
+});
 
 // Group by voice actor, prefer webm format
-let voiceActors = $derived(() => {
+let voiceActors = $derived.by(() => {
 	const map = new Map<number, PronunciationAudio>();
 	for (const audio of audios) {
 		const existing = map.get(audio.metadata.voice_actor_id);
@@ -26,17 +38,27 @@ let voiceActors = $derived(() => {
 });
 
 function play(audio: PronunciationAudio) {
+	if (activeAudio) {
+		activeAudio.pause();
+		activeAudio.src = "";
+	}
 	audioError = false;
 	playingUrl = audio.url;
 	const el = new Audio(audio.url);
-	el.onended = () => (playingUrl = null);
+	activeAudio = el;
+	el.onended = () => {
+		playingUrl = null;
+		activeAudio = null;
+	};
 	el.onerror = () => {
 		playingUrl = null;
 		audioError = true;
+		activeAudio = null;
 	};
 	el.play().catch(() => {
 		playingUrl = null;
 		audioError = true;
+		activeAudio = null;
 	});
 }
 </script>
@@ -49,7 +71,7 @@ function play(audio: PronunciationAudio) {
 		</div>
 
 		<div class="flex gap-3">
-			{#each voiceActors() as audio}
+			{#each voiceActors as audio}
 				<button
 					type="button"
 					class="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-muted/50 transition-colors disabled:opacity-50"

@@ -8,6 +8,7 @@ import {
 	getContentTypeCounts,
 	getAvailableLessonCount,
 	getLanguageSrsSummary,
+	getLanguageUserLevel,
 	getRecentlyUnlockedItems,
 	type ContentTypeCount,
 	type LanguageSrsSummary,
@@ -22,6 +23,7 @@ let refreshing = $state(false);
 let counts = $state<ContentTypeCount[]>([]);
 let lessonCount = $state(0);
 let srsSummary = $state<LanguageSrsSummary[]>([]);
+let userLevel = $state(1);
 let recentUnlocks = $state<LanguageItem[]>([]);
 let detailsLoaded = $state(false);
 
@@ -69,13 +71,15 @@ async function loadData() {
 		loading = false;
 		refreshing = false;
 
-		// Lazy-load secondary data (SRS distribution + recently unlocked)
-		const [srsR, recentR] = await Promise.all([
+		// Lazy-load secondary data (SRS distribution + recently unlocked + user level)
+		const [srsR, recentR, levelR] = await Promise.all([
 			getLanguageSrsSummary(),
 			getRecentlyUnlockedItems(10),
+			getLanguageUserLevel(),
 		]);
 		if (srsR.ok) srsSummary = srsR.data;
 		if (recentR.ok) recentUnlocks = recentR.data;
+		if (levelR.ok) userLevel = levelR.data;
 		detailsLoaded = true;
 	} catch {
 		addToast("Failed to load language overview", "error");
@@ -162,6 +166,22 @@ $effect(() => {
 			{/if}
 		</div>
 
+		<!-- Level progress card -->
+		<button
+			type="button"
+			class="flex w-full items-center justify-between rounded-lg border bg-card p-4 text-left transition-colors hover:bg-accent/50"
+			onclick={() => navigate("lang-levels")}
+		>
+			<div class="flex items-center gap-3">
+				<span class="text-2xl font-bold text-primary">Lv</span>
+				<div>
+					<div class="text-sm font-semibold">Level {userLevel}</div>
+					<div class="text-xs text-muted-foreground">View all 60 levels</div>
+				</div>
+			</div>
+			<span class="text-muted-foreground">&rsaquo;</span>
+		</button>
+
 		<!-- Content type cards -->
 		<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 			{#each counts as count (count.type)}
@@ -215,13 +235,16 @@ $effect(() => {
 				<h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Recently Unlocked</h3>
 				<div class="flex flex-wrap gap-2">
 					{#each recentUnlocks as item}
-						<div class="flex items-center gap-1.5 rounded-lg border bg-card px-3 py-1.5">
-							<span class="inline-block h-2 w-2 rounded-full {getTypeColor(item.content_type)}"></span>
+						<button
+							type="button"
+							class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-white transition-all hover:brightness-110 {getTypeColor(item.content_type)}"
+							onclick={() => navigate("lang-item-detail", { id: String(item.id), contentType: item.content_type })}
+						>
 							<span class="text-sm font-medium">{item.primary_text}</span>
 							{#if item.meaning}
-								<span class="text-xs text-muted-foreground">{item.meaning}</span>
+								<span class="text-xs opacity-80">{item.meaning}</span>
 							{/if}
-						</div>
+						</button>
 					{/each}
 				</div>
 			</div>

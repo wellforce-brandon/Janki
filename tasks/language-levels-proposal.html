@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Janki Language Levels -- 60-Level Curriculum Proposal</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --card: #16213e;
+    --card-hover: #1a2744;
+    --border: #2a3a5c;
+    --text: #e0e0e0;
+    --text-muted: #8892a8;
+    --text-dim: #5a6478;
+    --emerald: #10b981;
+    --yellow: #eab308;
+    --orange: #f97316;
+    --red: #ef4444;
+    --sky: #0ea5e9;
+    --purple: #a855f7;
+    --pink: #ec4899;
+    --blue: #3b82f6;
+    --teal: #14b8a6;
+    --amber: #f59e0b;
+    --rose: #f43f5e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  /* Summary stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    text-align: center;
+  }
+
+  .stat-card .value {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  .stat-card .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Tier sections */
+  .tier {
+    margin-bottom: 3rem;
+  }
+
+  .tier-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .tier-kanji {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .tier-info h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .tier-info .tier-meta {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .tier-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    margin-left: 0.5rem;
+  }
+
+  /* Level cards */
+  .level-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .level-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .level-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .level-count {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.05);
+    padding: 0.15rem 0.6rem;
+    border-radius: 9999px;
+  }
+
+  .level-body {
+    padding: 1rem 1.25rem;
+  }
+
+  .content-section {
+    margin-bottom: 0.75rem;
+  }
+
+  .content-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .content-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+  }
+
+  .content-label .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .dot-kana { background: var(--teal); }
+  .dot-grammar { background: var(--amber); }
+  .dot-vocab { background: var(--purple); }
+  .dot-conjugation { background: var(--rose); }
+  .dot-sentence { background: var(--blue); }
+
+  .content-items {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding-left: 1.25rem;
+  }
+
+  .milestone {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--emerald);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.6rem;
+    border-radius: 0.375rem;
+    margin-top: 0.5rem;
+  }
+
+  .note {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.25rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Auto-distributed banner */
+  .auto-banner {
+    background: rgba(168, 85, 247, 0.08);
+    border: 1px dashed rgba(168, 85, 247, 0.3);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .auto-banner strong {
+    color: var(--purple);
+  }
+
+  /* SRS key */
+  .srs-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.25rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+  }
+
+  .srs-key h3 {
+    width: 100%;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+  }
+
+  .srs-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .srs-tile {
+    width: 28px;
+    height: 28px;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .srs-locked {
+    border: 2px dashed rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.3);
+  }
+
+  .srs-lessons {
+    background: rgba(236, 72, 153, 0.3);
+    border: 1px solid rgba(236, 72, 153, 0.5);
+    color: rgba(236, 72, 153, 0.8);
+  }
+
+  .srs-reviews {
+    background: var(--pink);
+    color: white;
+  }
+
+  .srs-burned {
+    background: #52525b;
+    color: #a1a1aa;
+  }
+
+  .detail-note {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
+  }
+
+  /* Summary table */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    font-size: 0.85rem;
+  }
+
+  .summary-table th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .summary-table td {
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .summary-table tr:hover td {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+  .fw-600 { font-weight: 600; }
+  .text-emerald { color: var(--emerald); }
+  .text-yellow { color: var(--yellow); }
+  .text-orange { color: var(--orange); }
+  .text-red { color: var(--red); }
+  .text-sky { color: var(--sky); }
+  .text-purple { color: var(--purple); }
+</style>
+</head>
+<body>
+
+<h1>Janki Language Levels</h1>
+<p class="subtitle">60-level curated curriculum proposal -- items not assigned to a level remain accessible via the per-type browsers (Vocabulary, Grammar, etc.)</p>
+
+<!-- Summary stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="value">60</div>
+    <div class="label">Total Levels</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">6</div>
+    <div class="label">Tiers</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">~5,500</div>
+    <div class="label">Curated Items</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">33,214</div>
+    <div class="label">Total in DB</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">~92</div>
+    <div class="label">Avg Items/Level</div>
+  </div>
+</div>
+
+<!-- SRS Key -->
+<div class="srs-key">
+  <h3>SRS States on Level Page (same as Kanji section)</h3>
+  <div class="srs-item">
+    <div class="srs-tile srs-locked">A</div>
+    <div>
+      <div>Locked</div>
+      <div class="detail-note">Not yet available</div>
+    </div>
+  </div>
+  <div class="srs-item">
+    <div class="srs-tile srs-lessons">A</div>
+    <div>
+      <div>In Lessons</div>
+      <div class="detail-note">Unlocked, lesson not completed</div>
+    </div>
+  </div>
+  <div class="srs-item">
+    <div class="srs-tile srs-reviews">A</div>
+    <div>
+      <div>In Reviews</div>
+      <div class="detail-note">Lesson done, active SRS</div>
+    </div>
+  </div>
+  <div class="srs-item">
+    <div class="srs-tile srs-burned">A</div>
+    <div>
+      <div>Burned</div>
+      <div class="detail-note">Permanently mastered (stage 9)</div>
+    </div>
+  </div>
+  <div style="width: 100%; font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">
+    Apprentice 1-4, Guru 1-2, Master, Enlightened progression is shown inside item detail view, not on the level tiles.
+  </div>
+</div>
+
+<!-- Content type legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background: var(--teal)"></div> Kana</div>
+  <div class="legend-item"><div class="legend-dot" style="background: var(--amber)"></div> Grammar</div>
+  <div class="legend-item"><div class="legend-dot" style="background: var(--purple)"></div> Vocabulary</div>
+  <div class="legend-item"><div class="legend-dot" style="background: var(--rose)"></div> Conjugation</div>
+  <div class="legend-item"><div class="legend-dot" style="background: var(--blue)"></div> Sentences</div>
+</div>
+
+<!-- Tier summary table -->
+<table class="summary-table">
+  <thead>
+    <tr>
+      <th>Tier</th>
+      <th>Levels</th>
+      <th>JLPT Focus</th>
+      <th class="text-right">Kana</th>
+      <th class="text-right">Grammar</th>
+      <th class="text-right">Vocab</th>
+      <th class="text-right">Conj.</th>
+      <th class="text-right">Sent.</th>
+      <th class="text-right">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="fw-600 text-emerald">快 Pleasant</td>
+      <td>1-10</td>
+      <td>N5 Foundation</td>
+      <td class="text-right">~175</td>
+      <td class="text-right">~55</td>
+      <td class="text-right">~130</td>
+      <td class="text-right">~10</td>
+      <td class="text-right">~10</td>
+      <td class="text-right fw-600">~380</td>
+    </tr>
+    <tr>
+      <td class="fw-600 text-yellow">苦 Painful</td>
+      <td>11-20</td>
+      <td>N5 Complete + N4 Start</td>
+      <td class="text-right">~35</td>
+      <td class="text-right">~100</td>
+      <td class="text-right">~350</td>
+      <td class="text-right">~85</td>
+      <td class="text-right">~80</td>
+      <td class="text-right fw-600">~650</td>
+    </tr>
+    <tr>
+      <td class="fw-600 text-orange">死 Death</td>
+      <td>21-30</td>
+      <td>N4 + N3 Start</td>
+      <td class="text-right">--</td>
+      <td class="text-right">~86</td>
+      <td class="text-right">~550</td>
+      <td class="text-right">--</td>
+      <td class="text-right">~150</td>
+      <td class="text-right fw-600">~786</td>
+    </tr>
+    <tr>
+      <td class="fw-600 text-red">地獄 Hell</td>
+      <td>31-40</td>
+      <td>N3</td>
+      <td class="text-right">--</td>
+      <td class="text-right">~50</td>
+      <td class="text-right">~600</td>
+      <td class="text-right">--</td>
+      <td class="text-right">~200</td>
+      <td class="text-right fw-600">~850</td>
+    </tr>
+    <tr>
+      <td class="fw-600 text-sky">天国 Paradise</td>
+      <td>41-50</td>
+      <td>N2</td>
+      <td class="text-right">--</td>
+      <td class="text-right">~63</td>
+      <td class="text-right">~700</td>
+      <td class="text-right">--</td>
+      <td class="text-right">~250</td>
+      <td class="text-right fw-600">~1,013</td>
+    </tr>
+    <tr>
+      <td class="fw-600 text-purple">現実 Reality</td>
+      <td>51-60</td>
+      <td>N1</td>
+      <td class="text-right">--</td>
+      <td class="text-right">~50</td>
+      <td class="text-right">~1,000</td>
+      <td class="text-right">--</td>
+      <td class="text-right">~350</td>
+      <td class="text-right fw-600">~1,400</td>
+    </tr>
+    <tr style="border-top: 2px solid var(--border);">
+      <td class="fw-600" colspan="3">TOTAL CURATED</td>
+      <td class="text-right fw-600">~210</td>
+      <td class="text-right fw-600">~404</td>
+      <td class="text-right fw-600">~3,330</td>
+      <td class="text-right fw-600">~95</td>
+      <td class="text-right fw-600">~1,040</td>
+      <td class="text-right fw-600">~5,079</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ====================== TIER 1: PLEASANT ====================== -->
+<div class="tier">
+  <div class="tier-header">
+    <span class="tier-kanji text-emerald">快</span>
+    <div class="tier-info">
+      <h2>Pleasant <span class="tier-badge" style="background: var(--emerald);">Levels 1-10</span></h2>
+      <div class="tier-meta">N5 Foundation -- Kana mastery, basic grammar, core vocabulary (~380 items)</div>
+    </div>
+  </div>
+
+  <!-- Level 1 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 01</span>
+      <span class="level-count">~30 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (10)</div>
+        <div class="content-items">Hiragana vowels: あ い う え お (5) + K-row: か き く け こ (5)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~5)</div>
+        <div class="content-items">Copula / State-of-being pt1 (Tae Kim sections 001-004): です, だ, basic sentence patterns</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~15)</div>
+        <div class="content-items">Pronouns: 私, あなた, 彼, 彼女, これ, それ, あれ, etc.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 2 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 02</span>
+      <span class="level-count">~30 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (10)</div>
+        <div class="content-items">Hiragana S-row: さ し す せ そ (5) + T-row: た ち つ て と (5)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~5)</div>
+        <div class="content-items">Copula / State-of-being pt2 (Tae Kim sections 005-008): negation, past tense of copula</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~15)</div>
+        <div class="content-items">Numbers: 一 through 十, 百, 千, 万, zero, etc.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 3 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 03</span>
+      <span class="level-count">~30 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (10)</div>
+        <div class="content-items">Hiragana N-row: な に ぬ ね の (5) + H-row: は ひ ふ へ ほ (5)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~5)</div>
+        <div class="content-items">Basic particles pt1 (Tae Kim sections 009-013): は, も, が topic/subject markers</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~12)</div>
+        <div class="content-items">Days of the week (7): 月曜日-日曜日 + Seasons (5): 春, 夏, 秋, 冬</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 4 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 04</span>
+      <span class="level-count">~35 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (16)</div>
+        <div class="content-items">Hiragana M-row (5) + Y-row: や ゆ よ (3) + R-row (5) + W-row: わ を ん (3)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~5)</div>
+        <div class="content-items">Basic particles pt2 (Tae Kim sections 014-017): を, に, へ, で object/direction/location markers</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~12)</div>
+        <div class="content-items">Months: 一月-十二月 (12)</div>
+      </div>
+      <div class="milestone">✓ All Hiragana Seion Complete (46 characters)</div>
+    </div>
+  </div>
+
+  <!-- Level 5 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 05</span>
+      <span class="level-count">~35 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (15)</div>
+        <div class="content-items">Katakana vowels: ア イ ウ エ オ (5) + K-row (5) + S-row (5)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~7)</div>
+        <div class="content-items">Adjectives pt1 (Tae Kim sections 018-025): い-adjectives, basic conjugation</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~12)</div>
+        <div class="content-items">Hours: 一時-十二時 (~12 o'clock expressions)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 6 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 06</span>
+      <span class="level-count">~35 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (15)</div>
+        <div class="content-items">Katakana T-row (5) + N-row (5) + H-row (5)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~7)</div>
+        <div class="content-items">Adjectives pt2 (Tae Kim sections 026-038): な-adjectives, comparative forms</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~10)</div>
+        <div class="content-items">Minutes: 一分-expressions (~10 minute expressions)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 7 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 07</span>
+      <span class="level-count">~35 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (16)</div>
+        <div class="content-items">Katakana M-row (5) + Y-row (3) + R-row (5) + W-row (3)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~7)</div>
+        <div class="content-items">Verb basics (Tae Kim sections 039-045): る/う verb classification, dictionary form, ます form</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~10)</div>
+        <div class="content-items">Day numbers: 一日-十日 (~10 day-of-month counters)</div>
+      </div>
+      <div class="milestone">✓ All Katakana Seion Complete (46 characters)</div>
+    </div>
+  </div>
+
+  <!-- Level 8 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 08</span>
+      <span class="level-count">~35 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (~20)</div>
+        <div class="content-items">Dakuten pt1: が ぎ ぐ げ ご ざ じ ず ぜ ぞ + katakana equivalents (G and Z rows, both scripts)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~6)</div>
+        <div class="content-items">Negative verbs (Tae Kim sections 046-051): ない form, negative conjugation</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~9)</div>
+        <div class="content-items">Hundreds: 百-九百 (hundred counters)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 9 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 09</span>
+      <span class="level-count">~40 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (~20)</div>
+        <div class="content-items">Dakuten pt2: だ ぢ づ で ど ば び ぶ べ ぼ + katakana equivalents (D and B rows, both scripts)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~6)</div>
+        <div class="content-items">Past tense pt1 (Tae Kim sections 052-057): た form, past tense conjugation</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~10)</div>
+        <div class="content-items">Family: お父さん, お母さん, 兄弟, 家族, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~5)</div>
+        <div class="content-items">First N5 sentences: simple copula + particle sentences using learned vocab</div>
+      </div>
+      <div class="milestone">✓ All Dakuten Complete (voiced consonants)</div>
+    </div>
+  </div>
+
+  <!-- Level 10 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 10</span>
+      <span class="level-count">~45 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (~15)</div>
+        <div class="content-items">Handakuten: ぱ ぴ ぷ ぺ ぽ + katakana (10) + Yoon pt1: きゃ きゅ きょ しゃ しゅ しょ (5)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~6)</div>
+        <div class="content-items">Past tense pt2 (Tae Kim sections 058-063): て form, combined patterns</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~10)</div>
+        <div class="content-items">Places: 日本, アメリカ, 学校, 駅, etc. (countries + locations)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-conjugation"></span> Conjugation (~10)</div>
+        <div class="content-items">First conjugation batch: basic verb forms (dictionary, masu, te-form)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~5)</div>
+        <div class="content-items">N5 sentences batch 2: adjective + verb sentences</div>
+      </div>
+      <div class="milestone">✓ Pleasant Tier Complete -- Foundation Established</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== TIER 2: PAINFUL ====================== -->
+<div class="tier">
+  <div class="tier-header">
+    <span class="tier-kanji text-yellow">苦</span>
+    <div class="tier-info">
+      <h2>Painful <span class="tier-badge" style="background: var(--yellow); color: #000;">Levels 11-20</span></h2>
+      <div class="tier-meta">N5 Completion + N4 Start -- Remaining kana, verb particles, topical vocabulary (~650 items)</div>
+    </div>
+  </div>
+
+  <div class="auto-banner">
+    Levels 11-20 complete the N5 curriculum and begin N4. <strong>Kana</strong>: remaining yoon combinations and extended kana. <strong>Grammar</strong>: verb particles, transitivity, clauses, noun particles, adverbs (Tae Kim groups 7-12). <strong>Vocabulary</strong>: remaining N5 topic groups + first N4 high-frequency vocab. <strong>Conjugation</strong>: remaining 85 items distributed across these levels. <strong>Sentences</strong>: N5 sentences by frequency.
+  </div>
+
+  <!-- Level 11 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 11</span>
+      <span class="level-count">~50 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (~20)</div>
+        <div class="content-items">Yoon pt2: ちゃ ちゅ ちょ にゃ にゅ にょ ひゃ ひゅ ひょ みゃ みゅ みょ りゃ りゅ りょ + katakana equivalents</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~10)</div>
+        <div class="content-items">Verb particles pt1 (Tae Kim sections 064-074): と, から, まで with verbs</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~15)</div>
+        <div class="content-items">Greetings: おはよう, こんにちは, すみません, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~5)</div>
+        <div class="content-items">N5 sentences batch 3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 12 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 12</span>
+      <span class="level-count">~50 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (~15)</div>
+        <div class="content-items">Yoon pt3: voiced combinations (ぎゃ, じゃ, びゃ, ぴゃ, etc.) + katakana equivalents</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~10)</div>
+        <div class="content-items">Verb particles pt2 (Tae Kim sections 075-084): ので, のに, ながら compound particles</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~15)</div>
+        <div class="content-items">Question words: 何, いつ, どこ, 誰, なぜ, どう, いくら, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-conjugation"></span> Conjugation (~10)</div>
+        <div class="content-items">Conjugation batch 2: negative forms, past tense forms</div>
+      </div>
+      <div class="milestone">✓ All Yoon Complete (combination characters)</div>
+    </div>
+  </div>
+
+  <!-- Level 13 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 13</span>
+      <span class="level-count">~55 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~10)</div>
+        <div class="content-items">Verb particles pt3 (Tae Kim sections 085-094): てある, ていく, てくる progressive/directional</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~25)</div>
+        <div class="content-items">Food: ご飯, 水, お茶, 肉, 魚, 野菜, etc. + Thousands + Year students</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-conjugation"></span> Conjugation (~10)</div>
+        <div class="content-items">Conjugation batch 3: te-form, volitional, potential</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~10)</div>
+        <div class="content-items">N5 sentences batch 4: particle usage patterns</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 14 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 14</span>
+      <span class="level-count">~55 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~8)</div>
+        <div class="content-items">Transitivity (Tae Kim sections 095-101): transitive/intransitive verb pairs</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~25)</div>
+        <div class="content-items">Body: 目, 手, 足, 頭, 口, etc. + Age counters + People counters</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-conjugation"></span> Conjugation (~10)</div>
+        <div class="content-items">Conjugation batch 4: conditional, imperative</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~10)</div>
+        <div class="content-items">N5 sentences batch 5: verb usage patterns</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 15 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 15</span>
+      <span class="level-count">~55 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~8)</div>
+        <div class="content-items">Subordinate clauses (Tae Kim sections 102-109): relative clauses, quoting with と</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~25)</div>
+        <div class="content-items">School: 学生, 先生, 教室, 本, ペン, etc. + House: 部屋, 窓, ドア, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-conjugation"></span> Conjugation (~10)</div>
+        <div class="content-items">Conjugation batch 5: passive, causative</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~10)</div>
+        <div class="content-items">N5 sentences batch 6: adjective + clause patterns</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 16 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 16</span>
+      <span class="level-count">~60 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~14)</div>
+        <div class="content-items">Noun-related particles pt1 (Tae Kim sections 110-123): の, compound particles with nouns</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~30)</div>
+        <div class="content-items">Transport: 車, 電車, バス, 駅, etc. + Nature: 山, 川, 海, 花, 木, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-conjugation"></span> Conjugation (~10)</div>
+        <div class="content-items">Conjugation batch 6: causative-passive, formal forms</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~10)</div>
+        <div class="content-items">N5 sentences batch 7</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 17 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 17</span>
+      <span class="level-count">~60 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~14)</div>
+        <div class="content-items">Noun-related particles pt2 (Tae Kim sections 124-137): だけ, しか, ばかり limiting particles</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~30)</div>
+        <div class="content-items">Clothes: シャツ, 靴, 帽子, etc. + Colors: 赤, 青, 白, 黒, etc. + Animals: 犬, 猫, 鳥, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-conjugation"></span> Conjugation (~10)</div>
+        <div class="content-items">Conjugation batch 7: remaining verb forms</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~10)</div>
+        <div class="content-items">N5 sentences batch 8</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 18 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 18</span>
+      <span class="level-count">~60 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~12)</div>
+        <div class="content-items">Adverbs + sentence-ending particles (Tae Kim sections 138-149): よ, ね, な, さ gobi</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~35)</div>
+        <div class="content-items">Work: 仕事, 会社, 社員, etc. + Location: 上, 下, 中, 前, 後ろ, etc. + Time: 今, 昨日, 明日, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-conjugation"></span> Conjugation (~5)</div>
+        <div class="content-items">Conjugation batch 8: final conjugation items</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~10)</div>
+        <div class="content-items">N5 sentences batch 9</div>
+      </div>
+      <div class="milestone">✓ All Tae Kim Grammar Groups Complete (149 sections)</div>
+      <div class="milestone">✓ All Conjugation Items Complete (95 items)</div>
+    </div>
+  </div>
+
+  <!-- Level 19 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 19</span>
+      <span class="level-count">~65 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~10)</div>
+        <div class="content-items">Supplemental grammar pt1: frequency-ranked grammar items not in Tae Kim</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~40)</div>
+        <div class="content-items">Actions: 食べる, 飲む, 行く, 来る, etc. + Descriptors: 大きい, 小さい, 新しい, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (~5)</div>
+        <div class="content-items">Extended kana selection: common katakana extensions (ティ, ファ, etc.)</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~10)</div>
+        <div class="content-items">N5 sentences batch 10</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 20 -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Level 20</span>
+      <span class="level-count">~70 items</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~10)</div>
+        <div class="content-items">Supplemental grammar pt2 + first N4 grammar items</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~45)</div>
+        <div class="content-items">General N5 vocab: remaining high-frequency N5 items + first N4 vocab batch</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-kana"></span> Kana (~5)</div>
+        <div class="content-items">Extended kana selection: remaining useful extended kana</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~10)</div>
+        <div class="content-items">Mixed N5/N4 sentence batch</div>
+      </div>
+      <div class="milestone">✓ Painful Tier Complete -- Core N5 Mastered, N4 Begun</div>
+      <div class="milestone">✓ All Core Kana Complete (~210 characters)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== TIER 3: DEATH ====================== -->
+<div class="tier">
+  <div class="tier-header">
+    <span class="tier-kanji text-orange">死</span>
+    <div class="tier-info">
+      <h2>Death <span class="tier-badge" style="background: var(--orange); color: #000;">Levels 21-30</span></h2>
+      <div class="tier-meta">N4 Completion + N3 Start -- Intermediate grammar and vocabulary (~786 items)</div>
+    </div>
+  </div>
+
+  <div class="auto-banner">
+    Levels 21-30 complete N4 and begin N3. Items are distributed by <strong>frequency rank</strong> within each JLPT level. Each level contains ~80 items: <strong>~9 grammar</strong> items (all 86 N4 grammar spread across 10 levels) + <strong>~55 vocabulary</strong> (curated N4 high-frequency, then N3 start) + <strong>~15 sentences</strong> (N4 sentences by frequency).
+  </div>
+
+  <!-- Levels 21-30 summary -->
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Levels 21-25</span>
+      <span class="level-count">~80 items each</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~9/level)</div>
+        <div class="content-items">N4 grammar distributed by frequency: ~86 items across 10 levels. Covers intermediate patterns like conditionals (たら, ば, なら), giving/receiving (あげる/もらう/くれる), potential form, てしまう, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~55/level)</div>
+        <div class="content-items">N4 vocabulary by frequency rank: 3,054 total N4 vocab items. Curated selection of ~550 highest-frequency items (top ~18%). Covers daily life, travel, work, health, weather, emotions vocabulary.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~15/level)</div>
+        <div class="content-items">N4-level sentences from Core 2k/6k (frequency_rank 801-1500): practical daily conversation patterns.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Levels 26-30</span>
+      <span class="level-count">~80 items each</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~5/level)</div>
+        <div class="content-items">Remaining N4 grammar + first N3 grammar items (if any exist in the dataset).</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~55/level)</div>
+        <div class="content-items">Remaining curated N4 vocab + first N3 high-frequency vocab. Transition from elementary to intermediate vocabulary.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~15/level)</div>
+        <div class="content-items">N4 sentences continued + first N3 sentences (frequency_rank 1501-2500).</div>
+      </div>
+      <div class="milestone">✓ Death Tier Complete -- N4 Finished, N3 Foundation Built</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== TIER 4: HELL ====================== -->
+<div class="tier">
+  <div class="tier-header">
+    <span class="tier-kanji text-red">地獄</span>
+    <div class="tier-info">
+      <h2>Hell <span class="tier-badge" style="background: var(--red);">Levels 31-40</span></h2>
+      <div class="tier-meta">N3 -- Intermediate mastery, workplace Japanese, complex sentences (~850 items)</div>
+    </div>
+  </div>
+
+  <div class="auto-banner">
+    Levels 31-40 cover the N3 curriculum. Items distributed by <strong>frequency rank</strong>. Each level contains ~85 items: <strong>~5 grammar</strong> + <strong>~60 vocabulary</strong> (curated N3 high-frequency: ~600 of 3,525 total) + <strong>~20 sentences</strong> (N3 sentences from Core 2k/6k).
+  </div>
+
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Levels 31-40</span>
+      <span class="level-count">~85 items each</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~5/level)</div>
+        <div class="content-items">N3 grammar items (limited dataset -- ~50 items with N3 or untagged grammar). Covers compound verbs, formal expressions, written Japanese patterns, ようにする, ことにする, etc.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~60/level)</div>
+        <div class="content-items">N3 vocabulary by frequency: curated ~600 from 3,525 total. Business vocabulary, abstract concepts, compound words, する verbs, formal synonyms.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~20/level)</div>
+        <div class="content-items">N3 sentences (frequency_rank 1501-4000): workplace conversations, news-style sentences, more complex clause structures.</div>
+      </div>
+      <div class="milestone">✓ Hell Tier Complete -- JLPT N3 level achieved</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== TIER 5: PARADISE ====================== -->
+<div class="tier">
+  <div class="tier-header">
+    <span class="tier-kanji text-sky">天国</span>
+    <div class="tier-info">
+      <h2>Paradise <span class="tier-badge" style="background: var(--sky); color: #000;">Levels 41-50</span></h2>
+      <div class="tier-meta">N2 -- Upper intermediate, reading comprehension, nuanced expression (~1,013 items)</div>
+    </div>
+  </div>
+
+  <div class="auto-banner">
+    Levels 41-50 cover the N2 curriculum. Each level contains ~100 items: <strong>~6 grammar</strong> (63 N2 grammar items) + <strong>~70 vocabulary</strong> (curated N2 high-frequency: ~700 of 3,872 total) + <strong>~25 sentences</strong> (N2 sentences from Core 2k/6k).
+  </div>
+
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Levels 41-50</span>
+      <span class="level-count">~100 items each</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~6/level)</div>
+        <div class="content-items">N2 grammar (63 items): formal written patterns, nuanced conditionals, literary expressions, keigo foundations, complex conjunctions.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~70/level)</div>
+        <div class="content-items">N2 vocabulary by frequency: curated ~700 from 3,872. Academic vocabulary, formal synonyms, literary words, technical terms, idiomatic expressions.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~25/level)</div>
+        <div class="content-items">N2 sentences (frequency_rank 4001-6000): newspaper articles, formal writing, business correspondence patterns.</div>
+      </div>
+      <div class="milestone">✓ Paradise Tier Complete -- JLPT N2 level achieved</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== TIER 6: REALITY ====================== -->
+<div class="tier">
+  <div class="tier-header">
+    <span class="tier-kanji text-purple">現実</span>
+    <div class="tier-info">
+      <h2>Reality <span class="tier-badge" style="background: var(--purple);">Levels 51-60</span></h2>
+      <div class="tier-meta">N1 -- Advanced, native-level comprehension, specialized vocabulary (~1,400 items)</div>
+    </div>
+  </div>
+
+  <div class="auto-banner">
+    Levels 51-60 cover the N1 curriculum + remaining untagged items. Each level contains ~140 items: <strong>~5 grammar</strong> (remaining untagged grammar) + <strong>~100 vocabulary</strong> (curated N1 high-frequency: ~1,000 of 6,339 total, plus curated untagged vocab) + <strong>~35 sentences</strong> (N1 sentences from Core 2k/6k).
+  </div>
+
+  <div class="level-card">
+    <div class="level-header">
+      <span class="level-number">Levels 51-60</span>
+      <span class="level-count">~140 items each</span>
+    </div>
+    <div class="level-body">
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-grammar"></span> Grammar (~5/level)</div>
+        <div class="content-items">Remaining grammar items: advanced literary forms, classical Japanese carry-overs, specialized grammatical constructs.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-vocab"></span> Vocabulary (~100/level)</div>
+        <div class="content-items">N1 vocabulary by frequency: curated ~1,000 from 6,339 + select untagged high-frequency items. Specialized domains, low-frequency kanji compounds, literary vocabulary, onomatopoeia, formal/archaic expressions.</div>
+      </div>
+      <div class="content-section">
+        <div class="content-label"><span class="dot dot-sentence"></span> Sentences (~35/level)</div>
+        <div class="content-items">N1 sentences (frequency_rank > 6000): academic texts, literary excerpts, complex multi-clause sentences.</div>
+      </div>
+      <div class="milestone">✓ Reality Tier Complete -- Full Japanese Curriculum Mastered</div>
+    </div>
+  </div>
+</div>
+
+<!-- Design notes -->
+<div style="margin-top: 3rem; padding: 1.5rem; background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem;">
+  <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Design Notes</h2>
+
+  <h3 style="font-size: 1rem; color: var(--text-muted); margin: 1rem 0 0.5rem;">Curated vs Full Catalog</h3>
+  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+    Of the 33,214 total language items, approximately <strong>5,500 items</strong> are assigned to levels (the curated curriculum). The remaining ~27,700 items are still accessible via the per-type browser pages (Vocabulary, Grammar, Sentences, etc.) but are not part of the structured level progression. This keeps levels at a manageable density similar to WaniKani's ~143 items/level.
+  </p>
+
+  <h3 style="font-size: 1rem; color: var(--text-muted); margin: 1rem 0 0.5rem;">SRS Display</h3>
+  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+    <strong>Level page tiles</strong> show 4 states: Locked (dashed border), In Lessons (30% opacity), In Reviews (solid color), Burned (gray). This matches the kanji section exactly.<br>
+    <strong>Item detail view</strong> shows the full Apprentice 1-4 / Guru 1-2 / Master / Enlightened / Burned progression internally, not on the level tiles.
+  </p>
+
+  <h3 style="font-size: 1rem; color: var(--text-muted); margin: 1rem 0 0.5rem;">Unlock Logic (Hybrid)</h3>
+  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+    Level progression gates which items CAN be unlocked (90% Guru+ in level N unlocks level N+1). Per-type lesson caps still control HOW MANY get unlocked at a time, preventing overwhelm.
+  </p>
+
+  <h3 style="font-size: 1rem; color: var(--text-muted); margin: 1rem 0 0.5rem;">Item Count Estimates</h3>
+  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+    All item counts marked with ~ are estimates based on migration data analysis. Exact counts will be determined during implementation by querying the actual database. The migration will use existing <code>lesson_group</code>, <code>lesson_order</code>, <code>jlpt_level</code>, and <code>frequency_rank</code> columns to assign items to levels.
+  </p>
+</div>
+
+</body>
+</html>

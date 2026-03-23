@@ -14,7 +14,9 @@ import {
 	applyVocabTopicOrderingV2,
 	applyGrammarGroupOrdering,
 	applySentenceJlptTagging,
+	applyGrammarJlptTagging,
 } from "$lib/db/seed/language-data";
+import { assignLanguageLevels } from "$lib/db/seed/language-levels";
 import { loadSettings, getSettings } from "$lib/stores/app-settings.svelte";
 import { checkForUpdates } from "$lib/updater/check-update";
 import App from "./App.svelte";
@@ -30,6 +32,8 @@ async function init() {
 		await applyVocabTopicOrderingV2();
 		await applyGrammarGroupOrdering();
 		await applySentenceJlptTagging();
+		await applyGrammarJlptTagging();
+		await assignLanguageLevels();
 	} catch (e) {
 		console.error("[SEED FAILED]", e);
 	}

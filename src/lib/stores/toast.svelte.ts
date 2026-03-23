@@ -17,6 +17,7 @@ const DEFAULT_DURATIONS: Record<ToastType, number> = {
 const MAX_TOASTS = 5;
 let nextId = 0;
 let toasts = $state<Toast[]>([]);
+const timerMap = new Map<number, ReturnType<typeof setTimeout>>();
 
 export function getToasts(): Toast[] {
 	return toasts;
@@ -26,14 +27,24 @@ export function addToast(message: string, type: ToastType = "info", duration?: n
 	const id = nextId++;
 	const toast: Toast = { id, message, type, duration: duration ?? DEFAULT_DURATIONS[type] };
 
-	toasts = [...toasts, toast].slice(-MAX_TOASTS);
+	const newToasts = [...toasts, toast];
+	// Cancel timers for evicted toasts
+	if (newToasts.length > MAX_TOASTS) {
+		for (const evicted of newToasts.slice(0, newToasts.length - MAX_TOASTS)) {
+			const t = timerMap.get(evicted.id);
+			if (t) { clearTimeout(t); timerMap.delete(evicted.id); }
+		}
+	}
+	toasts = newToasts.slice(-MAX_TOASTS);
 
 	if (toast.duration > 0) {
-		setTimeout(() => dismissToast(id), toast.duration);
+		timerMap.set(id, setTimeout(() => dismissToast(id), toast.duration));
 	}
 }
 
 export function dismissToast(id: number): void {
+	const t = timerMap.get(id);
+	if (t) { clearTimeout(t); timerMap.delete(id); }
 	toasts = toasts.filter((t) => t.id !== id);
 }
 

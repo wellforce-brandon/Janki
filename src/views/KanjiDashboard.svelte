@@ -46,9 +46,13 @@ let recentMistakes = $state<
 	{ character: string; meanings: string; item_type: string; reviewed_at: string }[]
 >([]);
 
+let fetchId = 0;
+
 async function loadDashboard() {
+	const myId = ++fetchId;
 	try {
 		const seededR = await isKanjiSeeded();
+		if (myId !== fetchId) return;
 		seeded = seededR.ok && seededR.data;
 		if (!seeded) {
 			loading = false;
@@ -68,6 +72,7 @@ async function loadDashboard() {
 				getRecentMistakes(10),
 			]);
 
+		if (myId !== fetchId) return;
 		if (lessonR.ok) lessonCount = lessonR.data;
 		if (reviewR.ok) reviewCount = reviewR.data;
 		if (todayR.ok) todayReviewCount = todayR.data;

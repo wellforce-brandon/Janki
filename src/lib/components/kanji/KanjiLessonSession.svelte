@@ -35,16 +35,19 @@ let loadingFoundInKanji = $state(false);
 
 $effect(() => {
 	const item = current;
+	let cancelled = false;
 	if (item?.item_type === "radical" && item.wk_id) {
 		loadingFoundInKanji = true;
 		foundInKanji = [];
 		getItemsContainingComponent(item.wk_id, "kanji").then((result) => {
+			if (cancelled) return;
 			if (result.ok) foundInKanji = result.data;
 			loadingFoundInKanji = false;
 		});
 	} else {
 		foundInKanji = [];
 	}
+	return () => { cancelled = true; };
 });
 
 let editingNotes = $state(false);
@@ -68,6 +71,16 @@ let feedbackState = $state<"none" | "correct" | "incorrect" | "shake">("none");
 let correctAnswer = $state("");
 let isCompleting = $state(false);
 let quizInputEl = $state<HTMLInputElement | null>(null);
+let activeTimers: ReturnType<typeof setTimeout>[] = [];
+
+function safeTimeout(fn: () => void, ms: number) {
+	const id = setTimeout(fn, ms);
+	activeTimers.push(id);
+	return id;
+}
+
+// Clear all timers on component destroy
+$effect(() => () => activeTimers.forEach(clearTimeout));
 
 $effect(() => {
 	// Auto-focus the quiz input whenever the question changes
@@ -75,7 +88,7 @@ $effect(() => {
 	void feedbackState;
 	if (phase === "quiz" && feedbackState === "none") {
 		// Use tick to wait for DOM update
-		setTimeout(() => quizInputEl?.focus(), 0);
+		safeTimeout(() => quizInputEl?.focus(), 0);
 	}
 });
 
@@ -203,7 +216,7 @@ function submitQuizAnswer() {
 	if (answerResult === "wrong-reading-type") {
 		feedbackState = "shake";
 		shakeMessage = "We're looking for the on'yomi reading";
-		setTimeout(() => {
+		safeTimeout(() => {
 			feedbackState = "none";
 			shakeMessage = "";
 		}, 1500);
@@ -214,7 +227,7 @@ function submitQuizAnswer() {
 		feedbackState = "correct";
 		currentQuiz.answered = true;
 		currentQuiz.correct = true;
-		setTimeout(() => advanceQuiz(), 600);
+		safeTimeout(() => advanceQuiz(), 600);
 	} else {
 		feedbackState = "incorrect";
 		correctAnswer = getCorrectDisplay(currentQuiz.item, currentQuiz.type);

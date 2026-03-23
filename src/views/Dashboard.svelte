@@ -13,7 +13,10 @@ import {
 	getContentTypeCounts,
 	getAvailableLessonCount as getLangLessonCount,
 	getLanguageSrsDistribution,
+	getLanguageUserLevel,
+	getLanguageLevelProgress,
 	type ContentTypeCount,
+	type LanguageLevelProgress,
 } from "$lib/db/queries/language";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { type DailyStats, getStreak, getTodayStats } from "$lib/db/queries/stats";
@@ -34,12 +37,17 @@ let langDueTotal = $state(0);
 let langNewTotal = $state(0);
 let langLessonCount = $state(0);
 let langSrsDistribution = $state<{ srs_stage: number; count: number }[]>([]);
+let langUserLevel = $state(1);
+let langLevelProgress = $state<LanguageLevelProgress | null>(null);
 let refreshing = $state(false);
 
+let fetchId = 0;
+
 async function loadDashboard() {
+	const myId = ++fetchId;
 	error = null;
 	try {
-		const [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR] = await Promise.all([
+		const [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR, langLevelR] = await Promise.all([
 			getDueKanjiCount(),
 			getAvailableLessonCount(),
 			getStreak(),
@@ -48,8 +56,10 @@ async function loadDashboard() {
 			getContentTypeCounts(),
 			getLangLessonCount(),
 			getLanguageSrsDistribution(),
+			getLanguageUserLevel(),
 		]);
 
+		if (myId !== fetchId) return;
 		if (kanjiR.ok) kanjiDueCount = kanjiR.data;
 		if (lessonR.ok) kanjiLessonCount = lessonR.data;
 		if (streakR.ok) streak = streakR.data;
@@ -62,8 +72,9 @@ async function loadDashboard() {
 		}
 		if (langLessonR.ok) langLessonCount = langLessonR.data;
 		if (langSrsR.ok) langSrsDistribution = langSrsR.data;
+		if (langLevelR.ok) langUserLevel = langLevelR.data;
 
-		const anyFailed = [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR].some((r) => !r.ok);
+		const anyFailed = [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR, langLevelR].some((r) => !r.ok);
 		if (anyFailed) {
 			error = "Some stats failed to load.";
 		}
@@ -71,8 +82,13 @@ async function loadDashboard() {
 		// Run language item unlock check on dashboard load (catches up on kanji progress)
 		await checkAndUnlockItems();
 
-		const lpResult = await getLevelProgress(userLevel);
+		const [lpResult, langLpResult] = await Promise.all([
+			getLevelProgress(userLevel),
+			getLanguageLevelProgress(langUserLevel),
+		]);
+		if (myId !== fetchId) return;
 		if (lpResult.ok) levelProgress = lpResult.data;
+		if (langLpResult.ok) langLevelProgress = langLpResult.data;
 	} catch (e) {
 		error = e instanceof Error ? e.message : "Failed to load dashboard";
 		addToast(error, "error");
@@ -202,11 +218,36 @@ $effect(() => {
 					<div class="text-sm text-muted-foreground">Reviews Due</div>
 					<div class="mt-1 text-3xl font-bold text-blue-500">{langDueTotal}</div>
 				</div>
-				<div class="rounded-lg border bg-card p-4" aria-label="Content types: {contentCounts.length}">
-					<div class="text-sm text-muted-foreground">Content Types</div>
-					<div class="mt-1 text-3xl font-bold">{contentCounts.length}</div>
-				</div>
+				<button
+					type="button"
+					class="rounded-lg border bg-card p-4 text-left transition-colors hover:bg-accent/50"
+					aria-label="Language level: {langUserLevel}"
+					onclick={() => navigate("lang-levels")}
+				>
+					<div class="text-sm text-muted-foreground">Level</div>
+					<div class="mt-1 text-3xl font-bold">{langUserLevel}</div>
+				</button>
 			</div>
+			{#if langLevelProgress}
+				<button
+					type="button"
+					class="w-full rounded-lg border bg-card p-4 text-left transition-colors hover:bg-accent/50"
+					onclick={() => navigate("lang-levels")}
+				>
+					<div class="space-y-2">
+						<div class="flex items-center justify-between text-sm">
+							<span>Level {langLevelProgress.level}</span>
+							<span class="text-muted-foreground">{langLevelProgress.guru_plus} / {langLevelProgress.total} at Guru+</span>
+						</div>
+						<div class="h-2 rounded-full bg-muted">
+							<div
+								class="h-full rounded-full bg-purple-500 transition-all"
+								style="width: {langLevelProgress.percentage}%"
+							></div>
+						</div>
+					</div>
+				</button>
+			{/if}
 			{#if langSrsDistribution.length > 0}
 				<div class="flex flex-wrap gap-2 text-xs">
 					{#each langSrsDistribution as entry}

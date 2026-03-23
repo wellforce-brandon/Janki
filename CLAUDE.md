@@ -20,6 +20,7 @@ For features: say **"spec developer"** to generate a detailed plan, then start a
 - Avoid premature abstraction. Three similar lines are better than a forced helper.
 - Do not add comments for self-explanatory code. Add comments only when the "why" is non-obvious.
 - Files over 500 lines should be split. Large files consume excessive context.
+- **Zero-tolerance errors**: Fix ALL type/test errors before committing, including pre-existing ones. Use `npx svelte-check` (not `tsc`) for type checking. Never suppress errors with `@ts-ignore`.
 
 ## Hierarchical CLAUDE.md Architecture
 

@@ -7,6 +7,10 @@ vi.mock("../db/queries/language", () => ({
 	getLanguageItemById: vi.fn(),
 	updateLanguageItemSrs: vi.fn().mockResolvedValue({ ok: true }),
 	logLanguageReview: vi.fn().mockResolvedValue({ ok: true }),
+	checkAndUnlockLanguageLevel: vi.fn().mockResolvedValue({ ok: true, data: 0 }),
+	unlockLevelVocabIfKanaReviewed: vi.fn().mockResolvedValue({ ok: true, data: 0 }),
+	unlockSentencesWithMetPrerequisites: vi.fn().mockResolvedValue({ ok: true, data: 0 }),
+	deleteLatestLanguageReview: vi.fn().mockResolvedValue({ ok: true }),
 }));
 
 vi.mock("../db/queries/stats", () => ({
@@ -28,8 +32,9 @@ function makeItem(overrides: Record<string, unknown> = {}) {
 		correct_count: 5,
 		incorrect_count: 2,
 		lesson_completed_at: "2026-01-01 00:00:00",
+		language_level: 1,
 		...overrides,
-	};
+	} as unknown as import("../db/queries/language").LanguageItem;
 }
 
 describe("Language SRS", () => {
@@ -149,7 +154,7 @@ describe("Language SRS", () => {
 		it("should throw if item not found", async () => {
 			vi.mocked(getLanguageItemById).mockResolvedValue({
 				ok: false,
-				data: null,
+				error: "not found",
 			});
 			await expect(reviewLanguageItem(999, true)).rejects.toThrow("Language item 999 not found");
 		});

@@ -1,5 +1,5 @@
 import { getDb, type QueryResult, safeQuery, sqlPlaceholders } from "../database";
-import { safeParseJson } from "$lib/utils/common";
+
 import { calculateNextReview, STANDARD_INTERVALS, ACCELERATED_INTERVALS } from "$lib/srs/srs-common";
 
 export function computeFirstReviewTime(level: number): string {
@@ -271,31 +271,27 @@ export async function checkAndUnlockLevel(level: number): Promise<QueryResult<nu
 		}
 
 		// 2. Per-item vocab unlock: unlock vocab whose component kanji are ALL at Guru+
-		// Get all WK IDs that are at Guru+ (radicals + kanji)
-		const guruItems = await db.select<{ wk_id: number }[]>(
-			"SELECT wk_id FROM kanji_levels WHERE wk_id IS NOT NULL AND srs_stage >= 5",
+		// Use SQL subquery to avoid materializing all guru items into JS
+		const vocabToUnlock = await db.select<{ id: number }[]>(
+			`SELECT kl.id FROM kanji_levels kl
+			WHERE kl.item_type = 'vocab' AND kl.srs_stage = 0 AND kl.component_ids IS NOT NULL
+			AND NOT EXISTS (
+				SELECT 1 FROM json_each(kl.component_ids) je
+				WHERE NOT EXISTS (
+					SELECT 1 FROM kanji_levels kl2
+					WHERE kl2.wk_id = CAST(je.value AS INTEGER) AND kl2.srs_stage >= 5
+				)
+			)`,
 		);
-		const guruWkIds = new Set(guruItems.map((r) => r.wk_id));
-
-		// Find locked vocab with component_ids and check if all components are at Guru+
-		const lockedVocab = await db.select<{ id: number; component_ids: string }[]>(
-			"SELECT id, component_ids FROM kanji_levels WHERE item_type = 'vocab' AND srs_stage = 0 AND component_ids IS NOT NULL",
-		);
-		const vocabToUnlock: number[] = [];
-		for (const v of lockedVocab) {
-			const components = safeParseJson<number[]>(v.component_ids, []);
-			if (components.length > 0 && components.every((cid) => guruWkIds.has(cid))) {
-				vocabToUnlock.push(v.id);
-			}
-		}
-		if (vocabToUnlock.length > 0) {
-			const ph = sqlPlaceholders(vocabToUnlock.length);
+		const vocabIds = vocabToUnlock.map((r) => r.id);
+		if (vocabIds.length > 0) {
+			const ph = sqlPlaceholders(vocabIds.length);
 			await db.execute(
 				`UPDATE kanji_levels SET srs_stage = 1, unlocked_at = datetime('now'), next_review = datetime('now')
 				WHERE id IN (${ph})`,
-				vocabToUnlock,
+				vocabIds,
 			);
-			unlockedIds.push(...vocabToUnlock);
+			unlockedIds.push(...vocabIds);
 		}
 
 		// 3. If 90%+ kanji at Guru -> unlock next level radicals (level progression)
@@ -610,7 +606,7 @@ export async function getItemsByLevel(level: number): Promise<QueryResult<LevelI
 	});
 }
 
-export async function getAllAvailableLessons(): Promise<QueryResult<KanjiLevelItem[]>> {
+export async function getAllAvailableLessons(limit = 200): Promise<QueryResult<KanjiLevelItem[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<KanjiLevelItem[]>(
@@ -618,7 +614,9 @@ export async function getAllAvailableLessons(): Promise<QueryResult<KanjiLevelIt
 			WHERE srs_stage >= 1 AND lesson_completed_at IS NULL
 			ORDER BY level ASC,
 				CASE item_type WHEN 'radical' THEN 0 WHEN 'kanji' THEN 1 WHEN 'vocab' THEN 2 ELSE 3 END,
-				character ASC`,
+				character ASC
+			LIMIT ?`,
+			[limit],
 		);
 	});
 }

@@ -49,6 +49,7 @@ export interface LanguageItem {
 	prerequisite_keys: string | null;
 	lesson_group: string | null;
 	lesson_order: number | null;
+	language_level: number | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -995,5 +996,381 @@ export async function getPreviousGrammarGroup(lessonOrder: number): Promise<Quer
 			[lessonOrder - 1],
 		);
 		return rows.length > 0 ? rows[0].lesson_group : null;
+	});
+}
+
+// ===================== Language Level Queries =====================
+
+export interface LanguageLevelProgress {
+	level: number;
+	total: number;
+	guru_plus: number;
+	unlocked: number;
+	percentage: number;
+}
+
+/** Get progress for all language levels (1-60) */
+export async function getAllLanguageLevelProgress(): Promise<QueryResult<LanguageLevelProgress[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LanguageLevelProgress[]>(`
+			SELECT
+				language_level as level,
+				COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus,
+				COUNT(CASE WHEN srs_stage > 0 THEN 1 END) as unlocked,
+				CASE WHEN COUNT(*) > 0
+					THEN ROUND(COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) * 100.0 / COUNT(*))
+					ELSE 0
+				END as percentage
+			FROM language_items
+			WHERE language_level IS NOT NULL
+			GROUP BY language_level
+			ORDER BY language_level
+		`);
+	});
+}
+
+/** Get progress for a single language level */
+export async function getLanguageLevelProgress(level: number): Promise<QueryResult<LanguageLevelProgress>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<LanguageLevelProgress[]>(`
+			SELECT
+				language_level as level,
+				COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus,
+				COUNT(CASE WHEN srs_stage > 0 THEN 1 END) as unlocked,
+				CASE WHEN COUNT(*) > 0
+					THEN ROUND(COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) * 100.0 / COUNT(*))
+					ELSE 0
+				END as percentage
+			FROM language_items
+			WHERE language_level = ?
+		`, [level]);
+		return rows[0] ?? { level, total: 0, guru_plus: 0, unlocked: 0, percentage: 0 };
+	});
+}
+
+export interface LanguageLevelItem {
+	id: number;
+	content_type: string;
+	primary_text: string;
+	reading: string | null;
+	meaning: string | null;
+	srs_stage: number;
+	lesson_completed_at: string | null;
+	language_level: number;
+}
+
+/** Get all items for a language level, grouped by content type */
+export async function getLanguageLevelItems(level: number): Promise<QueryResult<LanguageLevelItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LanguageLevelItem[]>(`
+			SELECT id, content_type, primary_text, reading, meaning,
+				srs_stage, lesson_completed_at, language_level
+			FROM language_items
+			WHERE language_level = ?
+			ORDER BY
+				CASE content_type
+					WHEN 'kana' THEN 1
+					WHEN 'grammar' THEN 2
+					WHEN 'vocabulary' THEN 3
+					WHEN 'conjugation' THEN 4
+					WHEN 'sentence' THEN 5
+				END,
+				COALESCE(frequency_rank, 999999), id
+		`, [level]);
+	});
+}
+
+/** Get the user's current language level (lowest level with <90% at Guru+) */
+export async function getLanguageUserLevel(): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ level: number }[]>(`
+			SELECT language_level as level
+			FROM language_items
+			WHERE language_level IS NOT NULL
+			GROUP BY language_level
+			HAVING ROUND(COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) * 100.0 / COUNT(*)) < 90
+			ORDER BY language_level ASC
+			LIMIT 1
+		`);
+		return rows.length > 0 ? rows[0].level : 1;
+	});
+}
+
+/** Check if a level has 90% Guru+ and unlock the next level's KANA only */
+export async function checkAndUnlockLanguageLevel(currentLevel: number): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+
+		// Check if current level has 90% at Guru+
+		const progress = await db.select<{ total: number; guru_plus: number }[]>(`
+			SELECT COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
+			FROM language_items
+			WHERE language_level = ?
+		`, [currentLevel]);
+
+		const { total, guru_plus } = progress[0] ?? { total: 0, guru_plus: 0 };
+		if (total === 0 || (guru_plus / total) < 0.9) return 0;
+
+		const nextLevel = currentLevel + 1;
+		if (nextLevel > 60) return 0;
+
+		// Unlock next level's KANA only -- vocab unlocks after kana lessons are done
+		const result = await db.execute(
+			`UPDATE language_items
+			 SET srs_stage = 1, unlocked_at = datetime('now')
+			 WHERE language_level = ? AND srs_stage = 0 AND content_type = 'kana'`,
+			[nextLevel],
+		);
+
+		// Also check if the next level has no kana (levels 10+ may be vocab-only)
+		// If so, unlock all items in that level directly
+		const kanaCount = await db.select<{ cnt: number }[]>(
+			"SELECT COUNT(*) as cnt FROM language_items WHERE language_level = ? AND content_type = 'kana'",
+			[nextLevel],
+		);
+		if (kanaCount[0].cnt === 0) {
+			// No kana in this level -- unlock everything except sentences
+			const vocabResult = await db.execute(
+				`UPDATE language_items
+				 SET srs_stage = 1, unlocked_at = datetime('now')
+				 WHERE language_level = ? AND srs_stage = 0 AND content_type != 'sentence'`,
+				[nextLevel],
+			);
+			return result.rowsAffected + vocabResult.rowsAffected;
+		}
+
+		return result.rowsAffected;
+	});
+}
+
+/**
+ * Unlock vocab in a level after all kana in that level have completed lessons.
+ * Call this after lesson completion and after reviews.
+ */
+export async function unlockLevelVocabIfKanaReviewed(level: number): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+
+		// Check if all kana in this level have lesson_completed_at set
+		const kanaStatus = await db.select<{ total: number; lessoned: number }[]>(`
+			SELECT COUNT(*) as total,
+				COUNT(CASE WHEN lesson_completed_at IS NOT NULL THEN 1 END) as lessoned
+			FROM language_items
+			WHERE language_level = ? AND content_type = 'kana'
+		`, [level]);
+
+		const { total, lessoned } = kanaStatus[0] ?? { total: 0, lessoned: 0 };
+		// If no kana in level or not all lessoned yet, skip
+		if (total === 0 || lessoned < total) return 0;
+
+		// All kana lessoned -- unlock non-kana, non-sentence items in this level
+		// Sentences have their own per-word gating via prerequisite_keys
+		const result = await db.execute(
+			`UPDATE language_items
+			 SET srs_stage = 1, unlocked_at = datetime('now')
+			 WHERE language_level = ? AND srs_stage = 0 AND content_type NOT IN ('kana', 'sentence')`,
+			[level],
+		);
+
+		if (result.rowsAffected > 0) {
+			console.log(`[language-levels] Unlocked ${result.rowsAffected} vocab items in level ${level} (kana gate passed)`);
+		}
+
+		return result.rowsAffected;
+	});
+}
+
+// ===================== Level-Based Browsing Queries =====================
+
+export interface LevelGroupCount {
+	level: number;
+	total: number;
+	unlocked: number;
+	guru_plus: number;
+}
+
+/** Counts per language_level for a content type (for level-based browser) */
+export async function getLanguageItemCountsByLevel(
+	contentType: ContentType,
+): Promise<QueryResult<LevelGroupCount[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LevelGroupCount[]>(
+			`SELECT
+				language_level as level,
+				COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage > 0 THEN 1 END) as unlocked,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
+			FROM language_items
+			WHERE content_type = ? AND language_level IS NOT NULL
+			GROUP BY language_level
+			ORDER BY language_level`,
+			[contentType],
+		);
+	});
+}
+
+export interface LanguageItemsByLevel {
+	level: number;
+	total: number;
+	unlocked: number;
+	items: LanguageItem[];
+	subGroups: { key: string | null; label: string }[];
+}
+
+/** Get items for a content type within a tier (startLevel to endLevel), grouped by level */
+export async function getLanguageItemsByTypeAndTier(
+	contentType: ContentType,
+	startLevel: number,
+	endLevel: number,
+): Promise<QueryResult<LanguageItemsByLevel[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const items = await db.select<LanguageItem[]>(
+			`SELECT * FROM language_items
+			WHERE content_type = ? AND language_level >= ? AND language_level <= ?
+			ORDER BY language_level ASC, COALESCE(lesson_order, 9999) ASC,
+				COALESCE(frequency_rank, 999999) ASC, id ASC`,
+			[contentType, startLevel, endLevel],
+		);
+
+		// Group by level
+		const byLevel = new Map<number, LanguageItem[]>();
+		for (let lvl = startLevel; lvl <= endLevel; lvl++) {
+			byLevel.set(lvl, []);
+		}
+		for (const item of items) {
+			const arr = byLevel.get(item.language_level!);
+			if (arr) arr.push(item);
+		}
+
+		const result: LanguageItemsByLevel[] = [];
+		for (const [level, levelItems] of byLevel) {
+			if (levelItems.length === 0) continue;
+
+			// Collect unique sub-groups for this level
+			const seen = new Set<string | null>();
+			const subGroups: { key: string | null; label: string }[] = [];
+			for (const item of levelItems) {
+				const key = item.lesson_group ?? null;
+				if (!seen.has(key)) {
+					seen.add(key);
+					subGroups.push({
+						key,
+						label: key ? (GROUP_LABELS[key] ?? key) : "Other",
+					});
+				}
+			}
+
+			result.push({
+				level,
+				total: levelItems.length,
+				unlocked: levelItems.filter((i) => i.srs_stage > 0).length,
+				items: levelItems,
+				subGroups: subGroups.filter((g) => g.key !== null),
+			});
+		}
+		return result;
+	});
+}
+
+// ===================== Sentence Prerequisite Gating =====================
+
+/**
+ * Unlock sentences in a level whose prerequisite vocab/kanji have all been reviewed.
+ * Each sentence's prerequisite_keys (JSON array of item_keys) must all have
+ * lesson_completed_at set in either language_items or kanji_levels.
+ */
+export async function unlockSentencesWithMetPrerequisites(level: number): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+
+		// Get locked sentences in this level that have prerequisites
+		const sentences = await db.select<{ id: number; prerequisite_keys: string | null }[]>(
+			`SELECT id, prerequisite_keys FROM language_items
+			 WHERE language_level = ? AND content_type = 'sentence' AND srs_stage = 0
+			 AND prerequisite_keys IS NOT NULL AND prerequisite_keys != '[]'`,
+			[level],
+		);
+
+		if (sentences.length === 0) return 0;
+
+		// Also get locked sentences WITHOUT prerequisites -- unlock them directly
+		const noPrereqResult = await db.execute(
+			`UPDATE language_items
+			 SET srs_stage = 1, unlocked_at = datetime('now')
+			 WHERE language_level = ? AND content_type = 'sentence' AND srs_stage = 0
+			 AND (prerequisite_keys IS NULL OR prerequisite_keys = '[]')`,
+			[level],
+		);
+
+		// For sentences with prerequisites, check each one
+		const toUnlock: number[] = [];
+
+		for (const sentence of sentences) {
+			let keys: string[];
+			try {
+				keys = JSON.parse(sentence.prerequisite_keys ?? "[]");
+			} catch {
+				continue;
+			}
+			if (keys.length === 0) {
+				toUnlock.push(sentence.id);
+				continue;
+			}
+
+			// Check if all prerequisite keys have been lessoned
+			const placeholders = keys.map(() => "?").join(",");
+
+			// Check language_items
+			const langResult = await db.select<{ cnt: number }[]>(
+				`SELECT COUNT(*) as cnt FROM language_items
+				 WHERE item_key IN (${placeholders}) AND lesson_completed_at IS NOT NULL`,
+				keys,
+			);
+
+			// Check kanji_levels (for kanji prerequisites)
+			const kanjiKeys = keys.filter((k) => k.startsWith("kanji:"));
+			let kanjiMet = 0;
+			if (kanjiKeys.length > 0) {
+				const kanjiChars = kanjiKeys.map((k) => k.replace("kanji:", ""));
+				const kPlaceholders = kanjiChars.map(() => "?").join(",");
+				const kanjiResult = await db.select<{ cnt: number }[]>(
+					`SELECT COUNT(*) as cnt FROM kanji_levels
+					 WHERE character IN (${kPlaceholders}) AND lesson_completed_at IS NOT NULL`,
+					kanjiChars,
+				);
+				kanjiMet = kanjiResult[0]?.cnt ?? 0;
+			}
+
+			const langMet = langResult[0]?.cnt ?? 0;
+			const nonKanjiKeys = keys.filter((k) => !k.startsWith("kanji:")).length;
+
+			if (langMet >= nonKanjiKeys && kanjiMet >= kanjiKeys.length) {
+				toUnlock.push(sentence.id);
+			}
+		}
+
+		if (toUnlock.length > 0) {
+			for (let i = 0; i < toUnlock.length; i += 500) {
+				const chunk = toUnlock.slice(i, i + 500);
+				const placeholders = chunk.map(() => "?").join(",");
+				await db.execute(
+					`UPDATE language_items SET srs_stage = 1, unlocked_at = datetime('now')
+					 WHERE id IN (${placeholders})`,
+					chunk,
+				);
+			}
+			console.log(`[language-levels] Unlocked ${toUnlock.length} sentences in level ${level} (prerequisites met)`);
+		}
+
+		return noPrereqResult.rowsAffected + toUnlock.length;
 	});
 }

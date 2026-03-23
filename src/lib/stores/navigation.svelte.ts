@@ -24,6 +24,8 @@ export type View =
 	| "lang-lesson-picker"
 	| "lang-decks"
 	| "lang-browse"
+	| "lang-levels"
+	| "lang-level"
 	| "lang-item-detail"
 	| "deck-browse"
 	| "search"
@@ -52,6 +54,8 @@ const SECTION_ROOTS: Record<string, View> = {
 	"lang-lessons": "lang-overview",
 	"lang-lesson-picker": "lang-overview",
 	"lang-decks": "lang-overview",
+	"lang-levels": "lang-overview",
+	"lang-level": "lang-levels",
 	"lang-browse": "lang-overview",
 	"lang-item-detail": "lang-overview",
 	"deck-browse": "lang-decks",

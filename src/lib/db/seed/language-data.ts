@@ -49,7 +49,7 @@ async function isLanguageSeeded(): Promise<QueryResult<boolean>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ value: string }[]>(
-			"SELECT value FROM settings WHERE key = 'language_seeded'",
+			"SELECT value FROM settings WHERE key = 'language_seeded_v2'",
 		);
 		return rows.length > 0 && rows[0].value === "true";
 	});
@@ -59,7 +59,7 @@ async function markLanguageSeeded(): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		await db.execute(
-			"INSERT OR REPLACE INTO settings (key, value) VALUES ('language_seeded', 'true')",
+			"INSERT OR REPLACE INTO settings (key, value) VALUES ('language_seeded_v2', 'true')",
 		);
 	});
 }
@@ -142,6 +142,12 @@ export async function seedLanguageData(): Promise<void> {
 	console.log("Seeding language data from merged deck export...");
 
 	const db = await getDb();
+
+	// Clear old data for clean re-seed (vocab data was cleaned in v2)
+	await db.execute("DELETE FROM language_review_log");
+	await db.execute("DELETE FROM language_items");
+	console.log("[Seed] Cleared old language data for fresh import.");
+
 	let totalInserted = 0;
 
 	for (const [filename, contentType] of Object.entries(CONTENT_TYPE_MAP)) {
@@ -946,5 +952,17 @@ export async function applySentenceJlptTagging(): Promise<void> {
 	return runFixup("sentence_jlpt_v1", "Applying sentence JLPT tagging", [
 		`UPDATE language_items SET jlpt_level = 'N5'
 		WHERE content_type = 'sentence' AND jlpt_level IS NULL`,
+	]);
+}
+
+/**
+ * Tag Tae Kim grammar items as N5.
+ * These are quiz questions and example sentences from the Tae Kim guide,
+ * which covers N5-level grammar (copula, particles, adjectives, verb basics, etc.).
+ */
+export async function applyGrammarJlptTagging(): Promise<void> {
+	return runFixup("grammar_jlpt_v1", "Applying grammar JLPT tagging", [
+		`UPDATE language_items SET jlpt_level = 'N5'
+		WHERE content_type = 'grammar' AND jlpt_level IS NULL`,
 	]);
 }

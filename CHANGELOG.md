@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.24.0.0] - 2026-03-23
+
+### Added
+
+- WaniKani-style language levels system with 60 levels and gated progression
+- LanguageLevels overview page with level tier pagination (1-10, 11-20, etc.)
+- LanguageLevel detail page showing items per level with SRS-colored tiles
+- Level-based unlock system: kana gate within levels, Guru+ progression to next level
+- Sentence prerequisite-based unlocking tied to vocabulary mastery
+- Language level display in sidebar, dashboard, and item detail views
+- Migration v16: adds language_level column to language_items table
+- JLPT N5 tagging for 369 Tae Kim grammar items (quiz questions and example sentences)
+- Timer-safe cleanup for review and lesson session components
+
+### Changed
+
+- LanguageItemBrowser redesigned from JLPT-tier accordions to level-based browsing
+- Language review flow triggers level progression checks after each review
+- Sidebar updated with language levels navigation entry
+- Dashboard shows language level progress alongside kanji
+
 ## [0.23.1.0] - 2026-03-23
 
 ### Fixed

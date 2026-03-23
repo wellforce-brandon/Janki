@@ -40,10 +40,20 @@ let feedbackState = $state<"none" | "correct" | "incorrect">("none");
 let correctAnswer = $state("");
 let isCompleting = $state(false);
 let quizInputEl = $state<HTMLInputElement | null>(null);
+let activeTimers: ReturnType<typeof setTimeout>[] = [];
+
+function safeTimeout(fn: () => void, ms: number) {
+	const id = setTimeout(fn, ms);
+	activeTimers.push(id);
+	return id;
+}
+
+// Clear all timers on component destroy
+$effect(() => () => activeTimers.forEach(clearTimeout));
 
 $effect(() => {
 	if (phase === "quiz" && feedbackState === "none" && quizIndex >= 0) {
-		setTimeout(() => quizInputEl?.focus(), 50);
+		safeTimeout(() => quizInputEl?.focus(), 50);
 	}
 });
 
@@ -178,7 +188,7 @@ function submitQuizAnswer() {
 		feedbackState = "correct";
 		currentQuiz.answered = true;
 		currentQuiz.correct = true;
-		setTimeout(() => advanceQuiz(), 600);
+		safeTimeout(() => advanceQuiz(), 600);
 	} else {
 		feedbackState = "incorrect";
 		correctAnswer = getExpectedAnswer(currentQuiz.item);

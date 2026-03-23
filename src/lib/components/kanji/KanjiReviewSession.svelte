@@ -59,6 +59,7 @@ let inputValue = $state("");
 let feedbackState = $state<"none" | "correct" | "incorrect" | "shake">("none");
 let correctAnswer = $state("");
 let isProcessing = $state(false);
+let inputDisabled = $derived(feedbackState === "correct" || feedbackState === "incorrect" || isProcessing);
 let sessionStartTime = $state(Date.now());
 let itemStartTime = $state(Date.now());
 
@@ -70,8 +71,18 @@ type ItemResult = {
 	readingCorrect: boolean | null;
 	startTime: number;
 };
-let itemResults = $state<Map<number, ItemResult>>(new Map());
-let savedItems = $state<Map<number, { allCorrect: boolean; unlockedCount: number }>>(new Map());
+let itemResults = new Map<number, ItemResult>();
+let savedItems = new Map<number, { allCorrect: boolean; unlockedCount: number }>();
+let activeTimers: ReturnType<typeof setTimeout>[] = [];
+
+function safeTimeout(fn: () => void, ms: number) {
+	const id = setTimeout(fn, ms);
+	activeTimers.push(id);
+	return id;
+}
+
+// Clear all timers on component destroy
+$effect(() => () => activeTimers.forEach(clearTimeout));
 
 function getOrCreateItemResult(itemId: number): ItemResult {
 	let r = itemResults.get(itemId);
@@ -153,7 +164,7 @@ async function submitAnswer() {
 		// Kun'yomi entered for kanji -- shake, don't mark wrong
 		feedbackState = "shake";
 		shakeMessage = "We're looking for the on'yomi reading";
-		setTimeout(() => {
+		safeTimeout(() => {
 			feedbackState = "none";
 			shakeMessage = "";
 		}, 1500);
@@ -171,7 +182,7 @@ async function submitAnswer() {
 		else result.readingCorrect = true;
 
 		await saveItemIfComplete(current.item, result);
-		setTimeout(() => advanceToNext(), 600);
+		safeTimeout(() => advanceToNext(), 600);
 	} else {
 		feedbackState = "incorrect";
 		correctAnswer = getCorrectDisplay(current.item, current.type);
@@ -339,7 +350,7 @@ function handleKeydown(e: KeyboardEvent) {
 							class:dark:text-green-400={feedbackState === "correct"}
 							placeholder="Type reading in romaji..."
 							bind:value={inputValue}
-							disabled={feedbackState === "correct" || feedbackState === "incorrect" || isProcessing}
+							disabled={inputDisabled}
 							aria-label="Type reading in romaji"
 						/>
 						{#if inputValue.length > 0 && displayValue !== inputValue}
@@ -354,7 +365,7 @@ function handleKeydown(e: KeyboardEvent) {
 							class:dark:text-green-400={feedbackState === "correct"}
 							placeholder="Type the {current.item.item_type === 'radical' ? 'name' : 'meaning'}..."
 							bind:value={inputValue}
-							disabled={feedbackState === "correct" || feedbackState === "incorrect" || isProcessing}
+							disabled={inputDisabled}
 							aria-label="Type the meaning"
 						/>
 					{/if}

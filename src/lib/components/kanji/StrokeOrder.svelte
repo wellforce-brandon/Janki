@@ -16,9 +16,10 @@ function getCodepoint(char: string): string {
 $effect(() => {
 	loading = true;
 	error = false;
+	const controller = new AbortController();
 	const codepoint = getCodepoint(character);
 	// Load SVG from data/kanjivg/ directory
-	fetch(`/data/kanjivg/${codepoint}.svg`)
+	fetch(`/data/kanjivg/${codepoint}.svg`, { signal: controller.signal })
 		.then((r) => {
 			if (!r.ok) throw new Error("Not found");
 			return r.text();
@@ -27,10 +28,13 @@ $effect(() => {
 			svgContent = text;
 			loading = false;
 		})
-		.catch(() => {
-			error = true;
-			loading = false;
+		.catch((e) => {
+			if (e.name !== "AbortError") {
+				error = true;
+				loading = false;
+			}
 		});
+	return () => controller.abort();
 });
 </script>
 

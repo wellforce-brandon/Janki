@@ -43,32 +43,13 @@ const CONJUGATION_VOCAB_THRESHOLD = 10;
 let unlockRunning = false;
 
 export async function checkAndUnlockItems(): Promise<QueryResult<number>> {
-	if (unlockRunning) return { ok: true, data: 0 };
-	unlockRunning = true;
-	try {
-	return await safeQuery(async () => {
-		let totalUnlocked = 0;
-
-		// 1. Kana: progressive group unlock (already capped by group size)
-		totalUnlocked += await unlockKana();
-
-		// 2. Vocabulary: JLPT-ordered, frequency-ranked, kanji-gated, capped
-		totalUnlocked += await unlockVocabulary();
-
-		// 3. Grammar: JLPT-ordered, frequency-ranked, capped
-		totalUnlocked += await unlockGrammar();
-
-		// 4. Sentences: milestone-gated, frequency-ranked, capped
-		totalUnlocked += await unlockSentences();
-
-		// 5. Conjugation: milestone-gated, capped
-		totalUnlocked += await unlockConjugations();
-
-		return totalUnlocked;
-	});
-	} finally {
-		unlockRunning = false;
-	}
+	// Level-based unlocking is now handled by:
+	// - checkAndUnlockLanguageLevel() in language.ts (level progression)
+	// - unlockLevelVocabIfKanaReviewed() in language.ts (kana gate within level)
+	// - unlockSentencesWithMetPrerequisites() in language.ts (sentence prereqs)
+	// The old per-type JLPT-gated unlock logic is disabled to prevent
+	// bypassing the level system.
+	return { ok: true, data: 0 };
 }
 
 // --- Kana (unchanged -- already properly gated) ---

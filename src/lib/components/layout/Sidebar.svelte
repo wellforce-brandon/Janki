@@ -53,11 +53,32 @@ let sections = $derived<NavSection[]>([
 		label: "Language",
 		items: [
 			{ id: "lang-overview", label: "Overview", shortcut: "Ctrl+2" },
+			{
+				id: "lang-levels",
+				label: "Levels",
+				subViews: ["lang-level"],
+				flyout: { kind: "levels" },
+			},
 			{ id: "lang-kana", label: "Kana" },
-			{ id: "lang-vocabulary", label: "Vocabulary", shortcut: "Ctrl+7" },
-			{ id: "lang-grammar", label: "Grammar", shortcut: "Ctrl+5" },
-			{ id: "lang-sentences", label: "Sentences", shortcut: "Ctrl+6" },
-			{ id: "lang-conjugation", label: "Conjugation", hidden: !hasConjugation },
+			{
+				id: "lang-vocabulary",
+				label: "Vocabulary",
+				shortcut: "Ctrl+7",
+				flyout: { kind: "items" as const, color: "bg-purple-500 dark:bg-purple-600" },
+			},
+			{
+				id: "lang-grammar",
+				label: "Grammar",
+				shortcut: "Ctrl+5",
+				flyout: { kind: "items" as const, color: "bg-amber-500 dark:bg-amber-600" },
+			},
+			{
+				id: "lang-sentences",
+				label: "Sentences",
+				shortcut: "Ctrl+6",
+				flyout: { kind: "items" as const, color: "bg-blue-500 dark:bg-blue-600" },
+			},
+			{ id: "lang-conjugation", label: "Conjugation", hidden: !hasConjugation, flyout: { kind: "items" as const, color: "bg-rose-500 dark:bg-rose-600" } },
 			{ id: "lang-lessons", label: "Lessons", subViews: ["lang-lesson-picker"] },
 			{ id: "lang-review", label: "Review", shortcut: "Ctrl+3" },
 		],
@@ -115,6 +136,7 @@ function showFlyout(id: string) {
 	if (hoverTimeout) clearTimeout(hoverTimeout);
 	expandedTier = null;
 	openFlyout = id;
+	activeLevelsFlyoutId = id;
 }
 
 function scheduleFlyoutClose() {
@@ -129,15 +151,20 @@ function keepFlyoutOpen() {
 	if (hoverTimeout) clearTimeout(hoverTimeout);
 }
 
+let activeLevelsFlyoutId = $state<string | null>(null);
+
 function handleLevelClick(level: number) {
+	const target = activeLevelsFlyoutId === "lang-levels" ? "lang-level" : "kanji-level";
 	openFlyout = null;
 	expandedTier = null;
-	navigate("kanji-level", { level: String(level) });
+	activeLevelsFlyoutId = null;
+	navigate(target, { level: String(level) });
 }
 
 function handleTierClick(item: NavItem, tierIndex: number) {
 	openFlyout = null;
 	expandedTier = null;
+	activeLevelsFlyoutId = null;
 	navigate(item.id, { tier: String(tierIndex) });
 }
 </script>

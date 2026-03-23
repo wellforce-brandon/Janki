@@ -20,6 +20,8 @@ import KanjiVocabulary from "./views/KanjiVocabulary.svelte";
 import LanguageItemBrowser from "./views/LanguageItemBrowser.svelte";
 import LanguageItemDetail from "./views/LanguageItemDetail.svelte";
 import LanguageKana from "./views/LanguageKana.svelte";
+import LanguageLevels from "./views/LanguageLevels.svelte";
+import LanguageLevel from "./views/LanguageLevel.svelte";
 import LanguageOverview from "./views/LanguageOverview.svelte";
 import LanguageLessonPicker from "./views/LanguageLessonPicker.svelte";
 import LanguageLessons from "./views/LanguageLessons.svelte";
@@ -80,6 +82,10 @@ function handleKeydown(e: KeyboardEvent) {
 				<Dashboard />
 			{:else if currentView() === "lang-overview"}
 				<LanguageOverview />
+			{:else if currentView() === "lang-levels"}
+				<LanguageLevels />
+			{:else if currentView() === "lang-level"}
+				<LanguageLevel />
 			{:else if currentView() === "lang-vocabulary"}
 				<LanguageItemBrowser contentType="vocabulary" title="Vocabulary" />
 			{:else if currentView() === "lang-grammar"}
@@ -95,6 +101,7 @@ function handleKeydown(e: KeyboardEvent) {
 					itemId={Number(viewParams().id)}
 					contentType={viewParams().contentType}
 					jlptLevel={viewParams().jlptLevel}
+					fromLevel={viewParams().fromLevel}
 				/>
 			{:else if currentView() === "lang-review"}
 				<LanguageReview />

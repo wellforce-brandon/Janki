@@ -20,6 +20,9 @@ let summary = $state<ReviewSummary | null>(null);
 let levelBefore = $state(1);
 let showLevelUp = $state(false);
 let newLevel = $state(1);
+let dailyLimit = $derived(getSettings().kanjiMaxDailyReviews);
+let remaining = $derived(dailyLimit > 0 ? Math.max(0, dailyLimit - todayCount) : Infinity);
+let atDailyLimit = $derived(dailyLimit > 0 && remaining === 0);
 
 async function loadDueItems() {
 	loading = true;
@@ -35,7 +38,7 @@ async function loadDueItems() {
 }
 
 function startSession() {
-	if (dueItems.length === 0) return;
+	if (dueItems.length === 0 || atDailyLimit) return;
 	summary = null;
 	sessionActive = true;
 }
@@ -106,12 +109,33 @@ $effect(() => {
 				{/if}
 
 				<div class="flex justify-center gap-2 pt-4">
-					{#if dueItems.length > 0}
+					{#if dueItems.length > 0 && !atDailyLimit}
 						<Button onclick={startSession}>Continue Reviews ({dueItems.length})</Button>
+					{:else if atDailyLimit}
+						<p class="text-sm text-amber-600 dark:text-amber-400">Daily review limit reached</p>
 					{/if}
 					<Button variant="outline" onclick={() => navigate("kanji-extra-study")}>Extra Study</Button>
 					<Button variant="outline" onclick={() => navigate("kanji-dashboard")}>Back to Overview</Button>
 				</div>
+			</div>
+		</div>
+	{:else if atDailyLimit}
+		<h2 class="text-2xl font-bold" tabindex="-1">Kanji Reviews</h2>
+		<div class="mx-auto max-w-md rounded-lg border bg-card p-8 text-center">
+			<div class="text-5xl font-bold text-amber-500">{todayCount}</div>
+			<p class="mt-2 font-medium text-amber-600 dark:text-amber-400">Daily limit reached</p>
+			<p class="mt-1 text-sm text-muted-foreground">
+				You've completed {todayCount} of {dailyLimit} kanji reviews today.
+				Your limit resets at midnight.
+			</p>
+			{#if dueItems.length > 0}
+				<p class="mt-2 text-sm text-muted-foreground">
+					{dueItems.length} review{dueItems.length > 1 ? "s" : ""} will be waiting.
+				</p>
+			{/if}
+			<div class="mt-6 flex justify-center gap-2">
+				<Button variant="outline" onclick={() => navigate("kanji-extra-study")}>Extra Study</Button>
+				<Button variant="outline" onclick={() => navigate("kanji-dashboard")}>Back to Overview</Button>
 			</div>
 		</div>
 	{:else if dueItems.length === 0}
@@ -137,7 +161,7 @@ $effect(() => {
 
 			{#if todayCount > 0}
 				<p class="mt-1 text-sm text-muted-foreground">
-					{todayCount} completed today
+					{todayCount} completed today{dailyLimit > 0 ? ` (${remaining} remaining)` : ""}
 				</p>
 			{/if}
 

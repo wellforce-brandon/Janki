@@ -55,6 +55,17 @@ export async function getTodayKanjiReviewCount(): Promise<QueryResult<number>> {
 	});
 }
 
+export async function getTodayKanjiLessonCount(): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ count: number }[]>(
+			`SELECT COUNT(*) as count FROM kanji_levels
+			WHERE date(lesson_completed_at) = date('now')`,
+		);
+		return rows[0]?.count ?? 0;
+	});
+}
+
 export async function getKanjiReviewStats(
 	days: number,
 ): Promise<QueryResult<KanjiReviewDayStats[]>> {

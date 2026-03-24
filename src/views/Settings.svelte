@@ -198,39 +198,42 @@ async function handleResetDefaults() {
 		</div>
 	</section>
 
-	<!-- Review Limits -->
+	<!-- Language Daily Limits -->
 	<section class="space-y-3 rounded-lg border bg-card p-4">
-		<h3 class="font-medium">Review Limits</h3>
+		<h3 class="font-medium">Language Daily Limits</h3>
+		<p class="text-sm text-muted-foreground">
+			Maximum lessons and reviews per day for the language section. Set to 0 for unlimited.
+		</p>
 		<div class="grid grid-cols-2 gap-4">
 			<div class="space-y-1">
-				<label class="text-sm text-muted-foreground" for="new-limit">Daily new cards</label>
+				<label class="text-sm text-muted-foreground" for="lang-daily-lessons">Max daily lessons</label>
 				<input
-					id="new-limit"
+					id="lang-daily-lessons"
 					type="number"
 					min="0"
 					max="100"
 					class="w-full rounded-md border bg-background px-3 py-2"
-					value={s.dailyNewLimit}
+					value={s.languageMaxDailyLessons}
 					onchange={(e) => {
 						const val = Number((e.target as HTMLInputElement).value);
-						saveSetting("dailyNewLimit", val);
-						addToast("Daily new cards limit saved", "success");
+						saveSetting("languageMaxDailyLessons", val);
+						addToast("Language daily lesson limit saved", "success");
 					}}
 				/>
 			</div>
 			<div class="space-y-1">
-				<label class="text-sm text-muted-foreground" for="review-limit">Daily review limit</label>
+				<label class="text-sm text-muted-foreground" for="lang-daily-reviews">Max daily reviews</label>
 				<input
-					id="review-limit"
+					id="lang-daily-reviews"
 					type="number"
 					min="0"
 					max="1000"
 					class="w-full rounded-md border bg-background px-3 py-2"
-					value={s.dailyReviewLimit}
+					value={s.languageMaxDailyReviews}
 					onchange={(e) => {
 						const val = Number((e.target as HTMLInputElement).value);
-						saveSetting("dailyReviewLimit", val);
-						addToast("Daily review limit saved", "success");
+						saveSetting("languageMaxDailyReviews", val);
+						addToast("Language daily review limit saved", "success");
 					}}
 				/>
 			</div>
@@ -454,7 +457,23 @@ async function handleResetDefaults() {
 					onchange={(e) => {
 						const val = Number((e.target as HTMLInputElement).value);
 						saveSetting("kanjiMaxDailyLessons", val);
-						addToast("Daily lesson limit saved", "success");
+						addToast("Kanji daily lesson limit saved", "success");
+					}}
+				/>
+			</div>
+			<div class="space-y-1">
+				<label class="text-sm text-muted-foreground" for="kanji-daily-reviews">Max daily reviews</label>
+				<input
+					id="kanji-daily-reviews"
+					type="number"
+					min="0"
+					max="1000"
+					class="w-full rounded-md border bg-background px-3 py-2"
+					value={s.kanjiMaxDailyReviews}
+					onchange={(e) => {
+						const val = Number((e.target as HTMLInputElement).value);
+						saveSetting("kanjiMaxDailyReviews", val);
+						addToast("Kanji daily review limit saved", "success");
 					}}
 				/>
 			</div>

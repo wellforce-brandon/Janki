@@ -4,8 +4,6 @@ export type KanjiReviewOrder = "due-first" | "apprentice-first" | "lower-srs" | 
 
 export interface AppSettings {
 	theme: "dark" | "light" | "system";
-	dailyNewLimit: number;
-	dailyReviewLimit: number;
 	ttsEnabled: boolean;
 	ttsRate: number;
 	ttsPitch: number;
@@ -13,9 +11,12 @@ export interface AppSettings {
 	showReviewTimer: boolean;
 	kanjiBatchSize: number;
 	kanjiMaxDailyLessons: number;
+	kanjiMaxDailyReviews: number;
 	kanjiReviewOrder: KanjiReviewOrder;
 	kanjiShowSrsIndicator: boolean;
 	kanjiAutoplayAudio: boolean;
+	languageMaxDailyLessons: number;
+	languageMaxDailyReviews: number;
 	vocabLessonCap: number;
 	grammarLessonCap: number;
 	sentenceLessonCap: number;
@@ -25,8 +26,6 @@ export interface AppSettings {
 
 const DEFAULTS: AppSettings = {
 	theme: "dark",
-	dailyNewLimit: 20,
-	dailyReviewLimit: 200,
 	ttsEnabled: true,
 	ttsRate: 1.0,
 	ttsPitch: 1.0,
@@ -34,9 +33,12 @@ const DEFAULTS: AppSettings = {
 	showReviewTimer: true,
 	kanjiBatchSize: 5,
 	kanjiMaxDailyLessons: 15,
+	kanjiMaxDailyReviews: 200,
 	kanjiReviewOrder: "due-first",
 	kanjiShowSrsIndicator: true,
 	kanjiAutoplayAudio: false,
+	languageMaxDailyLessons: 20,
+	languageMaxDailyReviews: 200,
 	vocabLessonCap: 10,
 	grammarLessonCap: 5,
 	sentenceLessonCap: 5,

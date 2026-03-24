@@ -532,6 +532,17 @@ export async function getTodayLanguageReviewCount(): Promise<QueryResult<number>
 	});
 }
 
+/** Count lessons completed today */
+export async function getTodayLanguageLessonCount(): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ count: number }[]>(
+			"SELECT COUNT(*) as count FROM language_items WHERE date(lesson_completed_at) = date('now')",
+		);
+		return rows[0]?.count ?? 0;
+	});
+}
+
 /** Forecast: upcoming reviews bucketed by hour for next N hours */
 export async function getUpcomingLanguageReviews(
 	hours: number,

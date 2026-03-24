@@ -2,6 +2,7 @@ import {
 	getAvailableLessons,
 	getAvailableLessonCount,
 	getLanguageItemById,
+	getTodayLanguageLessonCount,
 	markLessonsBatchCompleted,
 	type ContentType,
 	type LanguageItem,
@@ -9,35 +10,48 @@ import {
 import { calculateNextReview } from "./language-srs";
 import { checkAndUnlockWithinLevel } from "./language-unlock";
 import type { QueryResult } from "../db/database";
+import { getSettings } from "../stores/app-settings.svelte";
 
 const DEFAULT_BATCH_SIZE = 5;
 
 export interface LessonBatch {
 	items: LanguageItem[];
 	totalAvailable: number;
+	todayCompleted: number;
+	dailyLimit: number;
 }
 
 /**
  * Get the next batch of lessons to study.
- * Returns unlocked items that haven't had their lesson completed yet.
+ * Returns unlocked items that haven't had their lesson completed yet,
+ * capped by the daily lesson limit.
  */
 export async function getNextLessonBatch(
 	contentType?: ContentType,
 	batchSize = DEFAULT_BATCH_SIZE,
 ): Promise<QueryResult<LessonBatch>> {
-	const [itemsResult, countResult] = await Promise.all([
+	const dailyLimit = getSettings().languageMaxDailyLessons;
+
+	const [itemsResult, countResult, todayResult] = await Promise.all([
 		getAvailableLessons(contentType, batchSize),
 		getAvailableLessonCount(contentType),
+		getTodayLanguageLessonCount(),
 	]);
 
 	if (!itemsResult.ok) return { ok: false, error: itemsResult.error };
 	if (!countResult.ok) return { ok: false, error: countResult.error };
+	const todayCompleted = todayResult.ok ? todayResult.data : 0;
+
+	const remaining = dailyLimit > 0 ? Math.max(0, dailyLimit - todayCompleted) : Infinity;
+	const cappedItems = itemsResult.data.slice(0, remaining);
 
 	return {
 		ok: true,
 		data: {
-			items: itemsResult.data,
+			items: cappedItems,
 			totalAvailable: countResult.data,
+			todayCompleted,
+			dailyLimit,
 		},
 	};
 }

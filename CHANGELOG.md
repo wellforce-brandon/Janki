@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.28.0.0] - 2026-03-24
+
+### Added
+
+- Daily lesson caps for kanji (kanjiMaxDailyLessons, default 15) and language (languageMaxDailyLessons, default 20) enforced in lesson flows
+- Daily review caps for kanji (kanjiMaxDailyReviews, default 200) and language (languageMaxDailyReviews, default 200) enforced in review flows
+- "Daily limit reached" state with amber styling shown when lesson or review caps are hit, with reset-at-midnight messaging
+- Remaining daily allowance shown on lesson and review start screens
+- Per-system daily limit controls in Settings (Language Daily Limits section and Kanji section)
+
+### Removed
+
+- Removed unused dailyNewLimit and dailyReviewLimit settings (replaced by per-system caps)
+
 ## [0.27.0.0] - 2026-03-24
 
 ### Added

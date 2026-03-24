@@ -11,10 +11,12 @@ import {
 	getDueLanguageCount,
 	getAvailableLessonCount,
 	getLanguageUserLevel,
+	getTodayLanguageReviewCount,
 	type ContentType,
 	type LanguageItem,
 } from "$lib/db/queries/language";
 import { checkLevelProgression } from "$lib/srs/language-unlock";
+import { getSettings } from "$lib/stores/app-settings.svelte";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 import { formatTime } from "$lib/utils/common";
@@ -23,31 +25,37 @@ let loading = $state(true);
 let dueItems = $state<LanguageItem[]>([]);
 let dueCount = $state(0);
 let lessonCount = $state(0);
+let todayReviewCount = $state(0);
 let sessionActive = $state(false);
 let summary = $state<ReviewSummary | null>(null);
 let selectedType = $state<string>("all");
 let levelBefore = $state(1);
 let showLevelUp = $state(false);
 let newLevel = $state(1);
+let dailyLimit = $derived(getSettings().languageMaxDailyReviews);
+let remaining = $derived(dailyLimit > 0 ? Math.max(0, dailyLimit - todayReviewCount) : Infinity);
+let atDailyLimit = $derived(dailyLimit > 0 && remaining === 0);
 
 async function loadDueItems() {
 	loading = true;
 	const typeFilter = selectedType === "all" ? undefined : (selectedType as ContentType);
-	const [dueResult, countResult, lessonResult, levelResult] = await Promise.all([
+	const [dueResult, countResult, lessonResult, levelResult, reviewCountResult] = await Promise.all([
 		getDueLanguageItems(typeFilter),
 		getDueLanguageCount(typeFilter),
 		getAvailableLessonCount(typeFilter),
 		getLanguageUserLevel(),
+		getTodayLanguageReviewCount(),
 	]);
 	if (dueResult.ok) dueItems = dueResult.data;
 	if (countResult.ok) dueCount = countResult.data;
 	if (lessonResult.ok) lessonCount = lessonResult.data;
 	if (levelResult.ok) levelBefore = levelResult.data;
+	if (reviewCountResult.ok) todayReviewCount = reviewCountResult.data;
 	loading = false;
 }
 
 function startSession() {
-	if (dueItems.length === 0) return;
+	if (dueItems.length === 0 || atDailyLimit) return;
 	summary = null;
 	sessionActive = true;
 }
@@ -115,11 +123,31 @@ $effect(() => {
 				</div>
 
 				<div class="flex justify-center gap-2 pt-4">
-					{#if dueCount > 0}
+					{#if dueCount > 0 && !atDailyLimit}
 						<Button onclick={startSession}>Continue Reviews ({dueCount})</Button>
+					{:else if atDailyLimit}
+						<p class="text-sm text-amber-600 dark:text-amber-400">Daily review limit reached</p>
 					{/if}
 					<Button variant="outline" onclick={() => navigate("lang-overview")}>Back to Overview</Button>
 				</div>
+			</div>
+		</div>
+	{:else if atDailyLimit}
+		<h2 class="text-2xl font-bold" tabindex="-1">Language Review</h2>
+		<div class="mx-auto max-w-md rounded-lg border bg-card p-8 text-center">
+			<div class="text-5xl font-bold text-amber-500">{todayReviewCount}</div>
+			<p class="mt-2 font-medium text-amber-600 dark:text-amber-400">Daily limit reached</p>
+			<p class="mt-1 text-sm text-muted-foreground">
+				You've completed {todayReviewCount} of {dailyLimit} language reviews today.
+				Your limit resets at midnight.
+			</p>
+			{#if dueCount > 0}
+				<p class="mt-2 text-sm text-muted-foreground">
+					{dueCount} review{dueCount > 1 ? "s" : ""} will be waiting.
+				</p>
+			{/if}
+			<div class="mt-6">
+				<Button variant="outline" onclick={() => navigate("lang-overview")}>Back to Overview</Button>
 			</div>
 		</div>
 	{:else if dueCount === 0 && lessonCount === 0}
@@ -150,6 +178,11 @@ $effect(() => {
 			<div class="text-5xl font-bold text-primary">{dueCount}</div>
 			<p class="mt-2 text-muted-foreground">review{dueCount > 1 ? "s" : ""} available</p>
 
+			{#if todayReviewCount > 0}
+				<p class="mt-1 text-sm text-muted-foreground">
+					{todayReviewCount} completed today{dailyLimit > 0 ? ` (${remaining} remaining)` : ""}
+				</p>
+			{/if}
 			{#if lessonCount > 0}
 				<p class="mt-1 text-sm text-muted-foreground">
 					{lessonCount} lesson{lessonCount > 1 ? "s" : ""} available

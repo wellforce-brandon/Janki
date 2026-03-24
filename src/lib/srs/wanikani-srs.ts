@@ -1,6 +1,6 @@
-import { checkAndUnlockLevel, updateKanjiSrsState } from "../db/queries/kanji";
-import { logKanjiReview } from "../db/queries/kanji-reviews";
+import { checkAndUnlockLevel } from "../db/queries/kanji";
 import { invalidateCache } from "../db/query-cache";
+import { withTransaction } from "../db/database";
 import {
 	calculateNextReview as calculateNextReviewBase,
 	calculateDrop,
@@ -59,17 +59,30 @@ export async function reviewKanjiItem(
 
 	const nextReview = calculateNextReview(newStage, level);
 
-	await updateKanjiSrsState(id, newStage, nextReview, correct ? 1 : 0, correct ? 0 : 1, meaningIncorrect, readingIncorrect);
+	await withTransaction(async (db) => {
+		await db.execute(
+			`UPDATE kanji_levels SET
+				srs_stage = ?,
+				next_review = ?,
+				correct_count = correct_count + ?,
+				incorrect_count = incorrect_count + ?,
+				meaning_current_streak = CASE WHEN ? = 0 THEN meaning_current_streak + 1 ELSE 0 END,
+				meaning_max_streak = CASE WHEN ? = 0 THEN MAX(meaning_max_streak, meaning_current_streak + 1) ELSE meaning_max_streak END,
+				reading_current_streak = CASE WHEN ? = 0 THEN reading_current_streak + 1 ELSE 0 END,
+				reading_max_streak = CASE WHEN ? = 0 THEN MAX(reading_max_streak, reading_current_streak + 1) ELSE reading_max_streak END
+			WHERE id = ?`,
+			[newStage, nextReview, correct ? 1 : 0, correct ? 0 : 1,
+				meaningIncorrect, meaningIncorrect,
+				readingIncorrect, readingIncorrect,
+				id],
+		);
 
-	await logKanjiReview(
-		id,
-		correct,
-		currentStage,
-		newStage,
-		durationMs,
-		meaningIncorrect,
-		readingIncorrect,
-	);
+		await db.execute(
+			`INSERT INTO kanji_review_log (kanji_level_id, correct, srs_stage_before, srs_stage_after, duration_ms, meaning_incorrect, reading_incorrect)
+			VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			[id, correct ? 1 : 0, currentStage, newStage, durationMs, meaningIncorrect, readingIncorrect],
+		);
+	});
 
 	// Trigger unlock cascade when item is promoted (correct answer)
 	let unlockedIds: number[] = [];

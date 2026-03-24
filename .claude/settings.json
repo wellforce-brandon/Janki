@@ -192,7 +192,11 @@
       "Bash(jq '[.[].jlpt_level // \"\"\"\"untagged\"\"\"\"] | group_by\\(.\\) | map\\({level: .[0], count: length}\\)' public/data/language/conjugation.json)",
       "Bash(jq '[.[].jlpt_level // \"\"\"\"untagged\"\"\"\"] | group_by\\(.\\) | map\\({level: .[0], count: length}\\)' public/data/language/sentence.json)",
       "Bash(jq .[0:2])",
-      "Bash(jq .[0:1] c:GithubJankipublicdatalanguagegrammar.json)"
+      "Bash(jq .[0:1] c:GithubJankipublicdatalanguagegrammar.json)",
+      "Bash(powershell.exe -NoProfile -Command '$env:Path = \"\"C:\\\\Users\\\\B_StL\\\\.cargo\\\\bin;\"\" + $env:Path; cargo tauri build 2>&1')",
+      "Bash(powershell.exe -NoProfile -Command '$env:Path = \"\"C:\\\\Users\\\\B_StL\\\\.cargo\\\\bin;\"\" + $env:Path; npx tauri build 2>&1')",
+      "Bash(grep -rn \"$effect\" /c/Github/Janki/src --include=\"*.svelte\")",
+      "Bash(node -e \"console.log\\(require\\(''./package.json''\\).version\\)\")"
     ],
     "deny": [
       "Read(~/.ssh/**)",

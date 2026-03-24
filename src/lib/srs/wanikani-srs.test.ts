@@ -1,14 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
 import { getStageColor, STAGE_CATEGORIES, STAGE_NAMES } from "./wanikani-srs";
 
-// Mock the database modules since reviewKanjiItem calls them
+// Mock the database module -- withTransaction just executes the callback with a mock db
+const mockExecute = vi.fn().mockResolvedValue({ rowsAffected: 1 });
+vi.mock("../db/database", () => ({
+	withTransaction: vi.fn(async (fn: (db: { execute: typeof mockExecute }) => Promise<unknown>) => {
+		return fn({ execute: mockExecute });
+	}),
+}));
+
 vi.mock("../db/queries/kanji", () => ({
-	updateKanjiSrsState: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
 	checkAndUnlockLevel: vi.fn().mockResolvedValue({ ok: true, data: [] }),
 }));
 
-vi.mock("../db/queries/kanji-reviews", () => ({
-	logKanjiReview: vi.fn().mockResolvedValue({ ok: true, data: undefined }),
+vi.mock("../db/query-cache", () => ({
+	invalidateCache: vi.fn(),
 }));
 
 describe("WaniKani SRS", () => {

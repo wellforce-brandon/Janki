@@ -79,7 +79,11 @@ async function loadDashboard() {
 			error = "Some stats failed to load.";
 		}
 
-		// Run unlock check for current language level on dashboard load
+		// Run unlock check for current and previous language level on dashboard load
+		// (previous level may have pending unlocks from a prior session)
+		if (langUserLevel > 1) {
+			await checkAndUnlockWithinLevel(langUserLevel - 1);
+		}
 		if (langUserLevel > 0) {
 			await checkAndUnlockWithinLevel(langUserLevel);
 		}

@@ -1,9 +1,9 @@
 <script lang="ts">
-import { getTheme, setTheme } from "$lib/stores/settings.svelte";
+import { getSettings, saveSetting } from "$lib/stores/app-settings.svelte";
 
 function toggle() {
-	const current = getTheme();
-	setTheme(current === "dark" ? "light" : "dark");
+	const current = getSettings().theme;
+	saveSetting("theme", current === "dark" ? "light" : "dark");
 }
 </script>
 
@@ -12,7 +12,7 @@ function toggle() {
 	class="rounded-md p-2 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
 	aria-label="Toggle theme"
 >
-	{#if getTheme() === "dark"}
+	{#if getSettings().theme === "dark"}
 		<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 			<circle cx="12" cy="12" r="5"></circle>
 			<line x1="12" y1="1" x2="12" y2="3"></line>

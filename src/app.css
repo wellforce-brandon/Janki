@@ -360,3 +360,12 @@
 	background-color: rgb(168 85 247 / 0.25);
 	color: rgb(192 132 252);
 }
+
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-hide {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
+}

@@ -53,6 +53,8 @@ let sections = $derived<NavSection[]>([
 		label: "Language",
 		items: [
 			{ id: "lang-overview", label: "Overview", shortcut: "Ctrl+2" },
+			{ id: "lang-lessons", label: "Lessons", subViews: ["lang-lesson-picker"] },
+			{ id: "lang-review", label: "Reviews", shortcut: "Ctrl+3" },
 			{
 				id: "lang-levels",
 				label: "Levels",
@@ -79,8 +81,6 @@ let sections = $derived<NavSection[]>([
 				flyout: { kind: "items" as const, color: "bg-blue-500 dark:bg-blue-600" },
 			},
 			{ id: "lang-conjugation", label: "Conjugation", hidden: !hasConjugation, flyout: { kind: "items" as const, color: "bg-rose-500 dark:bg-rose-600" } },
-			{ id: "lang-lessons", label: "Lessons", subViews: ["lang-lesson-picker"] },
-			{ id: "lang-review", label: "Review", shortcut: "Ctrl+3" },
 		],
 	},
 	{
@@ -169,15 +169,15 @@ function handleTierClick(item: NavItem, tierIndex: number) {
 }
 </script>
 
-<nav class="flex h-full w-60 flex-col border-r border-border bg-sidebar p-4">
+<nav class="flex h-full w-[17rem] flex-col border-r border-border bg-sidebar p-4">
 	<div class="mb-6 px-2 text-xl font-bold tracking-tight text-sidebar-foreground">
 		<span class="text-primary">J</span>anki
 	</div>
-	<div class="flex flex-1 flex-col gap-6">
+	<div class="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto scrollbar-hide">
 		{#each sections as section, sectionIndex}
 			<div>
 				{#if section.label}
-					<div class="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-sidebar-foreground/50">
+					<div class="mb-2 rounded-md bg-black/10 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-sidebar-foreground/50 dark:bg-white/5">
 						{section.label}
 					</div>
 				{:else if sectionIndex === sections.length - 1}
@@ -221,7 +221,7 @@ function handleTierClick(item: NavItem, tierIndex: number) {
 												<div>
 													<button
 														type="button"
-														class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+														class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
 														onclick={() => expandedTier = expandedTier === tier.index ? null : tier.index}
 														role="menuitem"
 													>

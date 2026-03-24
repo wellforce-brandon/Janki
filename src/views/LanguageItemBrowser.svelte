@@ -1,5 +1,6 @@
 <script lang="ts">
 import LoadingState from "$lib/components/ui/loading-state.svelte";
+import LazySection from "$lib/components/ui/lazy-section.svelte";
 import {
 	getLanguageItemsByTypeAndTier,
 	type ContentType,
@@ -74,6 +75,13 @@ function getSrsClasses(item: LanguageItem): string {
 	if (item.srs_stage === 8)
 		return "bg-sky-500 dark:bg-sky-600 text-white border border-transparent";
 	return "bg-muted text-muted-foreground border border-transparent";
+}
+
+function estimateSectionHeight(itemCount: number): number {
+	const cols = 10;
+	const rowHeight = 72;
+	const headerHeight = 48;
+	return Math.ceil(itemCount / cols) * rowHeight + headerHeight;
 }
 
 function getMeaningDisplay(item: LanguageItem): string {
@@ -168,6 +176,7 @@ $effect(() => {
 	{:else}
 		<div class="space-y-8">
 			{#each levelData as level}
+				<LazySection estimatedHeight={estimateSectionHeight(level.items.length)}>
 				<section id="lang-level-section-{level.level}" class="space-y-3">
 					<div class="flex items-center justify-between">
 						<h3 class="text-lg font-semibold">
@@ -232,6 +241,7 @@ $effect(() => {
 						{/each}
 					</div>
 				</section>
+				</LazySection>
 			{/each}
 		</div>
 	{/if}

@@ -197,7 +197,7 @@ $effect(() => { loadLevel(selectedLevel); });
 		</p>
 		<div class="grid grid-cols-3 gap-3">
 			{#each typeCards as card}
-				<button type="button" class="rounded-lg border {card.border} p-3 text-center transition-colors hover:bg-accent" onclick={() => handleTypeClick(card.key)}>
+				<button type="button" class="rounded-lg border {card.border} p-3 text-center transition-colors hover:bg-muted" onclick={() => handleTypeClick(card.key)}>
 					<div class="mx-auto mb-1.5 flex items-center justify-center gap-1.5">
 						<span class="inline-block h-4 w-4 rounded {card.icon}"></span>
 						<span class="text-xs font-medium">{card.label}</span>

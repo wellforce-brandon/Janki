@@ -1,5 +1,6 @@
 <script lang="ts">
 import LoadingState from "$lib/components/ui/loading-state.svelte";
+import LazySection from "$lib/components/ui/lazy-section.svelte";
 import {
 	getLanguageLevelItems,
 	getLanguageLevelProgress,
@@ -159,6 +160,7 @@ let sections = $derived((() => {
 		<LoadingState message="Loading level {level}..." />
 	{:else}
 		{#each sections as section}
+			<LazySection estimatedHeight={Math.ceil(section.items.length / 10) * 72 + 48}>
 			<section class="space-y-3">
 				<h3 class="text-lg font-semibold {section.color}">
 					{section.title}
@@ -201,6 +203,7 @@ let sections = $derived((() => {
 					{/each}
 				</div>
 			</section>
+			</LazySection>
 		{/each}
 
 		<!-- Legend -->

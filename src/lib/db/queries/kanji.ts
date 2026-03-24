@@ -684,6 +684,23 @@ export async function markKanjiSeeded(): Promise<QueryResult<void>> {
 	});
 }
 
+/** Reset all kanji learning progress (SRS state, review logs). Does NOT delete items. */
+export async function resetAllKanjiProgress(): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute("DELETE FROM kanji_review_log");
+		await db.execute("DELETE FROM review_log");
+		await db.execute(`UPDATE kanji_levels SET
+			srs_stage = 0,
+			unlocked_at = NULL,
+			next_review = NULL,
+			correct_count = 0,
+			incorrect_count = 0,
+			lesson_completed_at = NULL
+		`);
+	});
+}
+
 export async function getItemsByWkIds(
 	wkIds: number[],
 ): Promise<QueryResult<KanjiLevelItem[]>> {

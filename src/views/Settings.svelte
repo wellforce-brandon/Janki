@@ -10,13 +10,17 @@ import {
 } from "$lib/stores/app-settings.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
-import { rebuildFtsIndex } from "$lib/db/queries/language";
+import { rebuildFtsIndex, resetAllLanguageProgress } from "$lib/db/queries/language";
+import { resetAllKanjiProgress } from "$lib/db/queries/kanji";
 import { checkForUpdates } from "$lib/updater/check-update";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
 let s = $derived(getSettings());
 let appVersion = $state("...");
 let showResetConfirm = $state(false);
+let pendingZoom = $state<number | null>(null);
+let showResetLearningConfirm = $state<"language" | "kanji" | "all" | null>(null);
+let resettingLearning = $state(false);
 
 $effect(() => {
 	getVersion().then((v) => {
@@ -73,6 +77,29 @@ async function handleRebuildFts() {
 	}
 }
 
+async function handleResetLearning() {
+	const target = showResetLearningConfirm;
+	if (!target) return;
+	resettingLearning = true;
+	try {
+		if (target === "language" || target === "all") {
+			const r = await resetAllLanguageProgress();
+			if (!r.ok) { addToast(`Failed to reset language data: ${r.error}`, "error"); return; }
+		}
+		if (target === "kanji" || target === "all") {
+			const r = await resetAllKanjiProgress();
+			if (!r.ok) { addToast(`Failed to reset kanji data: ${r.error}`, "error"); return; }
+		}
+		const label = target === "all" ? "All learning" : target === "language" ? "Language" : "Kanji";
+		addToast(`${label} progress has been reset`, "success");
+	} catch (e) {
+		addToast(`Reset failed: ${e instanceof Error ? e.message : String(e)}`, "error");
+	} finally {
+		resettingLearning = false;
+		showResetLearningConfirm = null;
+	}
+}
+
 async function handleResetDefaults() {
 	showResetConfirm = false;
 	await resetAllSettings();
@@ -98,21 +125,33 @@ async function handleResetDefaults() {
 			{/each}
 		</div>
 		<div class="space-y-1">
-			<label class="text-sm text-muted-foreground" for="ui-zoom">UI Zoom: {(s.uiZoom * 100).toFixed(0)}%</label>
-			<input
-				id="ui-zoom"
-				type="range"
-				min="0.8"
-				max="2.0"
-				step="0.1"
-				class="w-full"
-				value={s.uiZoom}
-				oninput={(e) => {
-					const val = Number((e.target as HTMLInputElement).value);
-					saveSetting("uiZoom", val);
-					getCurrentWebviewWindow().setZoom(val).catch(console.error);
-				}}
-			/>
+			<label class="text-sm text-muted-foreground" for="ui-zoom">UI Zoom: {((pendingZoom ?? s.uiZoom) * 100).toFixed(0)}%</label>
+			<div class="flex items-center gap-3">
+				<input
+					id="ui-zoom"
+					type="range"
+					min="0.8"
+					max="2.0"
+					step="0.1"
+					class="flex-1"
+					value={pendingZoom ?? s.uiZoom}
+					oninput={(e) => {
+						pendingZoom = Number((e.target as HTMLInputElement).value);
+					}}
+				/>
+				<Button
+					disabled={pendingZoom === null || pendingZoom === s.uiZoom}
+					onclick={() => {
+						const val = pendingZoom!;
+						saveSetting("uiZoom", val);
+						getCurrentWebviewWindow().setZoom(val).catch(console.error);
+						pendingZoom = null;
+						addToast(`Zoom set to ${(val * 100).toFixed(0)}%`, "success");
+					}}
+				>
+					Apply
+				</Button>
+			</div>
 		</div>
 	</section>
 
@@ -440,6 +479,39 @@ async function handleResetDefaults() {
 			</div>
 		{:else}
 			<Button variant="outline" onclick={() => (showResetConfirm = true)}>Reset to Defaults</Button>
+		{/if}
+	</section>
+
+	<!-- Reset Learning Data -->
+	<section class="space-y-3 rounded-lg border border-destructive/30 bg-card p-4">
+		<h3 class="font-medium text-destructive">Reset Learning Data</h3>
+		<p class="text-sm text-muted-foreground">
+			Reset all SRS progress, review history, and unlock state. Your vocabulary, kanji, and content data will be kept -- only your learning progress is erased.
+		</p>
+		{#if showResetLearningConfirm}
+			<div class="rounded-lg border border-destructive/50 bg-destructive/10 p-4 space-y-3">
+				<p class="text-sm font-medium text-destructive">
+					Are you sure you want to reset your {showResetLearningConfirm === "all" ? "language and kanji" : showResetLearningConfirm} progress? This will delete all review history and reset every item to locked. This cannot be undone.
+				</p>
+				<div class="flex items-center gap-3">
+					<Button variant="destructive" onclick={handleResetLearning} disabled={resettingLearning}>
+						{resettingLearning ? "Resetting..." : "Yes, reset everything"}
+					</Button>
+					<Button variant="outline" onclick={() => (showResetLearningConfirm = null)}>Cancel</Button>
+				</div>
+			</div>
+		{:else}
+			<div class="flex flex-wrap gap-2">
+				<Button variant="destructive" onclick={() => (showResetLearningConfirm = "language")}>
+					Reset Language Progress
+				</Button>
+				<Button variant="destructive" onclick={() => (showResetLearningConfirm = "kanji")}>
+					Reset Kanji Progress
+				</Button>
+				<Button variant="destructive" onclick={() => (showResetLearningConfirm = "all")}>
+					Reset All Progress
+				</Button>
+			</div>
 		{/if}
 	</section>
 

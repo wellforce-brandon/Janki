@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.25.0.0] - 2026-03-23
+
+### Added
+
+- Data enrichment pipeline: JMDict (PoS for 1,680 vocab items), JPDB frequency ranks (1,244 items), KanjiAPI validation
+- Enrichment scripts: `npm run enrich`, `enrich:jmdict`, `enrich:frequency`, `enrich:kanjiapi`
+- LazySection component for deferred DOM rendering via IntersectionObserver
+- Language Overview redesigned to match Kanji Dashboard: lessons/reviews/forecast, level progress widget, item spread table, critical items, recent mistakes
+- LanguageLevelProgressWidget with per-content-type breakdown and level picker
+- Dashboard query functions: getTodayLanguageReviewCount, getUpcomingLanguageReviews, getCriticalLanguageItems, getRecentLanguageMistakes, getLanguageLevelProgressByType
+- Reset Learning Data section in Settings with separate language/kanji/all reset options and confirmation dialog
+- Pagination safety valve on getLanguageItemsByTypeAndTier query
+- Lightweight tier-level count aggregate query
+- Scrollbar-hide CSS utility for sidebar
+- Learning paths deep dive plan in tasks/
+
+### Changed
+
+- Sidebar reordered: language nav now shows Overview, Lessons, Reviews first (matching kanji)
+- Sidebar section labels (Language, Kanji) now have subtle background tint
+- Sidebar widened from 240px to 272px with hidden scrollbar for overflow
+- Sidebar nav list now scrollable when content exceeds viewport
+- Item Spread rows and Level Progress type cards use bg-muted instead of bg-accent (fixes olive color in light theme)
+- Tier flyout hover color changed from bg-accent to bg-muted
+- UI Zoom slider now requires Apply button instead of instant changes
+- LanguageItemBrowser level sections lazy-render via LazySection
+- LanguageLevel content-type sections lazy-render via LazySection
+
+### Fixed
+
+- Sidebar Settings button cut off at bottom (missing overflow-y-auto on nav container)
+
 ## [0.24.0.0] - 2026-03-23
 
 ### Added

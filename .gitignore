@@ -85,3 +85,8 @@ logs/
 tmp/
 temp/
 *.tmp
+
+# Enrichment pipeline
+scripts/data/
+scripts/reports/
+scripts/.cache/

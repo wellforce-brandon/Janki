@@ -284,7 +284,7 @@ $effect(() => {
 				</div>
 				<div class="space-y-1.5">
 					{#each srsSpread as row}
-						<div class="flex items-center gap-3 rounded-md bg-accent px-3 py-2">
+						<div class="flex items-center gap-3 rounded-md bg-muted px-3 py-2">
 							<span class="flex-1 text-sm font-medium">{row.category}</span>
 							<span class="inline-flex min-w-[2.5rem] items-center justify-center rounded-full bg-blue-500 px-2.5 py-0.5 text-xs font-bold text-white dark:bg-blue-600">
 								{row.radical}

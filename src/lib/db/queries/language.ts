@@ -519,6 +519,144 @@ export async function getRecentlyUnlockedItems(limit = 10): Promise<QueryResult<
 	});
 }
 
+// ===================== Dashboard Queries =====================
+
+/** Count reviews completed today */
+export async function getTodayLanguageReviewCount(): Promise<QueryResult<number>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ count: number }[]>(
+			"SELECT COUNT(*) as count FROM language_review_log WHERE created_at >= date('now', 'start of day')",
+		);
+		return rows[0]?.count ?? 0;
+	});
+}
+
+/** Forecast: upcoming reviews bucketed by hour for next N hours */
+export async function getUpcomingLanguageReviews(
+	hours: number,
+): Promise<QueryResult<{ hour: string; count: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ hour: string; count: number }[]>(
+			`SELECT strftime('%Y-%m-%d %H:00', next_review) as hour, COUNT(*) as count
+			FROM language_items
+			WHERE srs_stage BETWEEN 1 AND 8
+				AND lesson_completed_at IS NOT NULL
+				AND next_review > datetime('now')
+				AND next_review <= datetime('now', '+' || ? || ' hours')
+			GROUP BY hour ORDER BY hour`,
+			[hours],
+		);
+	});
+}
+
+export interface CriticalLanguageItem {
+	id: number;
+	content_type: string;
+	primary_text: string;
+	reading: string | null;
+	meaning: string | null;
+	srs_stage: number;
+	correct_count: number;
+	incorrect_count: number;
+	accuracy: number;
+}
+
+/** Items with accuracy below threshold (at least 4 reviews) */
+export async function getCriticalLanguageItems(
+	threshold: number,
+	limit: number,
+): Promise<QueryResult<CriticalLanguageItem[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<CriticalLanguageItem[]>(
+			`SELECT id, content_type, primary_text, reading, meaning, srs_stage,
+				correct_count, incorrect_count,
+				ROUND(CAST(correct_count AS REAL) / (correct_count + incorrect_count) * 100) as accuracy
+			FROM language_items
+			WHERE srs_stage BETWEEN 1 AND 8
+				AND (correct_count + incorrect_count) >= 4
+				AND CAST(correct_count AS REAL) / (correct_count + incorrect_count) < ?
+			ORDER BY accuracy ASC
+			LIMIT ?`,
+			[threshold, limit],
+		);
+	});
+}
+
+export interface RecentLanguageMistake {
+	id: number;
+	content_type: string;
+	primary_text: string;
+	reading: string | null;
+	meaning: string | null;
+	srs_stage: number;
+	last_mistake: string;
+}
+
+/** Items answered incorrectly, most recent first */
+export async function getRecentLanguageMistakes(
+	limit: number,
+): Promise<QueryResult<RecentLanguageMistake[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<RecentLanguageMistake[]>(
+			`SELECT li.id, li.content_type, li.primary_text, li.reading, li.meaning, li.srs_stage,
+				MAX(lr.created_at) as last_mistake
+			FROM language_review_log lr
+			JOIN language_items li ON li.id = lr.item_id
+			WHERE lr.correct = 0
+			GROUP BY li.id
+			ORDER BY last_mistake DESC
+			LIMIT ?`,
+			[limit],
+		);
+	});
+}
+
+export interface LanguageLevelProgressByType {
+	content_type: string;
+	total: number;
+	guru_plus: number;
+	unlocked: number;
+}
+
+/** Get level progress broken down by content type */
+export async function getLanguageLevelProgressByType(
+	level: number,
+): Promise<QueryResult<LanguageLevelProgressByType[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<LanguageLevelProgressByType[]>(
+			`SELECT content_type,
+				COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus,
+				COUNT(CASE WHEN srs_stage > 0 THEN 1 END) as unlocked
+			FROM language_items
+			WHERE language_level = ?
+			GROUP BY content_type`,
+			[level],
+		);
+	});
+}
+
+/** Reset all language learning progress (SRS state, review logs). Does NOT delete items. */
+export async function resetAllLanguageProgress(): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute("DELETE FROM language_review_log");
+		await db.execute(`UPDATE language_items SET
+			srs_stage = 0,
+			unlocked_at = NULL,
+			next_review = NULL,
+			correct_count = 0,
+			incorrect_count = 0,
+			lesson_completed_at = NULL
+		`);
+	});
+}
+
 /** Rebuild FTS5 search index from language_items table */
 export async function rebuildFtsIndex(): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
@@ -1052,6 +1190,33 @@ export async function getLanguageLevelProgress(level: number): Promise<QueryResu
 	});
 }
 
+export interface TierLevelCount {
+	level: number;
+	total: number;
+	unlocked: number;
+}
+
+/** Get lightweight counts per level for a content type within a tier (fast aggregate) */
+export async function getLanguageTierLevelCounts(
+	contentType: ContentType,
+	startLevel: number,
+	endLevel: number,
+): Promise<QueryResult<TierLevelCount[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<TierLevelCount[]>(`
+			SELECT
+				language_level as level,
+				COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage > 0 THEN 1 END) as unlocked
+			FROM language_items
+			WHERE content_type = ? AND language_level >= ? AND language_level <= ?
+			GROUP BY language_level
+			ORDER BY language_level ASC
+		`, [contentType, startLevel, endLevel]);
+	});
+}
+
 export interface LanguageLevelItem {
 	id: number;
 	content_type: string;
@@ -1230,16 +1395,24 @@ export async function getLanguageItemsByTypeAndTier(
 	contentType: ContentType,
 	startLevel: number,
 	endLevel: number,
+	options?: { limit?: number; offset?: number },
 ): Promise<QueryResult<LanguageItemsByLevel[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const items = await db.select<LanguageItem[]>(
-			`SELECT * FROM language_items
+		let sql = `SELECT * FROM language_items
 			WHERE content_type = ? AND language_level >= ? AND language_level <= ?
 			ORDER BY language_level ASC, COALESCE(lesson_order, 9999) ASC,
-				COALESCE(frequency_rank, 999999) ASC, id ASC`,
-			[contentType, startLevel, endLevel],
-		);
+				COALESCE(frequency_rank, 999999) ASC, id ASC`;
+		const params: (string | number)[] = [contentType, startLevel, endLevel];
+		if (options?.limit) {
+			sql += ` LIMIT ?`;
+			params.push(options.limit);
+			if (options.offset) {
+				sql += ` OFFSET ?`;
+				params.push(options.offset);
+			}
+		}
+		const items = await db.select<LanguageItem[]>(sql, params);
 
 		// Group by level
 		const byLevel = new Map<number, LanguageItem[]>();

@@ -1,11 +1,14 @@
 import {
 	getLanguageItemById,
 	updateLanguageItemSrs,
+	updateLanguageItemSrsExec,
 	logLanguageReview,
+	logLanguageReviewExec,
 	deleteLatestLanguageReview,
 } from "../db/queries/language";
 import { invalidateCache } from "../db/query-cache";
 import { updateDailyStats } from "../db/queries/stats";
+import { safeQuery, withTransaction } from "../db/database";
 import { calculateNextReview, calculateDrop } from "./srs-common";
 import { checkAndUnlockWithinLevel } from "./language-unlock";
 
@@ -23,7 +26,7 @@ export interface LanguageReviewResult {
 export async function reviewLanguageItem(
 	itemId: number,
 	correct: boolean,
-	durationMs: number = 0,
+	durationMs: number | null = null,
 	incorrectCount = 1,
 ): Promise<LanguageReviewResult> {
 	const itemResult = await getLanguageItemById(itemId);
@@ -46,24 +49,41 @@ export async function reviewLanguageItem(
 
 	const nextReview = calculateNextReview(newStage);
 
-	await updateLanguageItemSrs(
-		itemId,
-		newStage,
-		nextReview,
-		item.correct_count + (correct ? 1 : 0),
-		item.incorrect_count + (correct ? 0 : 1),
-	);
+	await withTransaction(async (db) => {
+		await updateLanguageItemSrsExec(
+			db, itemId, newStage, nextReview,
+			item.correct_count + (correct ? 1 : 0),
+			item.incorrect_count + (correct ? 0 : 1),
+		);
 
-	await logLanguageReview(itemId, currentStage, newStage, correct, durationMs);
+		await logLanguageReviewExec(db, itemId, currentStage, newStage, correct, durationMs);
 
-	await updateDailyStats(correct, isNew, durationMs);
+		const isNew_ = isNew ? 1 : 0;
+		const correctVal = correct ? 1 : 0;
+		const incorrectVal = correct ? 0 : 1;
+		await db.execute(
+			`INSERT INTO daily_stats (date, reviews_count, new_cards_count, correct_count, incorrect_count, time_spent_ms)
+			VALUES (date('now'), 1, ?, ?, ?, ?)
+			ON CONFLICT(date) DO UPDATE SET
+				reviews_count = reviews_count + 1,
+				new_cards_count = new_cards_count + ?,
+				correct_count = correct_count + ?,
+				incorrect_count = incorrect_count + ?,
+				time_spent_ms = time_spent_ms + ?`,
+			[isNew_, correctVal, incorrectVal, durationMs ?? 0, isNew_, correctVal, incorrectVal, durationMs ?? 0],
+		);
+	});
 
 	// Invalidate cached counts since SRS state changed
 	invalidateCache("contentTypeCounts");
 
 	// After each review, check if new items should unlock within this level
 	if (item.language_level) {
-		checkAndUnlockWithinLevel(item.language_level).catch(console.error);
+		try {
+			await checkAndUnlockWithinLevel(item.language_level);
+		} catch (e) {
+			console.error("Failed to check unlock progression:", e);
+		}
 	}
 
 	return { newStage, nextReview };

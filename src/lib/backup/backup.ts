@@ -1,6 +1,6 @@
 import { appDataDir, join } from "@tauri-apps/api/path";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { copyFile, exists, mkdir, readDir, remove } from "@tauri-apps/plugin-fs";
+import { copyFile, exists, mkdir, readDir, readFile, remove, rename, stat } from "@tauri-apps/plugin-fs";
 import { closeDb, getDb } from "$lib/db/database";
 
 const BACKUP_DIR = "backups";
@@ -48,6 +48,26 @@ export async function importBackup(): Promise<boolean> {
 	if (!selected) return false;
 
 	const dbPath = await getDbPath();
+	const dataDir = await appDataDir();
+	const tempPath = await join(dataDir, `janki-import-${Date.now()}.db.tmp`);
+
+	// Copy to temp path first and validate before touching the live DB
+	await copyFile(selected, tempPath);
+	const fileInfo = await stat(tempPath);
+	if (!fileInfo.size || fileInfo.size < 100) {
+		await remove(tempPath).catch(() => {});
+		throw new Error("Selected file is not a valid SQLite database (too small)");
+	}
+
+	// Validate SQLite magic header: first 16 bytes must be "SQLite format 3\0"
+	const SQLITE_MAGIC = "SQLite format 3\0";
+	const fileBytes = await readFile(tempPath);
+	const header = new TextDecoder("ascii").decode(fileBytes.slice(0, 16));
+	if (header !== SQLITE_MAGIC) {
+		await remove(tempPath).catch(() => {});
+		throw new Error("Selected file is not a valid SQLite database (invalid header)");
+	}
+
 	// Back up current DB before replacing (skip if no DB exists yet)
 	if (await exists(dbPath)) {
 		const backupDir = await getBackupDir();
@@ -58,10 +78,11 @@ export async function importBackup(): Promise<boolean> {
 	// Close active DB connection before replacing the file
 	await closeDb();
 
-	// Replace current DB with selected backup
-	await copyFile(selected, dbPath);
+	// Atomically replace via rename (same filesystem, no partial copy risk)
+	await rename(tempPath, dbPath);
 
-	// Force reconnection so the next query uses the restored DB
+	// Force reconnection so the next query uses the restored DB.
+	// getDb() runs runMigrations() on init, so older-schema imports are auto-migrated.
 	await getDb();
 	return true;
 }

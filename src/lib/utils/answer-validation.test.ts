@@ -40,11 +40,13 @@ describe("Answer Validation", () => {
 			expect(fuzzyMatch("hello", "hello")).toBe(true);
 		});
 
-		it("should match when user answer contains expected with similar length", () => {
+		it("should match when expected contains user answer with similar length", () => {
 			// "hello world" (11) in "the big hello world" (19): 11/19 = 58% -- below 60% threshold
 			expect(fuzzyMatch("the big hello world", "hello world")).toBe(false);
-			// But similar-length substring works: "hello world" (11) in "hello world!" (12): 11/12 = 92%
-			expect(fuzzyMatch("hello world!", "hello world")).toBe(true);
+			// User typed subset: "hello world" (11) in expected "hello world!" (12): 11/12 = 92%
+			expect(fuzzyMatch("hello world", "hello world!")).toBe(true);
+			// User typed superset: "hello world!" is NOT a subset of "hello world" -- rejected
+			expect(fuzzyMatch("hello world!", "hello world")).toBe(false);
 		});
 
 		it("should not match short substring in long string", () => {

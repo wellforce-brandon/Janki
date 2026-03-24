@@ -21,9 +21,12 @@ interface GrammarPoint {
 	examples: { ja: string; en: string; reading: string }[];
 }
 
-const grammarPoints = Array.isArray((n5Data as Record<string, unknown>).points)
-	? (n5Data.points as GrammarPoint[])
-	: (console.warn("[Search] n5Data.points is not an array"), [] as GrammarPoint[]);
+let grammarPoints: GrammarPoint[] = [];
+if (Array.isArray((n5Data as Record<string, unknown>).points)) {
+	grammarPoints = n5Data.points as GrammarPoint[];
+} else {
+	console.warn("[Search] n5Data.points is not an array -- grammar search will be empty");
+}
 
 const CONTENT_TYPES = [
 	{ value: "", label: "All Types" },
@@ -43,6 +46,7 @@ let kanjiResults = $state<KanjiLevelItem[]>([]);
 let langResults = $state<LanguageItem[]>([]);
 let searching = $state(false);
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let searchAborted = false;
 let searchInput: HTMLInputElement | undefined = $state();
 
 let grammarResults = $derived.by(() => {
@@ -77,6 +81,7 @@ async function search(q: string) {
 
 	// Kanji search (via query layer)
 	const kanjiResult = await searchKanjiItems(q.trim(), 50);
+	if (searchAborted) return;
 	kanjiResults = kanjiResult.ok ? kanjiResult.data : [];
 
 	// Language items search (FTS5 with LIKE fallback)
@@ -84,6 +89,7 @@ async function search(q: string) {
 		q.trim(),
 		contentTypeFilter || undefined,
 	);
+	if (searchAborted) return;
 	langResults = langResult.ok ? langResult.data : [];
 
 	searching = false;
@@ -107,6 +113,7 @@ function openKanji(item: KanjiLevelItem) {
 $effect(() => {
 	searchInput?.focus();
 	return () => {
+		searchAborted = true;
 		if (debounceTimer) clearTimeout(debounceTimer);
 	};
 });

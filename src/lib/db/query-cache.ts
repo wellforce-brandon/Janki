@@ -42,12 +42,10 @@ export function setCache<T>(key: string, data: T, ttlMs = DEFAULT_TTL_MS): void 
 	cache.set(key, { data, expires: Date.now() + ttlMs });
 }
 
-export function invalidateCache(prefix?: string): void {
-	if (!prefix) {
+export function invalidateCache(key?: keyof typeof CACHE_KEYS): void {
+	if (!key) {
 		cache.clear();
 		return;
 	}
-	for (const key of cache.keys()) {
-		if (key.startsWith(prefix)) cache.delete(key);
-	}
+	cache.delete(key);
 }

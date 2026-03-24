@@ -1,12 +1,21 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { calculateNextReview } from "./language-srs";
-import { toSqliteDateTime } from "../utils/common";
 
-// Mock DB modules
+// Mock DB modules -- withTransaction executes the callback with a mock db
+const mockExecute = vi.fn().mockResolvedValue({ rowsAffected: 1 });
+vi.mock("../db/database", () => ({
+	safeQuery: vi.fn((fn: () => Promise<unknown>) => fn().then((data) => ({ ok: true, data })).catch((e) => ({ ok: false, error: String(e) }))),
+	withTransaction: vi.fn(async (fn: (db: { execute: typeof mockExecute }) => Promise<unknown>) => {
+		return fn({ execute: mockExecute });
+	}),
+}));
+
 vi.mock("../db/queries/language", () => ({
 	getLanguageItemById: vi.fn(),
 	updateLanguageItemSrs: vi.fn().mockResolvedValue({ ok: true }),
+	updateLanguageItemSrsExec: vi.fn().mockResolvedValue(undefined),
 	logLanguageReview: vi.fn().mockResolvedValue({ ok: true }),
+	logLanguageReviewExec: vi.fn().mockResolvedValue(0),
 	deleteLatestLanguageReview: vi.fn().mockResolvedValue({ ok: true }),
 }));
 
@@ -39,18 +48,6 @@ function makeItem(overrides: Record<string, unknown> = {}) {
 }
 
 describe("Language SRS", () => {
-	describe("toSqliteDateTime", () => {
-		it("should format date as YYYY-MM-DD HH:MM:SS", () => {
-			const d = new Date("2026-03-15T14:30:45.123Z");
-			expect(toSqliteDateTime(d)).toBe("2026-03-15 14:30:45");
-		});
-
-		it("should strip milliseconds and timezone", () => {
-			const d = new Date("2026-01-01T00:00:00.000Z");
-			expect(toSqliteDateTime(d)).toBe("2026-01-01 00:00:00");
-		});
-	});
-
 	describe("calculateNextReview", () => {
 		it("should return null for stage 0 (Locked)", () => {
 			expect(calculateNextReview(0)).toBeNull();

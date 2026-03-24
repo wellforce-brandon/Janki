@@ -1,7 +1,6 @@
 import {
 	getAvailableLessons,
 	getAvailableLessonCount,
-	getLanguageItemById,
 	getTodayLanguageLessonCount,
 	markLessonsBatchCompleted,
 	type ContentType,
@@ -59,28 +58,33 @@ export async function getNextLessonBatch(
 /**
  * Complete a lesson batch: set lesson_completed_at and schedule first review.
  * First review is at Apprentice 1 interval (4 hours, rounded to top of hour).
+ * Pass the full items array to avoid re-fetching by ID for level info.
  */
 export async function completeLessonBatch(
-	itemIds: number[],
+	items: LanguageItem[],
 ): Promise<QueryResult<void>> {
 	const nextReview = calculateNextReview(1); // Apprentice 1 = 4 hours
 	if (!nextReview) {
 		return { ok: false, error: "Failed to calculate next review time" };
 	}
 
+	const itemIds = items.map((i) => i.id);
 	const result = await markLessonsBatchCompleted(itemIds, nextReview);
 
 	// After completing lessons, check if more items should unlock in those levels
 	if (result.ok) {
 		const levelsToCheck = new Set<number>();
-		for (const id of itemIds) {
-			const itemResult = await getLanguageItemById(id);
-			if (itemResult.ok && itemResult.data?.language_level) {
-				levelsToCheck.add(itemResult.data.language_level);
+		for (const item of items) {
+			if (item.language_level) {
+				levelsToCheck.add(item.language_level);
 			}
 		}
 		for (const level of levelsToCheck) {
-			checkAndUnlockWithinLevel(level).catch(console.error);
+			try {
+				await checkAndUnlockWithinLevel(level);
+			} catch (e) {
+				console.error("Failed to check unlock progression:", e);
+			}
 		}
 	}
 

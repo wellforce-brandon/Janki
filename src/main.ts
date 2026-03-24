@@ -20,7 +20,7 @@ import { assignLanguageLevels } from "$lib/db/seed/language-levels";
 import { rebuildFtsIndex } from "$lib/db/queries/language";
 import { rebuildKanjiFtsIndex } from "$lib/db/queries/kanji";
 import { loadSettings, getSettings } from "$lib/stores/app-settings.svelte";
-import { checkForUpdates } from "$lib/updater/check-update";
+import { checkForUpdatesSilent } from "$lib/updater/check-update";
 import App from "./App.svelte";
 
 async function init() {
@@ -49,7 +49,7 @@ async function init() {
 
 	// Non-blocking: auto-backup and update check run after app is ready
 	autoBackup().catch(console.error);
-	checkForUpdates().catch(console.error);
+	checkForUpdatesSilent().catch(console.error);
 }
 
 init()

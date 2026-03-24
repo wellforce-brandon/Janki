@@ -3,6 +3,7 @@ import {
 	unlockLanguageItems,
 	getPendingLessonCount,
 	getLevelContentTypeProgress,
+	getLevelAllContentTypeProgress,
 	getLockedItemsByLevelAndType,
 	getLevelOverallProgress,
 	unlockSentencesWithMetPrerequisites,
@@ -33,45 +34,35 @@ export interface UnlockResult {
 export async function checkAndUnlockWithinLevel(level: number): Promise<number> {
 	let totalUnlocked = 0;
 
-	// Step 1: If 90% of level's kana are guru+, unlock vocabulary
-	const kanaProgress = await getLevelContentTypeProgress(level, "kana");
-	if (kanaProgress.ok) {
-		const { total, guru_plus } = kanaProgress.data;
-		// If no kana in this level, the gate is automatically passed
-		const kanaGatePassed = total === 0 || (guru_plus / total) >= GURU_GATE_THRESHOLD;
+	// Fetch all content type progress for this level in one query
+	const allProgress = await getLevelAllContentTypeProgress(level);
+	if (!allProgress.ok) return 0;
 
-		if (kanaGatePassed) {
-			totalUnlocked += await unlockTypeInLevel(level, "vocabulary", "vocabLessonCap");
-		}
+	const progress = allProgress.data;
+	const isGatePassed = (type: string) => {
+		const p = progress[type];
+		return !p || p.total === 0 || (p.guru_plus / p.total) >= GURU_GATE_THRESHOLD;
+	};
+
+	// Step 1: If 90% of level's kana are guru+, unlock vocabulary
+	if (isGatePassed("kana")) {
+		totalUnlocked += await unlockTypeInLevel(level, "vocabulary", "vocabLessonCap");
 	}
 
 	// Step 2: If 90% of level's vocabulary are guru+, unlock grammar + conjugation
-	const vocabProgress = await getLevelContentTypeProgress(level, "vocabulary");
-	if (vocabProgress.ok) {
-		const { total, guru_plus } = vocabProgress.data;
-		const vocabGatePassed = total === 0 || (guru_plus / total) >= GURU_GATE_THRESHOLD;
-
-		if (vocabGatePassed) {
-			totalUnlocked += await unlockTypeInLevel(level, "grammar", "grammarLessonCap");
-			totalUnlocked += await unlockTypeInLevel(level, "conjugation", "conjugationLessonCap");
-		}
+	if (isGatePassed("vocabulary")) {
+		totalUnlocked += await unlockTypeInLevel(level, "grammar", "grammarLessonCap");
+		totalUnlocked += await unlockTypeInLevel(level, "conjugation", "conjugationLessonCap");
 	}
 
 	// Step 3: If 90% of level's grammar are guru+, unlock sentences
-	const grammarProgress = await getLevelContentTypeProgress(level, "grammar");
-	if (grammarProgress.ok) {
-		const { total, guru_plus } = grammarProgress.data;
-		// If no grammar in this level, check if vocab gate passed instead
-		const grammarGatePassed = total === 0 || (guru_plus / total) >= GURU_GATE_THRESHOLD;
+	if (isGatePassed("grammar")) {
+		// First try prerequisite-based sentence unlocking
+		const prereqResult = await unlockSentencesWithMetPrerequisites(level);
+		if (prereqResult.ok) totalUnlocked += prereqResult.data;
 
-		if (grammarGatePassed) {
-			// First try prerequisite-based sentence unlocking
-			const prereqResult = await unlockSentencesWithMetPrerequisites(level);
-			if (prereqResult.ok) totalUnlocked += prereqResult.data;
-
-			// Also unlock any remaining locked sentences up to the cap
-			totalUnlocked += await unlockTypeInLevel(level, "sentence", "sentenceLessonCap");
-		}
+		// Also unlock any remaining locked sentences up to the cap
+		totalUnlocked += await unlockTypeInLevel(level, "sentence", "sentenceLessonCap");
 	}
 
 	if (totalUnlocked > 0) {
@@ -88,6 +79,7 @@ export async function checkAndUnlockWithinLevel(level: number): Promise<number> 
  * Call after a review batch completes.
  * Returns the new level number if unlocked, or null.
  */
+// TODO: Wire up after review batches -- currently unused, intended for level-up gating
 export async function checkLevelProgression(level: number): Promise<UnlockResult> {
 	const result: UnlockResult = { unlockedCount: 0, newLevelUnlocked: null };
 

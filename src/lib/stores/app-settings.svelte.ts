@@ -124,6 +124,7 @@ export async function resetAllSettings(): Promise<void> {
 	applyTheme(DEFAULTS.theme);
 }
 
+// Listener cleanup: in Tauri, window close kills the process, so no explicit teardown needed.
 let systemThemeHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
 function applyTheme(theme: string): void {

@@ -1,8 +1,10 @@
 import Database from "@tauri-apps/plugin-sql";
+export type { Database };
 import { migrations } from "./migrations";
 
 let db: Database | null = null;
 let dbInitPromise: Promise<Database> | null = null;
+let inTransaction = false;
 
 export type QueryResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -14,6 +16,29 @@ export async function safeQuery<T>(fn: () => Promise<T>): Promise<QueryResult<T>
 		const error = e instanceof Error ? e.message : String(e);
 		console.error("[DB Error]", error);
 		return { ok: false, error };
+	}
+}
+
+/**
+ * Execute multiple operations in a single SQLite transaction.
+ * Automatically rolls back on error.
+ */
+export async function withTransaction<T>(fn: (db: Database) => Promise<T>): Promise<T> {
+	if (inTransaction) {
+		throw new Error("Cannot nest transactions -- use the existing db handle passed to your callback");
+	}
+	const db = await getDb();
+	inTransaction = true;
+	await db.execute("BEGIN");
+	try {
+		const result = await fn(db);
+		await db.execute("COMMIT");
+		return result;
+	} catch (e) {
+		await db.execute("ROLLBACK").catch(() => {});
+		throw e;
+	} finally {
+		inTransaction = false;
 	}
 }
 
@@ -79,6 +104,8 @@ async function runMigrations(database: Database): Promise<void> {
 			)
 				.map((s) => s.trim())
 				.filter((s) => s.length > 0);
+			// Manual BEGIN/COMMIT instead of withTransaction: migrations run during DB init,
+			// before withTransaction's getDb() is available (circular dependency).
 			try {
 				await database.execute("BEGIN");
 				for (const stmt of statements) {

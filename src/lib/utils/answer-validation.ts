@@ -17,12 +17,14 @@ export function normalizeLanguageAnswer(answer: string): string {
 export function fuzzyMatch(userAnswer: string, expected: string): boolean {
 	if (userAnswer === expected) return true;
 
-	// Substring match: accept when both are >= 3 chars and shorter is >= 75% of longer
+	// Substring match: both strings must be >= 3 chars and within 75% length of each other.
+	// Then only accept if the expected answer contains the user's answer (user wrote a subset).
+	// The length ratio guard rejects wildly different lengths before the includes check.
 	if (userAnswer.length >= 3 && expected.length >= 3) {
 		const shorter = Math.min(userAnswer.length, expected.length);
 		const longer = Math.max(userAnswer.length, expected.length);
 		if (shorter / longer >= 0.75) {
-			if (userAnswer.includes(expected) || expected.includes(userAnswer)) return true;
+			if (expected.includes(userAnswer)) return true;
 		}
 	}
 

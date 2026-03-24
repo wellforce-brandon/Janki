@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.29.0.0] - 2026-03-24
+
+### Added
+
+- Automatic update detection with sidebar banner -- silently checks for updates on app startup and shows a green "Update to vX.Y.Z" button at the bottom-left of the sidebar when a new version is available
+- "You're on the latest version" toast when manually checking for updates and none are found
+
+### Fixed
+
+- Level unlock mutations (kanji, vocab, next-level radicals) now run inside a single transaction to prevent partial unlocks on failure
+- `durationMs` parameter default changed from `0` to `null` so unknown review durations are stored as NULL instead of 0
+- Backup import now validates the SQLite magic header, not just file size, rejecting corrupt or non-SQLite files
+- Fire-and-forget unlock calls after reviews and lessons now properly awaited with error handling
+- Inlined SQL in language review transaction replaced with shared query functions to eliminate duplication
+- Nested `withTransaction` calls now throw a descriptive error instead of causing a SQLite "cannot start transaction within transaction" failure
+
+### Changed
+
+- Duplicate `shuffle` function in LanguageLessonSession replaced with shared `fisherYatesShuffle` utility
+- Cache invalidation now uses exact typed keys instead of fragile prefix matching
+- `toSqliteDateTime` tests moved from language-srs.test.ts to common.test.ts where the function lives
+- Answer validation comment updated to accurately describe the two-step fuzzy matching logic
+- Added ORDER BY allowlist rejection test for kanji review queries
+
 ## [0.28.1.0] - 2026-03-24
 
 ### Fixed

@@ -2,6 +2,8 @@
 import type { View } from "$lib/stores/navigation.svelte";
 import { currentView, navigate } from "$lib/stores/navigation.svelte";
 import { getContentTypeCounts, type ContentTypeCount } from "$lib/db/queries/language";
+import { getPendingUpdate, isInstalling } from "$lib/stores/update.svelte";
+import { installUpdate } from "$lib/updater/check-update";
 
 interface TierFlyout {
 	kind: "levels" | "items";
@@ -273,4 +275,33 @@ function handleTierClick(item: NavItem, tierIndex: number) {
 			</div>
 		{/each}
 	</div>
+
+	{#if getPendingUpdate()}
+		<div class="border-t border-border/50 px-2 py-3">
+			<button
+				type="button"
+				class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors
+					{isInstalling()
+						? 'bg-muted text-muted-foreground cursor-wait'
+						: 'bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400 dark:hover:bg-green-500/20'}"
+				onclick={installUpdate}
+				disabled={isInstalling()}
+			>
+				{#if isInstalling()}
+					<svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+						<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25" />
+						<path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75" />
+					</svg>
+					<span>Installing...</span>
+				{:else}
+					<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+						<polyline points="7 10 12 15 17 10" />
+						<line x1="12" y1="15" x2="12" y2="3" />
+					</svg>
+					<span class="flex-1 text-left">Update to v{getPendingUpdate()?.version}</span>
+				{/if}
+			</button>
+		</div>
+	{/if}
 </nav>

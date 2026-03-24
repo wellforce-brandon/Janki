@@ -1,4 +1,4 @@
-import { getDb, safeQuery, sqlPlaceholders, type QueryResult } from "../database";
+import { getDb, safeQuery, sqlPlaceholders, type QueryResult, withTransaction, type Database } from "../database";
 import { getCached, setCache, CACHE_KEYS } from "../query-cache";
 
 // Content type literal
@@ -237,6 +237,23 @@ export async function searchLanguageItems(
 	});
 }
 
+export async function updateLanguageItemSrsExec(
+	dbHandle: Database,
+	id: number,
+	srsStage: number,
+	nextReview: string | null,
+	correctCount: number,
+	incorrectCount: number,
+): Promise<void> {
+	await dbHandle.execute(
+		`UPDATE language_items SET
+			srs_stage = ?, next_review = ?, correct_count = ?, incorrect_count = ?,
+			updated_at = datetime('now')
+		WHERE id = ?`,
+		[srsStage, nextReview, correctCount, incorrectCount, id],
+	);
+}
+
 export async function updateLanguageItemSrs(
 	id: number,
 	srsStage: number,
@@ -246,14 +263,24 @@ export async function updateLanguageItemSrs(
 ): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		await db.execute(
-			`UPDATE language_items SET
-				srs_stage = ?, next_review = ?, correct_count = ?, incorrect_count = ?,
-				updated_at = datetime('now')
-			WHERE id = ?`,
-			[srsStage, nextReview, correctCount, incorrectCount, id],
-		);
+		await updateLanguageItemSrsExec(db, id, srsStage, nextReview, correctCount, incorrectCount);
 	});
+}
+
+export async function logLanguageReviewExec(
+	dbHandle: Database,
+	itemId: number,
+	srsStageBefore: number,
+	srsStageAfter: number,
+	correct: boolean,
+	durationMs?: number | null,
+): Promise<number> {
+	const result = await dbHandle.execute(
+		`INSERT INTO language_review_log (item_id, srs_stage_before, srs_stage_after, correct, duration_ms)
+		VALUES (?, ?, ?, ?, ?)`,
+		[itemId, srsStageBefore, srsStageAfter, correct ? 1 : 0, durationMs ?? null],
+	);
+	return result.lastInsertId ?? 0;
 }
 
 export async function logLanguageReview(
@@ -265,12 +292,7 @@ export async function logLanguageReview(
 ): Promise<QueryResult<number>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const result = await db.execute(
-			`INSERT INTO language_review_log (item_id, srs_stage_before, srs_stage_after, correct, duration_ms)
-			VALUES (?, ?, ?, ?, ?)`,
-			[itemId, srsStageBefore, srsStageAfter, correct ? 1 : 0, durationMs ?? null],
-		);
-		return result.lastInsertId ?? 0;
+		return logLanguageReviewExec(db, itemId, srsStageBefore, srsStageAfter, correct, durationMs);
 	});
 }
 
@@ -685,18 +707,19 @@ export async function clearLanguageLevelsSeed(): Promise<QueryResult<void>> {
 /** Reset all language learning progress (SRS state, review logs, path selection). Does NOT delete items. */
 export async function resetAllLanguageProgress(): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
-		const db = await getDb();
-		await db.execute("DELETE FROM language_review_log");
-		await db.execute(`UPDATE language_items SET
-			srs_stage = 0,
-			unlocked_at = NULL,
-			next_review = NULL,
-			correct_count = 0,
-			incorrect_count = 0,
-			lesson_completed_at = NULL
-		`);
-		await db.execute("DELETE FROM settings WHERE key = 'language_path'");
-		await db.execute("DELETE FROM settings WHERE key = 'language_levels_v5_paths'");
+		await withTransaction(async (db) => {
+			await db.execute("DELETE FROM language_review_log");
+			await db.execute(`UPDATE language_items SET
+				srs_stage = 0,
+				unlocked_at = NULL,
+				next_review = NULL,
+				correct_count = 0,
+				incorrect_count = 0,
+				lesson_completed_at = NULL
+			`);
+			await db.execute("DELETE FROM settings WHERE key = 'language_path'");
+			await db.execute("DELETE FROM settings WHERE key = 'language_levels_v5_paths'");
+		});
 	});
 }
 
@@ -1326,6 +1349,27 @@ export async function getLevelContentTypeProgress(
 			WHERE language_level = ? AND content_type = ?
 		`, [level, contentType]);
 		return rows[0] ?? { total: 0, guru_plus: 0 };
+	});
+}
+
+/** Get guru+ progress for all content types in a level in one query */
+export async function getLevelAllContentTypeProgress(
+	level: number,
+): Promise<QueryResult<Record<string, { total: number; guru_plus: number }>>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ content_type: string; total: number; guru_plus: number }[]>(`
+			SELECT content_type, COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
+			FROM language_items
+			WHERE language_level = ?
+			GROUP BY content_type
+		`, [level]);
+		const result: Record<string, { total: number; guru_plus: number }> = {};
+		for (const row of rows) {
+			result[row.content_type] = { total: row.total, guru_plus: row.guru_plus };
+		}
+		return result;
 	});
 }
 

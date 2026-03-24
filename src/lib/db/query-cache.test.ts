@@ -78,20 +78,18 @@ describe("Query Cache", () => {
 			expect(getCached("c")).toBeUndefined();
 		});
 
-		it("should clear only entries matching prefix", () => {
-			setCache("contentTypeCounts:vocab", 10);
-			setCache("contentTypeCounts:grammar", 5);
-			setCache("otherKey", "keep");
+		it("should clear only the exact key specified", () => {
+			setCache("contentTypeCounts", 10);
+			setCache("srsSummary", 5);
 			invalidateCache("contentTypeCounts");
-			expect(getCached("contentTypeCounts:vocab")).toBeUndefined();
-			expect(getCached("contentTypeCounts:grammar")).toBeUndefined();
-			expect(getCached("otherKey")).toBe("keep");
+			expect(getCached("contentTypeCounts")).toBeUndefined();
+			expect(getCached("srsSummary")).toBe(5);
 		});
 
-		it("should handle prefix that matches nothing", () => {
-			setCache("key", "value");
-			invalidateCache("nonexistent");
-			expect(getCached("key")).toBe("value");
+		it("should handle key that is not in cache", () => {
+			setCache("contentTypeCounts", "value");
+			invalidateCache("srsSummary");
+			expect(getCached("contentTypeCounts")).toBe("value");
 		});
 	});
 });

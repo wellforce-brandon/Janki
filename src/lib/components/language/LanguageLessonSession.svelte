@@ -6,6 +6,7 @@ import { getTypeLabel, getTypeColor } from "$lib/utils/content-type";
 import { completeLessonBatch } from "$lib/srs/language-lessons";
 import { addToast } from "$lib/stores/toast.svelte";
 import { normalizeLanguageAnswer } from "$lib/utils/answer-validation";
+import { fisherYatesShuffle } from "$lib/utils/common";
 
 interface Props {
 	items: LanguageItem[];
@@ -155,18 +156,9 @@ function backToTeaching() {
 	correctAnswer = "";
 }
 
-function shuffle<T>(arr: T[]): T[] {
-	const a = [...arr];
-	for (let i = a.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[a[i], a[j]] = [a[j], a[i]];
-	}
-	return a;
-}
-
 function buildQuizQueue() {
 	const questions: QuizQuestion[] = [];
-	const shuffled = shuffle(items);
+	const shuffled = fisherYatesShuffle(items);
 	for (const item of shuffled) {
 		questions.push({ item, answered: false, correct: false });
 	}
@@ -225,8 +217,7 @@ function dismissIncorrect() {
 async function completeLesson() {
 	if (isCompleting) return;
 	isCompleting = true;
-	const ids = items.map((i) => i.id);
-	const result = await completeLessonBatch(ids);
+	const result = await completeLessonBatch(items);
 	if (result.ok) {
 		addToast(`${items.length} item${items.length > 1 ? "s" : ""} learned!`, "success");
 	} else {

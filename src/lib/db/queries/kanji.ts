@@ -689,7 +689,6 @@ export async function resetAllKanjiProgress(): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		await db.execute("DELETE FROM kanji_review_log");
-		await db.execute("DELETE FROM review_log");
 		await db.execute(`UPDATE kanji_levels SET
 			srs_stage = 0,
 			unlocked_at = NULL,
@@ -787,5 +786,18 @@ export async function searchKanjiItems(
 				[likeQuery, likeQuery, likeQuery, likeQuery, limit],
 			);
 		}
+	});
+}
+
+export async function rebuildKanjiFtsIndex(): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute("DELETE FROM kanji_fts");
+		await db.execute(
+			`INSERT INTO kanji_fts(rowid, character, meanings, readings)
+			SELECT id, character, meanings,
+				COALESCE(readings_on, '') || ' ' || COALESCE(readings_kun, '') || ' ' || COALESCE(reading, '')
+			FROM kanji_levels`,
+		);
 	});
 }

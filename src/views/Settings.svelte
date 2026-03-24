@@ -22,7 +22,7 @@ import {
 	setLanguagePath,
 } from "$lib/db/queries/language";
 import { assignLanguageLevels } from "$lib/db/seed/language-levels";
-import { resetAllKanjiProgress } from "$lib/db/queries/kanji";
+import { resetAllKanjiProgress, rebuildKanjiFtsIndex } from "$lib/db/queries/kanji";
 import { checkForUpdates } from "$lib/updater/check-update";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import PathPicker from "$lib/components/language/PathPicker.svelte";
@@ -96,11 +96,15 @@ let rebuildingFts = $state(false);
 async function handleRebuildFts() {
 	rebuildingFts = true;
 	try {
-		const result = await rebuildFtsIndex();
-		if (result.ok) {
+		const [langResult, kanjiResult] = await Promise.all([
+			rebuildFtsIndex(),
+			rebuildKanjiFtsIndex(),
+		]);
+		if (langResult.ok && kanjiResult.ok) {
 			addToast("Search index rebuilt successfully", "success");
 		} else {
-			addToast(`Rebuild failed: ${result.error}`, "error");
+			const err = !langResult.ok ? langResult.error : !kanjiResult.ok ? kanjiResult.error : "Unknown";
+			addToast(`Rebuild failed: ${err}`, "error");
 		}
 	} catch (e) {
 		addToast(`Rebuild failed: ${e instanceof Error ? e.message : String(e)}`, "error");

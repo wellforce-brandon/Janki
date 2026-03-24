@@ -682,7 +682,7 @@ export async function clearLanguageLevelsSeed(): Promise<QueryResult<void>> {
 	});
 }
 
-/** Reset all language learning progress (SRS state, review logs). Does NOT delete items. */
+/** Reset all language learning progress (SRS state, review logs, path selection). Does NOT delete items. */
 export async function resetAllLanguageProgress(): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
@@ -695,6 +695,8 @@ export async function resetAllLanguageProgress(): Promise<QueryResult<void>> {
 			incorrect_count = 0,
 			lesson_completed_at = NULL
 		`);
+		await db.execute("DELETE FROM settings WHERE key = 'language_path'");
+		await db.execute("DELETE FROM settings WHERE key = 'language_levels_v5_paths'");
 	});
 }
 

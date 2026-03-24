@@ -17,6 +17,8 @@ import {
 	applyGrammarJlptTagging,
 } from "$lib/db/seed/language-data";
 import { assignLanguageLevels } from "$lib/db/seed/language-levels";
+import { rebuildFtsIndex } from "$lib/db/queries/language";
+import { rebuildKanjiFtsIndex } from "$lib/db/queries/kanji";
 import { loadSettings, getSettings } from "$lib/stores/app-settings.svelte";
 import { checkForUpdates } from "$lib/updater/check-update";
 import App from "./App.svelte";
@@ -34,6 +36,8 @@ async function init() {
 		await applySentenceJlptTagging();
 		await applyGrammarJlptTagging();
 		await assignLanguageLevels();
+		await rebuildFtsIndex();
+		await rebuildKanjiFtsIndex();
 	} catch (e) {
 		console.error("[SEED FAILED]", e);
 	}

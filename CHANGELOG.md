@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.28.1.0] - 2026-03-24
+
+### Fixed
+
+- Search returning no results due to FTS5 indexes being populated before data was seeded
+- "Reset Kanji Progress" failing with "no such table: review_log" error
+- Olive green hover color on light theme replaced with neutral gray accent
+
+### Changed
+
+- FTS indexes for both kanji and language now rebuild automatically on every app startup
+- "Rebuild Search Index" button in Settings now rebuilds both kanji and language indexes
+
 ## [0.28.0.0] - 2026-03-24
 
 ### Added

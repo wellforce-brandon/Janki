@@ -1,6 +1,6 @@
 <script lang="ts">
-import Header from "$lib/components/layout/Header.svelte";
 import PathPicker from "$lib/components/language/PathPicker.svelte";
+import Header from "$lib/components/layout/Header.svelte";
 import Sidebar from "$lib/components/layout/Sidebar.svelte";
 import ToastContainer from "$lib/components/layout/ToastContainer.svelte";
 import { getLanguagePath } from "$lib/db/queries/language";

@@ -40,7 +40,13 @@ export async function checkForUpdates(): Promise<void> {
 		}
 	} catch (e) {
 		console.error("[Updater] Check failed:", e);
-		addToast("Update check failed", "error", 3000);
+		const msg = e instanceof Error ? e.message : String(e);
+		// Network errors or missing release artifacts are expected during builds
+		if (msg.includes("404") || msg.includes("network") || msg.includes("fetch")) {
+			addToast("No update info available yet -- try again later", "info", 3000);
+		} else {
+			addToast("Update check failed", "error", 3000);
+		}
 	}
 }
 

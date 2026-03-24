@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.25.0.1] - 2026-03-23
+
+### Fixed
+
+- Tag 7,958 of 8,104 sentences with JLPT levels via vocabulary content analysis (was 61)
+- Assign lesson_group to all 1,166 grammar items across 47 semantic groups (was 0)
+- Set default frequency_rank (50000) for 3,331 unranked vocabulary items so they sort last
+
+### Added
+
+- Script: `scripts/tag-sentence-jlpt.mjs` -- automated sentence JLPT tagging via vocab/JMDict analysis
+- Script: `scripts/assign-grammar-groups.mjs` -- grammar grouping by context notes, patterns, and topic analysis
+
 ## [0.25.0.0] - 2026-03-23
 
 ### Added

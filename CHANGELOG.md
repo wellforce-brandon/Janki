@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.26.0.0] - 2026-03-24
+
+### Added
+
+- Learning path system with 4 selectable paths: JLPT N5 (60 levels), Conversational (60 levels, frequency-biased), JLPT N1 (100 levels), Completionist (100 levels, all items)
+- Path definitions with per-path pacing: kana level count, vocab density, grammar/sentence intro levels
+- Build-time level builder script (`npm run build:levels`) that generates item-to-level assignments per path
+- Group-aware kana distribution keeps hiragana rows, katakana rows, dakuten, yoon, and extended kana intact across levels
+- Grammar JLPT inference for 369 untagged items based on lesson group (Tae Kim groups -> N5, etc.)
+- Kana-only vocab detection places readable words in early kana levels as reinforcement
+- Pre-built path JSON files with level stats for debugging and UI use
+
+### Changed
+
+- Language level seed script now reads pre-built path JSON instead of computing assignments at runtime
+- Level assignments versioned as v5 (triggers re-assignment on existing installs)
+
 ## [0.25.0.1] - 2026-03-23
 
 ### Fixed

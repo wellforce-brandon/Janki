@@ -1,6 +1,6 @@
 {
 	"name": "janki",
-	"version": "0.25.0.1",
+	"version": "0.26.0.0",
 	"description": "Personal Japanese learning desktop app with FSRS-6 SRS and WaniKani-style kanji progression",
 	"private": true,
 	"type": "module",
@@ -17,7 +17,8 @@
 		"enrich": "node scripts/enrich-all.mjs",
 		"enrich:jmdict": "node scripts/enrich-jmdict.mjs",
 		"enrich:frequency": "node scripts/enrich-frequency.mjs",
-		"enrich:kanjiapi": "node scripts/enrich-kanjiapi.mjs"
+		"enrich:kanjiapi": "node scripts/enrich-kanjiapi.mjs",
+		"build:levels": "node scripts/build-language-levels.mjs"
 	},
 	"dependencies": {
 		"@fontsource/dm-sans": "^5.2.8",

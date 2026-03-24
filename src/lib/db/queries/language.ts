@@ -1,5 +1,12 @@
-import { getDb, safeQuery, sqlPlaceholders, type QueryResult, withTransaction, type Database } from "../database";
-import { getCached, setCache, CACHE_KEYS } from "../query-cache";
+import {
+	type Database,
+	getDb,
+	type QueryResult,
+	safeQuery,
+	sqlPlaceholders,
+	withTransaction,
+} from "../database";
+import { CACHE_KEYS, getCached, setCache } from "../query-cache";
 
 // Content type literal
 export type ContentType = "vocabulary" | "grammar" | "sentence" | "kana" | "conjugation";
@@ -109,7 +116,8 @@ export async function getLanguageItems(
 		}
 		if (options.searchQuery) {
 			const escaped = options.searchQuery.replace(/[%_\\]/g, "\\$&");
-			where += " AND (primary_text LIKE ? ESCAPE '\\' OR reading LIKE ? ESCAPE '\\' OR meaning LIKE ? ESCAPE '\\' OR item_key LIKE ? ESCAPE '\\')";
+			where +=
+				" AND (primary_text LIKE ? ESCAPE '\\' OR reading LIKE ? ESCAPE '\\' OR meaning LIKE ? ESCAPE '\\' OR item_key LIKE ? ESCAPE '\\')";
 			const like = `%${escaped}%`;
 			params.push(like, like, like, like);
 		}
@@ -132,10 +140,7 @@ export async function getLanguageItems(
 export async function getLanguageItemById(id: number): Promise<QueryResult<LanguageItem | null>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const rows = await db.select<LanguageItem[]>(
-			"SELECT * FROM language_items WHERE id = ?",
-			[id],
-		);
+		const rows = await db.select<LanguageItem[]>("SELECT * FROM language_items WHERE id = ?", [id]);
 		return rows[0] ?? null;
 	});
 }
@@ -296,9 +301,7 @@ export async function logLanguageReview(
 	});
 }
 
-export async function deleteLatestLanguageReview(
-	itemId: number,
-): Promise<QueryResult<void>> {
+export async function deleteLatestLanguageReview(itemId: number): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		await db.execute(
@@ -317,7 +320,8 @@ export async function getDueLanguageItems(
 	return safeQuery(async () => {
 		const db = await getDb();
 		const params: (string | number)[] = [];
-		let where = "srs_stage > 0 AND srs_stage < 9 AND lesson_completed_at IS NOT NULL AND next_review IS NOT NULL AND next_review <= datetime('now')";
+		let where =
+			"srs_stage > 0 AND srs_stage < 9 AND lesson_completed_at IS NOT NULL AND next_review IS NOT NULL AND next_review <= datetime('now')";
 
 		if (contentType) {
 			where += " AND content_type = ?";
@@ -332,7 +336,9 @@ export async function getDueLanguageItems(
 	});
 }
 
-export async function getLanguageSrsDistribution(): Promise<QueryResult<{ srs_stage: number; count: number }[]>> {
+export async function getLanguageSrsDistribution(): Promise<
+	QueryResult<{ srs_stage: number; count: number }[]>
+> {
 	const cached = getCached<{ srs_stage: number; count: number }[]>(CACHE_KEYS.srsSummary);
 	if (cached) return { ok: true, data: cached };
 
@@ -469,13 +475,12 @@ export async function getLanguageItemsByKanji(
 }
 
 /** Get due language items count */
-export async function getDueLanguageCount(
-	contentType?: ContentType,
-): Promise<QueryResult<number>> {
+export async function getDueLanguageCount(contentType?: ContentType): Promise<QueryResult<number>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const params: (string | number)[] = [];
-		let where = "srs_stage > 0 AND srs_stage < 9 AND lesson_completed_at IS NOT NULL AND next_review IS NOT NULL AND next_review <= datetime('now')";
+		let where =
+			"srs_stage > 0 AND srs_stage < 9 AND lesson_completed_at IS NOT NULL AND next_review IS NOT NULL AND next_review <= datetime('now')";
 
 		if (contentType) {
 			where += " AND content_type = ?";
@@ -515,7 +520,9 @@ export async function getLockedKanaItems(): Promise<QueryResult<{ id: number }[]
 }
 
 /** Check if items with given item_keys have reached a minimum SRS stage */
-export async function getItemKeyStages(itemKeys: string[]): Promise<QueryResult<{ item_key: string; srs_stage: number }[]>> {
+export async function getItemKeyStages(
+	itemKeys: string[],
+): Promise<QueryResult<{ item_key: string; srs_stage: number }[]>> {
 	if (itemKeys.length === 0) return { ok: true, data: [] };
 	return safeQuery(async () => {
 		const db = await getDb();
@@ -689,10 +696,9 @@ export async function getLanguagePath(): Promise<QueryResult<string | null>> {
 export async function setLanguagePath(pathId: string): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		await db.execute(
-			"INSERT OR REPLACE INTO settings (key, value) VALUES ('language_path', ?)",
-			[pathId],
-		);
+		await db.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('language_path', ?)", [
+			pathId,
+		]);
 	});
 }
 
@@ -737,7 +743,9 @@ export async function rebuildFtsIndex(): Promise<QueryResult<void>> {
 }
 
 /** Count items at Guru+ (srs_stage >= 5) for a given JLPT level */
-export async function getJlptLevelProgress(jlptLevel: string): Promise<QueryResult<{ total: number; guru_plus: number }>> {
+export async function getJlptLevelProgress(
+	jlptLevel: string,
+): Promise<QueryResult<{ total: number; guru_plus: number }>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ total: number; guru_plus: number }[]>(
@@ -753,7 +761,9 @@ export async function getJlptLevelProgress(jlptLevel: string): Promise<QueryResu
 // --- Kana group progression queries ---
 
 /** Get the next locked kana lesson_group (lowest lesson_order with locked items) */
-export async function getNextLockedKanaGroup(): Promise<QueryResult<{ lesson_group: string; lesson_order: number } | null>> {
+export async function getNextLockedKanaGroup(): Promise<
+	QueryResult<{ lesson_group: string; lesson_order: number } | null>
+> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ lesson_group: string; lesson_order: number }[]>(
@@ -767,7 +777,9 @@ export async function getNextLockedKanaGroup(): Promise<QueryResult<{ lesson_gro
 }
 
 /** Get locked kana items for a specific lesson_group */
-export async function getLockedKanaByGroup(lessonGroup: string): Promise<QueryResult<{ id: number }[]>> {
+export async function getLockedKanaByGroup(
+	lessonGroup: string,
+): Promise<QueryResult<{ id: number }[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<{ id: number }[]>(
@@ -778,7 +790,9 @@ export async function getLockedKanaByGroup(lessonGroup: string): Promise<QueryRe
 }
 
 /** Get progress for a kana lesson_group: total items and how many are at Apprentice 4+ */
-export async function getKanaGroupProgress(lessonGroup: string): Promise<QueryResult<{ total: number; at_apprentice4_plus: number }>> {
+export async function getKanaGroupProgress(
+	lessonGroup: string,
+): Promise<QueryResult<{ total: number; at_apprentice4_plus: number }>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ total: number; at_apprentice4_plus: number }[]>(
@@ -792,7 +806,9 @@ export async function getKanaGroupProgress(lessonGroup: string): Promise<QueryRe
 }
 
 /** Get the lesson_group just before a given lesson_order */
-export async function getPreviousKanaGroup(lessonOrder: number): Promise<QueryResult<string | null>> {
+export async function getPreviousKanaGroup(
+	lessonOrder: number,
+): Promise<QueryResult<string | null>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ lesson_group: string }[]>(
@@ -808,7 +824,9 @@ export async function getPreviousKanaGroup(lessonOrder: number): Promise<QueryRe
 // --- Cap-based unlock queries ---
 
 /** Count unlocked-but-not-yet-learned items for a specific content type */
-export async function getPendingLessonCount(contentType: ContentType): Promise<QueryResult<number>> {
+export async function getPendingLessonCount(
+	contentType: ContentType,
+): Promise<QueryResult<number>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ count: number }[]>(
@@ -879,7 +897,9 @@ export async function getLockedSentenceBatch(
 }
 
 /** Get a batch of locked conjugation items ordered by lesson_order then frequency/id */
-export async function getLockedConjugationBatch(limit: number): Promise<QueryResult<{ id: number }[]>> {
+export async function getLockedConjugationBatch(
+	limit: number,
+): Promise<QueryResult<{ id: number }[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<{ id: number }[]>(
@@ -1045,7 +1065,8 @@ export async function getLanguageItemsByJlptAndRange(
 	return safeQuery(async () => {
 		const db = await getDb();
 		const levelClause = jlptLevel === "None" ? "jlpt_level IS NULL" : "jlpt_level = ?";
-		const params: (string | number)[] = jlptLevel === "None" ? [contentType] : [contentType, jlptLevel];
+		const params: (string | number)[] =
+			jlptLevel === "None" ? [contentType] : [contentType, jlptLevel];
 
 		const items = await db.select<LanguageItem[]>(
 			`SELECT * FROM language_items
@@ -1060,7 +1081,7 @@ export async function getLanguageItemsByJlptAndRange(
 		for (const item of items) {
 			const key = item.lesson_group ?? null;
 			if (!grouped.has(key)) grouped.set(key, []);
-			grouped.get(key)!.push(item);
+			grouped.get(key)?.push(item);
 		}
 
 		const groups: JlptSubGroup[] = [];
@@ -1145,7 +1166,9 @@ export async function getAdjacentLanguageItem(
 // --- Grammar group progression queries ---
 
 /** Get the next locked grammar lesson_group (lowest lesson_order with locked items) */
-export async function getNextLockedGrammarGroup(): Promise<QueryResult<{ lesson_group: string; lesson_order: number } | null>> {
+export async function getNextLockedGrammarGroup(): Promise<
+	QueryResult<{ lesson_group: string; lesson_order: number } | null>
+> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ lesson_group: string; lesson_order: number }[]>(
@@ -1176,7 +1199,9 @@ export async function getLockedGrammarByGroup(
 }
 
 /** Get progress for a grammar lesson_group: total items and how many at Apprentice 4+ */
-export async function getGrammarGroupProgress(lessonGroup: string): Promise<QueryResult<{ total: number; at_apprentice4_plus: number }>> {
+export async function getGrammarGroupProgress(
+	lessonGroup: string,
+): Promise<QueryResult<{ total: number; at_apprentice4_plus: number }>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ total: number; at_apprentice4_plus: number }[]>(
@@ -1190,7 +1215,9 @@ export async function getGrammarGroupProgress(lessonGroup: string): Promise<Quer
 }
 
 /** Get the grammar lesson_group just before a given lesson_order */
-export async function getPreviousGrammarGroup(lessonOrder: number): Promise<QueryResult<string | null>> {
+export async function getPreviousGrammarGroup(
+	lessonOrder: number,
+): Promise<QueryResult<string | null>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		const rows = await db.select<{ lesson_group: string }[]>(
@@ -1236,10 +1263,13 @@ export async function getAllLanguageLevelProgress(): Promise<QueryResult<Languag
 }
 
 /** Get progress for a single language level */
-export async function getLanguageLevelProgress(level: number): Promise<QueryResult<LanguageLevelProgress>> {
+export async function getLanguageLevelProgress(
+	level: number,
+): Promise<QueryResult<LanguageLevelProgress>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const rows = await db.select<LanguageLevelProgress[]>(`
+		const rows = await db.select<LanguageLevelProgress[]>(
+			`
 			SELECT
 				language_level as level,
 				COUNT(*) as total,
@@ -1251,7 +1281,9 @@ export async function getLanguageLevelProgress(level: number): Promise<QueryResu
 				END as percentage
 			FROM language_items
 			WHERE language_level = ?
-		`, [level]);
+		`,
+			[level],
+		);
 		return rows[0] ?? { level, total: 0, guru_plus: 0, unlocked: 0, percentage: 0 };
 	});
 }
@@ -1270,7 +1302,8 @@ export async function getLanguageTierLevelCounts(
 ): Promise<QueryResult<TierLevelCount[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		return db.select<TierLevelCount[]>(`
+		return db.select<TierLevelCount[]>(
+			`
 			SELECT
 				language_level as level,
 				COUNT(*) as total,
@@ -1279,7 +1312,9 @@ export async function getLanguageTierLevelCounts(
 			WHERE content_type = ? AND language_level >= ? AND language_level <= ?
 			GROUP BY language_level
 			ORDER BY language_level ASC
-		`, [contentType, startLevel, endLevel]);
+		`,
+			[contentType, startLevel, endLevel],
+		);
 	});
 }
 
@@ -1295,10 +1330,13 @@ export interface LanguageLevelItem {
 }
 
 /** Get all items for a language level, grouped by content type */
-export async function getLanguageLevelItems(level: number): Promise<QueryResult<LanguageLevelItem[]>> {
+export async function getLanguageLevelItems(
+	level: number,
+): Promise<QueryResult<LanguageLevelItem[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		return db.select<LanguageLevelItem[]>(`
+		return db.select<LanguageLevelItem[]>(
+			`
 			SELECT id, content_type, primary_text, reading, meaning,
 				srs_stage, lesson_completed_at, language_level
 			FROM language_items
@@ -1312,7 +1350,9 @@ export async function getLanguageLevelItems(level: number): Promise<QueryResult<
 					WHEN 'sentence' THEN 5
 				END,
 				COALESCE(frequency_rank, 999999), id
-		`, [level]);
+		`,
+			[level],
+		);
 	});
 }
 
@@ -1342,12 +1382,15 @@ export async function getLevelContentTypeProgress(
 ): Promise<QueryResult<{ total: number; guru_plus: number }>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const rows = await db.select<{ total: number; guru_plus: number }[]>(`
+		const rows = await db.select<{ total: number; guru_plus: number }[]>(
+			`
 			SELECT COUNT(*) as total,
 				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
 			FROM language_items
 			WHERE language_level = ? AND content_type = ?
-		`, [level, contentType]);
+		`,
+			[level, contentType],
+		);
 		return rows[0] ?? { total: 0, guru_plus: 0 };
 	});
 }
@@ -1358,13 +1401,16 @@ export async function getLevelAllContentTypeProgress(
 ): Promise<QueryResult<Record<string, { total: number; guru_plus: number }>>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const rows = await db.select<{ content_type: string; total: number; guru_plus: number }[]>(`
+		const rows = await db.select<{ content_type: string; total: number; guru_plus: number }[]>(
+			`
 			SELECT content_type, COUNT(*) as total,
 				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
 			FROM language_items
 			WHERE language_level = ?
 			GROUP BY content_type
-		`, [level]);
+		`,
+			[level],
+		);
 		const result: Record<string, { total: number; guru_plus: number }> = {};
 		for (const row of rows) {
 			result[row.content_type] = { total: row.total, guru_plus: row.guru_plus };
@@ -1397,31 +1443,39 @@ export async function getLevelOverallProgress(
 ): Promise<QueryResult<{ total: number; guru_plus: number }>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const rows = await db.select<{ total: number; guru_plus: number }[]>(`
+		const rows = await db.select<{ total: number; guru_plus: number }[]>(
+			`
 			SELECT COUNT(*) as total,
 				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
 			FROM language_items
 			WHERE language_level = ?
-		`, [level]);
+		`,
+			[level],
+		);
 		return rows[0] ?? { total: 0, guru_plus: 0 };
 	});
 }
 
 /** Check if a level has 90% Guru+ and unlock the next level's KANA only */
-export async function checkAndUnlockLanguageLevel(currentLevel: number): Promise<QueryResult<number>> {
+export async function checkAndUnlockLanguageLevel(
+	currentLevel: number,
+): Promise<QueryResult<number>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 
 		// Check if current level has 90% at Guru+
-		const progress = await db.select<{ total: number; guru_plus: number }[]>(`
+		const progress = await db.select<{ total: number; guru_plus: number }[]>(
+			`
 			SELECT COUNT(*) as total,
 				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
 			FROM language_items
 			WHERE language_level = ?
-		`, [currentLevel]);
+		`,
+			[currentLevel],
+		);
 
 		const { total, guru_plus } = progress[0] ?? { total: 0, guru_plus: 0 };
-		if (total === 0 || (guru_plus / total) < 0.9) return 0;
+		if (total === 0 || guru_plus / total < 0.9) return 0;
 
 		const nextLevel = currentLevel + 1;
 		if (nextLevel > 60) return 0;
@@ -1464,12 +1518,15 @@ export async function unlockLevelVocabIfKanaReviewed(level: number): Promise<Que
 		const db = await getDb();
 
 		// Check if all kana in this level have lesson_completed_at set
-		const kanaStatus = await db.select<{ total: number; lessoned: number }[]>(`
+		const kanaStatus = await db.select<{ total: number; lessoned: number }[]>(
+			`
 			SELECT COUNT(*) as total,
 				COUNT(CASE WHEN lesson_completed_at IS NOT NULL THEN 1 END) as lessoned
 			FROM language_items
 			WHERE language_level = ? AND content_type = 'kana'
-		`, [level]);
+		`,
+			[level],
+		);
 
 		const { total, lessoned } = kanaStatus[0] ?? { total: 0, lessoned: 0 };
 		// If no kana in level or not all lessoned yet, skip
@@ -1485,7 +1542,9 @@ export async function unlockLevelVocabIfKanaReviewed(level: number): Promise<Que
 		);
 
 		if (result.rowsAffected > 0) {
-			console.log(`[language-levels] Unlocked ${result.rowsAffected} vocab items in level ${level} (kana gate passed)`);
+			console.log(
+				`[language-levels] Unlocked ${result.rowsAffected} vocab items in level ${level} (kana gate passed)`,
+			);
 		}
 
 		return result.rowsAffected;
@@ -1601,7 +1660,9 @@ export async function getLanguageItemsByTypeAndTier(
  * Each sentence's prerequisite_keys (JSON array of item_keys) must all have
  * lesson_completed_at set in either language_items or kanji_levels.
  */
-export async function unlockSentencesWithMetPrerequisites(level: number): Promise<QueryResult<number>> {
+export async function unlockSentencesWithMetPrerequisites(
+	level: number,
+): Promise<QueryResult<number>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 
@@ -1681,7 +1742,9 @@ export async function unlockSentencesWithMetPrerequisites(level: number): Promis
 					chunk,
 				);
 			}
-			console.log(`[language-levels] Unlocked ${toUnlock.length} sentences in level ${level} (prerequisites met)`);
+			console.log(
+				`[language-levels] Unlocked ${toUnlock.length} sentences in level ${level} (prerequisites met)`,
+			);
 		}
 
 		return noPrereqResult.rowsAffected + toUnlock.length;

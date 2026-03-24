@@ -10,17 +10,17 @@ import {
 	type LevelProgress,
 } from "$lib/db/queries/kanji";
 import {
+	type ContentTypeCount,
 	getContentTypeCounts,
 	getAvailableLessonCount as getLangLessonCount,
+	getLanguageLevelProgress,
 	getLanguageSrsDistribution,
 	getLanguageUserLevel,
-	getLanguageLevelProgress,
-	type ContentTypeCount,
 	type LanguageLevelProgress,
 } from "$lib/db/queries/language";
-import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { type DailyStats, getStreak, getTodayStats } from "$lib/db/queries/stats";
 import { checkAndUnlockWithinLevel } from "$lib/srs/language-unlock";
+import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -47,17 +47,18 @@ async function loadDashboard() {
 	const myId = ++fetchId;
 	error = null;
 	try {
-		const [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR, langLevelR] = await Promise.all([
-			getDueKanjiCount(),
-			getAvailableLessonCount(),
-			getStreak(),
-			getUserLevel(),
-			getTodayStats(),
-			getContentTypeCounts(),
-			getLangLessonCount(),
-			getLanguageSrsDistribution(),
-			getLanguageUserLevel(),
-		]);
+		const [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR, langLevelR] =
+			await Promise.all([
+				getDueKanjiCount(),
+				getAvailableLessonCount(),
+				getStreak(),
+				getUserLevel(),
+				getTodayStats(),
+				getContentTypeCounts(),
+				getLangLessonCount(),
+				getLanguageSrsDistribution(),
+				getLanguageUserLevel(),
+			]);
 
 		if (myId !== fetchId) return;
 		if (kanjiR.ok) kanjiDueCount = kanjiR.data;
@@ -74,7 +75,17 @@ async function loadDashboard() {
 		if (langSrsR.ok) langSrsDistribution = langSrsR.data;
 		if (langLevelR.ok) langUserLevel = langLevelR.data;
 
-		const anyFailed = [kanjiR, lessonR, streakR, levelR, statsR, contentR, langLessonR, langSrsR, langLevelR].some((r) => !r.ok);
+		const anyFailed = [
+			kanjiR,
+			lessonR,
+			streakR,
+			levelR,
+			statsR,
+			contentR,
+			langLessonR,
+			langSrsR,
+			langLevelR,
+		].some((r) => !r.ok);
 		if (anyFailed) {
 			error = "Some stats failed to load.";
 		}

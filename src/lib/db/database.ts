@@ -1,5 +1,7 @@
 import Database from "@tauri-apps/plugin-sql";
+
 export type { Database };
+
 import { migrations } from "./migrations";
 
 let db: Database | null = null;
@@ -25,7 +27,9 @@ export async function safeQuery<T>(fn: () => Promise<T>): Promise<QueryResult<T>
  */
 export async function withTransaction<T>(fn: (db: Database) => Promise<T>): Promise<T> {
 	if (inTransaction) {
-		throw new Error("Cannot nest transactions -- use the existing db handle passed to your callback");
+		throw new Error(
+			"Cannot nest transactions -- use the existing db handle passed to your callback",
+		);
 	}
 	const db = await getDb();
 	inTransaction = true;
@@ -87,7 +91,9 @@ async function runMigrations(database: Database): Promise<void> {
 	// Validate migration versions are strictly ascending
 	for (let i = 1; i < migrations.length; i++) {
 		if (migrations[i].version <= migrations[i - 1].version) {
-			throw new Error(`Migration versions out of order: ${migrations[i - 1].version} -> ${migrations[i].version}`);
+			throw new Error(
+				`Migration versions out of order: ${migrations[i - 1].version} -> ${migrations[i].version}`,
+			);
 		}
 	}
 
@@ -95,13 +101,11 @@ async function runMigrations(database: Database): Promise<void> {
 		if (migration.version > currentVersion) {
 			console.log(`Running migration v${migration.version}: ${migration.description}`);
 			if (!Array.isArray(migration.up)) {
-				console.warn(`[Migration] v${migration.version} uses string format -- prefer string[] to avoid semicolon splitting issues`);
+				console.warn(
+					`[Migration] v${migration.version} uses string format -- prefer string[] to avoid semicolon splitting issues`,
+				);
 			}
-			const statements = (
-				Array.isArray(migration.up)
-					? migration.up
-					: migration.up.split(";")
-			)
+			const statements = (Array.isArray(migration.up) ? migration.up : migration.up.split(";"))
 				.map((s) => s.trim())
 				.filter((s) => s.length > 0);
 			// Manual BEGIN/COMMIT instead of withTransaction: migrations run during DB init,

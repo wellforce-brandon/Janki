@@ -1,6 +1,6 @@
-import { getDb, safeQuery } from "../database";
-import { DEFAULT_PATH } from "$lib/data/learning-paths";
 import type { PathId } from "$lib/data/learning-paths";
+import { DEFAULT_PATH } from "$lib/data/learning-paths";
+import { getDb, safeQuery } from "../database";
 
 /**
  * Assigns language_items to language_level based on the user's selected learning path.
@@ -31,10 +31,9 @@ interface PathData {
 export async function assignLanguageLevels(): Promise<void> {
 	const check = await safeQuery(async () => {
 		const db = await getDb();
-		const rows = await db.select<{ value: string }[]>(
-			"SELECT value FROM settings WHERE key = ?",
-			[SETTINGS_KEY],
-		);
+		const rows = await db.select<{ value: string }[]>("SELECT value FROM settings WHERE key = ?", [
+			SETTINGS_KEY,
+		]);
 		return rows.length > 0 && rows[0].value === "true";
 	});
 	if (check.ok && check.data) return; // Already assigned
@@ -63,7 +62,7 @@ export async function assignLanguageLevels(): Promise<void> {
 		const byLevel = new Map<number, string[]>();
 		for (const [itemKey, level] of Object.entries(pathData.assignments)) {
 			if (!byLevel.has(level)) byLevel.set(level, []);
-			byLevel.get(level)!.push(itemKey);
+			byLevel.get(level)?.push(itemKey);
 		}
 
 		// Apply assignments in batches (500 items per SQL statement, SQLite variable limit)
@@ -91,10 +90,9 @@ export async function assignLanguageLevels(): Promise<void> {
 		await bootstrapLevel1(db);
 
 		// Mark as done
-		await db.execute(
-			"INSERT OR REPLACE INTO settings (key, value) VALUES (?, 'true')",
-			[SETTINGS_KEY],
-		);
+		await db.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, 'true')", [
+			SETTINGS_KEY,
+		]);
 	});
 
 	if (!result.ok) {
@@ -130,9 +128,7 @@ async function getSelectedPath(): Promise<PathId> {
 async function fetchPathData(pathId: PathId): Promise<PathData> {
 	const res = await fetch(`/data/language/paths/${pathId}.json`);
 	if (!res.ok) {
-		throw new Error(
-			`Failed to fetch path data for "${pathId}": ${res.status} ${res.statusText}`,
-		);
+		throw new Error(`Failed to fetch path data for "${pathId}": ${res.status} ${res.statusText}`);
 	}
 	return res.json();
 }
@@ -183,16 +179,11 @@ async function computeSentencePrerequisites(db: DbHandle): Promise<void> {
 	for (let i = 0; i < updates.length; i += 200) {
 		const chunk = updates.slice(i, i + 200);
 		for (const { id, keys } of chunk) {
-			await db.execute(
-				"UPDATE language_items SET prerequisite_keys = ? WHERE id = ?",
-				[keys, id],
-			);
+			await db.execute("UPDATE language_items SET prerequisite_keys = ? WHERE id = ?", [keys, id]);
 		}
 	}
 
-	console.log(
-		`[language-levels] Computed prerequisites for ${sentences.length} sentences.`,
-	);
+	console.log(`[language-levels] Computed prerequisites for ${sentences.length} sentences.`);
 }
 
 // ── Bootstrap ───────────────────────────────────────────────────────────────

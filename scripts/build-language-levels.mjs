@@ -11,8 +11,8 @@
  * Usage: node scripts/build-language-levels.mjs
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
-import { join } from "path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 // ── Path definitions (mirrors src/lib/data/learning-paths.ts) ───────────────
 
@@ -132,9 +132,7 @@ const GRAMMAR_GROUP_ORDER = [
 	"General Grammar",
 ];
 
-const grammarGroupIndex = new Map(
-	GRAMMAR_GROUP_ORDER.map((g, i) => [g, i]),
-);
+const grammarGroupIndex = new Map(GRAMMAR_GROUP_ORDER.map((g, i) => [g, i]));
 
 // ── Inferred JLPT for grammar items without explicit tags ───────────────────
 // Many grammar items (especially from Tae Kim) lack JLPT tags.
@@ -147,7 +145,7 @@ const GRAMMAR_INFERRED_JLPT = {
 	"Tae Kim: Introduction to Particles": "N5",
 	"Basic Particles": "N5",
 	"Tae Kim: Adjectives": "N5",
-	"Adjectives": "N5",
+	Adjectives: "N5",
 	"Tae Kim: Verb Basics": "N5",
 	"Verb Conjugation": "N5",
 	"Tae Kim: Negative Verbs": "N5",
@@ -224,19 +222,64 @@ const ROW_BASE_ORDER = {
 };
 
 const DAKUTEN_ROMAJI = new Set([
-	"ga", "gi", "gu", "ge", "go",
-	"za", "ji", "zu", "ze", "zo",
-	"da", "dzi", "dzu", "de", "do",
-	"ba", "bi", "bu", "be", "bo",
+	"ga",
+	"gi",
+	"gu",
+	"ge",
+	"go",
+	"za",
+	"ji",
+	"zu",
+	"ze",
+	"zo",
+	"da",
+	"dzi",
+	"dzu",
+	"de",
+	"do",
+	"ba",
+	"bi",
+	"bu",
+	"be",
+	"bo",
 ]);
 
 const HANDAKUTEN_ROMAJI = new Set(["pa", "pi", "pu", "pe", "po"]);
 
 const YOON_ROMAJI = new Set([
-	"kya", "kyu", "kyo", "sha", "shu", "sho", "cha", "chu", "cho",
-	"nya", "nyu", "nyo", "hya", "hyu", "hyo", "mya", "myu", "myo",
-	"rya", "ryu", "ryo", "gya", "gyu", "gyo", "ja", "ju", "jo",
-	"bya", "byu", "byo", "pya", "pyu", "pyo",
+	"kya",
+	"kyu",
+	"kyo",
+	"sha",
+	"shu",
+	"sho",
+	"cha",
+	"chu",
+	"cho",
+	"nya",
+	"nyu",
+	"nyo",
+	"hya",
+	"hyu",
+	"hyo",
+	"mya",
+	"myu",
+	"myo",
+	"rya",
+	"ryu",
+	"ryo",
+	"gya",
+	"gyu",
+	"gyo",
+	"ja",
+	"ju",
+	"jo",
+	"bya",
+	"byu",
+	"byo",
+	"pya",
+	"pyu",
+	"pyo",
 ]);
 
 function isHiraganaChar(code) {
@@ -325,8 +368,7 @@ function distribute(items, startLevel, endLevel) {
 	const perLevel = Math.ceil(items.length / levelCount);
 
 	for (let i = 0; i < items.length; i++) {
-		const level =
-			startLevel + Math.min(Math.floor(i / perLevel), levelCount - 1);
+		const level = startLevel + Math.min(Math.floor(i / perLevel), levelCount - 1);
 		result.set(items[i].item_key, level);
 	}
 	return result;
@@ -344,8 +386,7 @@ function buildPath(pathDef, allData) {
 	const vocab = allData.vocab.filter((v) => {
 		const jlpt = v.jlpt_level;
 		if (jlpt && scope.has(jlpt)) {
-			if (pathDef.frequencyCutoff && v.frequency_rank > pathDef.frequencyCutoff)
-				return false;
+			if (pathDef.frequencyCutoff && v.frequency_rank > pathDef.frequencyCutoff) return false;
 			return true;
 		}
 		if (!jlpt && pathDef.includeUntagged) return true;
@@ -383,9 +424,7 @@ function buildPath(pathDef, allData) {
 	// Large groups (like extended kana, ~157 items) are split across multiple levels.
 
 	kana.sort(
-		(a, b) =>
-			getKanaOrder(a.romaji, a.primary_text) -
-			getKanaOrder(b.romaji, b.primary_text),
+		(a, b) => getKanaOrder(a.romaji, a.primary_text) - getKanaOrder(b.romaji, b.primary_text),
 	);
 
 	// Build ordered groups (each group = items with same kana order value)
@@ -452,7 +491,7 @@ function buildPath(pathDef, allData) {
 			// Reserve levels for remaining groups after this one
 			const itemsAfter = kanaGroups.slice(g + 1).reduce((s, gr) => s + gr.length, 0);
 			const levelsForAfter = itemsAfter > 0 ? Math.max(1, Math.ceil(itemsAfter / newTarget)) : 0;
-			const levelsForGroup = Math.max(1, (pacing.kanaLevels - kanaLevel + 1) - levelsForAfter);
+			const levelsForGroup = Math.max(1, pacing.kanaLevels - kanaLevel + 1 - levelsForAfter);
 			const splitSize = Math.ceil(group.length / levelsForGroup);
 
 			for (const item of group) {
@@ -473,7 +512,11 @@ function buildPath(pathDef, allData) {
 
 			// Advance if at or above target
 			const curTarget = (kana.length - totalKanaAssigned) / (pacing.kanaLevels - kanaLevel + 1);
-			if (kanaLevelItems.length >= curTarget && kanaLevel < pacing.kanaLevels && g < kanaGroups.length - 1) {
+			if (
+				kanaLevelItems.length >= curTarget &&
+				kanaLevel < pacing.kanaLevels &&
+				g < kanaGroups.length - 1
+			) {
 				for (const item of kanaLevelItems) {
 					assignments.set(item.item_key, kanaLevel);
 					if (!kanaByLevel.has(kanaLevel)) kanaByLevel.set(kanaLevel, []);
@@ -512,9 +555,7 @@ function buildPath(pathDef, allData) {
 	// ── 4. Assign kana-only vocab to kana levels ──
 
 	// Sort vocab by frequency for deterministic ordering
-	vocab.sort(
-		(a, b) => (a.frequency_rank || 99999) - (b.frequency_rank || 99999),
-	);
+	vocab.sort((a, b) => (a.frequency_rank || 99999) - (b.frequency_rank || 99999));
 
 	const kanaOnlyItems = [];
 	const regularVocab = [];
@@ -563,11 +604,7 @@ function buildPath(pathDef, allData) {
 	});
 
 	const vocabStartLevel = pacing.kanaLevels + 1;
-	for (const [key, level] of distribute(
-		regularVocab,
-		vocabStartLevel,
-		maxCoreLevels,
-	)) {
+	for (const [key, level] of distribute(regularVocab, vocabStartLevel, maxCoreLevels)) {
 		assignments.set(key, level);
 	}
 
@@ -580,25 +617,15 @@ function buildPath(pathDef, allData) {
 		return (a.frequency_rank || 99999) - (b.frequency_rank || 99999);
 	});
 
-	for (const [key, level] of distribute(
-		grammar,
-		pacing.grammarIntroLevel,
-		maxCoreLevels,
-	)) {
+	for (const [key, level] of distribute(grammar, pacing.grammarIntroLevel, maxCoreLevels)) {
 		assignments.set(key, level);
 	}
 
 	// ── 7. Assign conjugation ──
 
-	conjugation.sort((a, b) =>
-		a.primary_text.localeCompare(b.primary_text, "ja"),
-	);
+	conjugation.sort((a, b) => a.primary_text.localeCompare(b.primary_text, "ja"));
 
-	for (const [key, level] of distribute(
-		conjugation,
-		pacing.conjugationIntroLevel,
-		maxCoreLevels,
-	)) {
+	for (const [key, level] of distribute(conjugation, pacing.conjugationIntroLevel, maxCoreLevels)) {
 		assignments.set(key, level);
 	}
 
@@ -612,11 +639,7 @@ function buildPath(pathDef, allData) {
 		return (a._index || 0) - (b._index || 0);
 	});
 
-	for (const [key, level] of distribute(
-		sentences,
-		pacing.sentenceIntroLevel,
-		maxCoreLevels,
-	)) {
+	for (const [key, level] of distribute(sentences, pacing.sentenceIntroLevel, maxCoreLevels)) {
 		assignments.set(key, level);
 	}
 
@@ -632,14 +655,10 @@ function computeStats(assignments, allData, maxCoreLevels) {
 	// Build item_key -> content_type lookup
 	const keyToType = new Map();
 	for (const item of allData.kana) keyToType.set(item.item_key, "kana");
-	for (const item of allData.vocab)
-		keyToType.set(item.item_key, "vocabulary");
-	for (const item of allData.grammar)
-		keyToType.set(item.item_key, "grammar");
-	for (const item of allData.conjugation)
-		keyToType.set(item.item_key, "conjugation");
-	for (const item of allData.sentences)
-		keyToType.set(item.item_key, "sentence");
+	for (const item of allData.vocab) keyToType.set(item.item_key, "vocabulary");
+	for (const item of allData.grammar) keyToType.set(item.item_key, "grammar");
+	for (const item of allData.conjugation) keyToType.set(item.item_key, "conjugation");
+	for (const item of allData.sentences) keyToType.set(item.item_key, "sentence");
 
 	// Count by content type
 	for (const [itemKey] of assignments) {
@@ -692,12 +711,11 @@ const allData = {
 	kana: JSON.parse(readFileSync(join(DATA_DIR, "kana.json"), "utf8")),
 	vocab: JSON.parse(readFileSync(join(DATA_DIR, "vocabulary.json"), "utf8")),
 	grammar: JSON.parse(readFileSync(join(DATA_DIR, "grammar.json"), "utf8")),
-	conjugation: JSON.parse(
-		readFileSync(join(DATA_DIR, "conjugation.json"), "utf8"),
-	),
-	sentences: JSON.parse(
-		readFileSync(join(DATA_DIR, "sentence.json"), "utf8"),
-	).map((s, i) => ({ ...s, _index: i })),
+	conjugation: JSON.parse(readFileSync(join(DATA_DIR, "conjugation.json"), "utf8")),
+	sentences: JSON.parse(readFileSync(join(DATA_DIR, "sentence.json"), "utf8")).map((s, i) => ({
+		...s,
+		_index: i,
+	})),
 };
 
 console.log(
@@ -710,11 +728,7 @@ for (const [pathId, pathDef] of Object.entries(PATHS)) {
 	console.log(`\nBuilding path: ${pathDef.label} (${pathId})...`);
 
 	const assignments = buildPath(pathDef, allData);
-	const { contentTypes, levelStats } = computeStats(
-		assignments,
-		allData,
-		pathDef.maxCoreLevels,
-	);
+	const { contentTypes, levelStats } = computeStats(assignments, allData, pathDef.maxCoreLevels);
 
 	// Convert Map to plain object for JSON
 	const assignmentsObj = {};
@@ -733,9 +747,7 @@ for (const [pathId, pathDef] of Object.entries(PATHS)) {
 
 	const outPath = join(OUTPUT_DIR, `${pathId}.json`);
 	writeFileSync(outPath, JSON.stringify(output));
-	console.log(
-		`  -> ${outPath} (${assignments.size} items across ${pathDef.maxCoreLevels} levels)`,
-	);
+	console.log(`  -> ${outPath} (${assignments.size} items across ${pathDef.maxCoreLevels} levels)`);
 
 	// Print summary
 	console.log("  Content types:", contentTypes);
@@ -744,12 +756,8 @@ for (const [pathId, pathDef] of Object.entries(PATHS)) {
 	const totals = levelStats.map((s) => s.total);
 	const minTotal = Math.min(...totals.filter((t) => t > 0));
 	const maxTotal = Math.max(...totals);
-	const avgTotal = Math.round(
-		totals.reduce((a, b) => a + b, 0) / totals.length,
-	);
-	console.log(
-		`  Items per level: min=${minTotal}, max=${maxTotal}, avg=${avgTotal}`,
-	);
+	const avgTotal = Math.round(totals.reduce((a, b) => a + b, 0) / totals.length);
+	console.log(`  Items per level: min=${minTotal}, max=${maxTotal}, avg=${avgTotal}`);
 }
 
 console.log("\nDone.");

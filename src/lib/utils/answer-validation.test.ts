@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeLanguageAnswer, fuzzyMatch } from "./answer-validation";
+import { fuzzyMatch, normalizeLanguageAnswer } from "./answer-validation";
 
 describe("Answer Validation", () => {
 	describe("normalizeLanguageAnswer", () => {

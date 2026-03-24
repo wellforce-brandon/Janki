@@ -1,12 +1,9 @@
 <script lang="ts">
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "$lib/components/ui/tabs";
-import {
-	type LanguageItem,
-	searchLanguageItems,
-} from "$lib/db/queries/language";
 import { getKanaScriptLabel } from "$lib/data/kana-groups";
 import { type KanjiLevelItem, searchKanjiItems } from "$lib/db/queries/kanji";
+import { type LanguageItem, searchLanguageItems } from "$lib/db/queries/language";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { speakJapanese } from "$lib/tts/speech";
 import { parseMeanings } from "$lib/utils/kanji";
@@ -68,7 +65,17 @@ function formatLangItem(item: LanguageItem): string {
 }
 
 const srsLabel = (s: number) =>
-	s === 0 ? "New" : s <= 4 ? "Apprentice" : s <= 6 ? "Guru" : s === 7 ? "Master" : s === 8 ? "Enlightened" : "Burned";
+	s === 0
+		? "New"
+		: s <= 4
+			? "Apprentice"
+			: s <= 6
+				? "Guru"
+				: s === 7
+					? "Master"
+					: s === 8
+						? "Enlightened"
+						: "Burned";
 
 async function search(q: string) {
 	if (q.trim().length === 0) {
@@ -85,10 +92,7 @@ async function search(q: string) {
 	kanjiResults = kanjiResult.ok ? kanjiResult.data : [];
 
 	// Language items search (FTS5 with LIKE fallback)
-	const langResult = await searchLanguageItems(
-		q.trim(),
-		contentTypeFilter || undefined,
-	);
+	const langResult = await searchLanguageItems(q.trim(), contentTypeFilter || undefined);
 	if (searchAborted) return;
 	langResults = langResult.ok ? langResult.data : [];
 

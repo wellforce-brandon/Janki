@@ -5,9 +5,9 @@ import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 import { speakJapanese } from "$lib/tts/speech";
 import {
 	getTileClasses,
+	parseCharacterImages,
 	parseMeanings,
 	parsePartsOfSpeech,
-	parseCharacterImages,
 } from "$lib/utils/kanji";
 
 interface Props {
@@ -19,7 +19,9 @@ let { item }: Props = $props();
 let meanings = $derived(parseMeanings(item.meanings));
 let partsOfSpeech = $derived(parsePartsOfSpeech(item.parts_of_speech));
 let characterImages = $derived(parseCharacterImages(item.character_images));
-let hasCharacter = $derived(item.character !== item.character?.toLowerCase() || item.item_type !== "radical");
+let hasCharacter = $derived(
+	item.character !== item.character?.toLowerCase() || item.item_type !== "radical",
+);
 let svgImage = $derived(characterImages.find((img) => img.content_type === "image/svg+xml"));
 let pngImage = $derived(characterImages.find((img) => img.content_type === "image/png"));
 </script>

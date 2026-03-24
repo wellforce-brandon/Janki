@@ -1,16 +1,16 @@
 <script lang="ts">
 import { ChevronLeft, ChevronRight, Volume2 } from "@lucide/svelte";
+import SrsStageIndicator from "$lib/components/kanji/SrsStageIndicator.svelte";
 import ContentTypeBadge from "$lib/components/language/ContentTypeBadge.svelte";
 import PitchAccentDisplay from "$lib/components/language/PitchAccentDisplay.svelte";
 import WkBadge from "$lib/components/language/WkBadge.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import SrsStageIndicator from "$lib/components/kanji/SrsStageIndicator.svelte";
 import {
-	getLanguageItemById,
-	getAdjacentLanguageItem,
 	findWkCrossReferences,
+	getAdjacentLanguageItem,
+	getLanguageItemById,
 	type LanguageItem,
 	type WkCrossReference,
 } from "$lib/db/queries/language";
@@ -38,11 +38,16 @@ let wkRefs = $state<WkCrossReference[]>([]);
 function getParentView(): string {
 	if (fromLevel) return "lang-level";
 	switch (item?.content_type ?? contentType) {
-		case "vocabulary": return "lang-vocabulary";
-		case "grammar": return "lang-grammar";
-		case "sentence": return "lang-sentences";
-		case "conjugation": return "lang-conjugation";
-		default: return "lang-overview";
+		case "vocabulary":
+			return "lang-vocabulary";
+		case "grammar":
+			return "lang-grammar";
+		case "sentence":
+			return "lang-sentences";
+		case "conjugation":
+			return "lang-conjugation";
+		default:
+			return "lang-overview";
 	}
 }
 
@@ -71,34 +76,37 @@ async function loadItem(id: number) {
 
 	try {
 		const result = await getLanguageItemById(id);
-		if (myId !== fetchId) { console.warn("[detail] fetchId mismatch after getItem", myId, fetchId); return; }
+		if (myId !== fetchId) {
+			console.warn("[detail] fetchId mismatch after getItem", myId, fetchId);
+			return;
+		}
 		if (result.ok) {
 			item = result.data;
 			if (item) {
 				// Load adjacent items for keyboard nav (non-blocking)
-				getAdjacentLanguageItem(
-					item.content_type,
-					item.jlpt_level,
-					item.id,
-				).then((adjResult) => {
-					if (myId !== fetchId) return;
-					if (adjResult.ok) {
-						prevItem = adjResult.data.prev;
-						nextItem = adjResult.data.next;
-					}
-				}).catch(console.error);
+				getAdjacentLanguageItem(item.content_type, item.jlpt_level, item.id)
+					.then((adjResult) => {
+						if (myId !== fetchId) return;
+						if (adjResult.ok) {
+							prevItem = adjResult.data.prev;
+							nextItem = adjResult.data.next;
+						}
+					})
+					.catch(console.error);
 
 				// Load WK cross-references (non-blocking)
 				const kanji = new Set<string>();
 				for (const char of item.primary_text) {
 					const code = char.codePointAt(0) ?? 0;
-					if (code >= 0x4E00 && code <= 0x9FFF) kanji.add(char);
+					if (code >= 0x4e00 && code <= 0x9fff) kanji.add(char);
 				}
 				if (kanji.size > 0) {
-					findWkCrossReferences([...kanji]).then((wkResult) => {
-						if (myId !== fetchId) return;
-						if (wkResult.ok) wkRefs = wkResult.data;
-					}).catch(console.error);
+					findWkCrossReferences([...kanji])
+						.then((wkResult) => {
+							if (myId !== fetchId) return;
+							if (wkResult.ok) wkRefs = wkResult.data;
+						})
+						.catch(console.error);
 				}
 			}
 		} else {

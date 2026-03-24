@@ -7,11 +7,11 @@ import {
 } from "$lib/db/queries/kanji";
 import { parseReadings, parseWkIdArray } from "$lib/utils/kanji";
 import ItemHeader from "./ItemHeader.svelte";
-import MnemonicSection from "./MnemonicSection.svelte";
-import UserSynonyms from "./UserSynonyms.svelte";
-import UserNotes from "./UserNotes.svelte";
-import RelatedItemsGrid from "./RelatedItemsGrid.svelte";
 import ItemProgression from "./ItemProgression.svelte";
+import MnemonicSection from "./MnemonicSection.svelte";
+import RelatedItemsGrid from "./RelatedItemsGrid.svelte";
+import UserNotes from "./UserNotes.svelte";
+import UserSynonyms from "./UserSynonyms.svelte";
 
 interface Props {
 	item: KanjiLevelItem;
@@ -44,9 +44,15 @@ async function loadRelated(current: KanjiLevelItem) {
 	const similarIds = parseWkIdArray(current.visually_similar_ids);
 
 	const [compResult, simResult, vocabResult] = await Promise.all([
-		componentIds.length > 0 ? getItemsByWkIds(componentIds) : Promise.resolve({ ok: true as const, data: [] }),
-		similarIds.length > 0 ? getItemsByWkIds(similarIds) : Promise.resolve({ ok: true as const, data: [] }),
-		current.wk_id ? getItemsContainingComponent(current.wk_id, "vocab") : Promise.resolve({ ok: true as const, data: [] }),
+		componentIds.length > 0
+			? getItemsByWkIds(componentIds)
+			: Promise.resolve({ ok: true as const, data: [] }),
+		similarIds.length > 0
+			? getItemsByWkIds(similarIds)
+			: Promise.resolve({ ok: true as const, data: [] }),
+		current.wk_id
+			? getItemsContainingComponent(current.wk_id, "vocab")
+			: Promise.resolve({ ok: true as const, data: [] }),
 	]);
 
 	if (compResult.ok) componentRadicals = compResult.data;

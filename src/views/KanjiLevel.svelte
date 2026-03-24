@@ -13,7 +13,13 @@ import { getStageDots, getTileClasses } from "$lib/utils/kanji";
 
 let loading = $state(true);
 let items = $state<LevelItemsByType>({ radicals: [], kanji: [], vocab: [] });
-let progress = $state<LevelProgress>({ level: 1, total: 0, guru_plus: 0, unlocked: 0, percentage: 0 });
+let progress = $state<LevelProgress>({
+	level: 1,
+	total: 0,
+	guru_plus: 0,
+	unlocked: 0,
+	percentage: 0,
+});
 
 let level = $derived(Number(viewParams().level) || 1);
 

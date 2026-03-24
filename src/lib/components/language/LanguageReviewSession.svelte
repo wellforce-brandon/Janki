@@ -1,13 +1,17 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
-import { type LanguageItem } from "$lib/db/queries/language";
-import { getTypeLabel, getTypeColor } from "$lib/utils/content-type";
-import { reviewLanguageItem, undoLanguageReview, type LanguageReviewResult } from "$lib/srs/language-srs";
+import type { LanguageItem } from "$lib/db/queries/language";
+import {
+	type LanguageReviewResult,
+	reviewLanguageItem,
+	undoLanguageReview,
+} from "$lib/srs/language-srs";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
 import { speakJapanese } from "$lib/tts/speech";
-import { normalizeLanguageAnswer, fuzzyMatch } from "$lib/utils/answer-validation";
+import { fuzzyMatch, normalizeLanguageAnswer } from "$lib/utils/answer-validation";
 import { fisherYatesShuffle } from "$lib/utils/common";
+import { getTypeColor, getTypeLabel } from "$lib/utils/content-type";
 
 interface Props {
 	items: LanguageItem[];
@@ -169,17 +173,20 @@ async function submitAnswer() {
 			showStageTransition(oldStage, result);
 			showInfoPeek = true;
 
-			undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
-				index: currentIndex,
-				wasCorrect: true,
-				durationMs,
-				reviewResult: result,
-				item: current,
-				prevCorrectCount: current.correct_count,
-				prevIncorrectCount: current.incorrect_count,
-				prevSrsStage: oldStage,
-				prevNextReview,
-			}];
+			undoStack = [
+				...undoStack.slice(-(MAX_UNDO_DEPTH - 1)),
+				{
+					index: currentIndex,
+					wasCorrect: true,
+					durationMs,
+					reviewResult: result,
+					item: current,
+					prevCorrectCount: current.correct_count,
+					prevIncorrectCount: current.incorrect_count,
+					prevSrsStage: oldStage,
+					prevNextReview,
+				},
+			];
 
 			safeTimeout(() => advanceToNext(), 1200);
 		} else {
@@ -191,17 +198,20 @@ async function submitAnswer() {
 			showStageTransition(oldStage, result);
 			showInfoPeek = true;
 
-			undoStack = [...undoStack.slice(-(MAX_UNDO_DEPTH - 1)), {
-				index: currentIndex,
-				wasCorrect: false,
-				durationMs,
-				reviewResult: result,
-				item: current,
-				prevCorrectCount: current.correct_count,
-				prevIncorrectCount: current.incorrect_count,
-				prevSrsStage: oldStage,
-				prevNextReview,
-			}];
+			undoStack = [
+				...undoStack.slice(-(MAX_UNDO_DEPTH - 1)),
+				{
+					index: currentIndex,
+					wasCorrect: false,
+					durationMs,
+					reviewResult: result,
+					item: current,
+					prevCorrectCount: current.correct_count,
+					prevIncorrectCount: current.incorrect_count,
+					prevSrsStage: oldStage,
+					prevNextReview,
+				},
+			];
 		}
 	} catch (e) {
 		console.error("[review] Failed to process review:", e);

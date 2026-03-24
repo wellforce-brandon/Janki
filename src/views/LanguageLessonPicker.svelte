@@ -2,14 +2,11 @@
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
-import {
-	getAvailableLessons,
-	type LanguageItem,
-} from "$lib/db/queries/language";
 import { getKanaGroupLabel } from "$lib/data/kana-groups";
-import { getTypeLabel, getTypeColor } from "$lib/utils/content-type";
+import { getAvailableLessons, type LanguageItem } from "$lib/db/queries/language";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
+import { getTypeColor, getTypeLabel } from "$lib/utils/content-type";
 
 let loading = $state(true);
 let allItems = $state<LanguageItem[]>([]);

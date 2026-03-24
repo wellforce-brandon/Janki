@@ -2,11 +2,11 @@
 import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import type { LanguageItem } from "$lib/db/queries/language";
-import { getTypeLabel, getTypeColor } from "$lib/utils/content-type";
 import { completeLessonBatch } from "$lib/srs/language-lessons";
 import { addToast } from "$lib/stores/toast.svelte";
 import { normalizeLanguageAnswer } from "$lib/utils/answer-validation";
 import { fisherYatesShuffle } from "$lib/utils/common";
+import { getTypeColor, getTypeLabel } from "$lib/utils/content-type";
 
 interface Props {
 	items: LanguageItem[];
@@ -101,12 +101,16 @@ function checkAnswer(item: LanguageItem, input: string): boolean {
 				accepted.push(normalizeLanguageAnswer(m));
 			}
 		}
-		return accepted.some((a) => a === userAnswer || userAnswer.includes(a) || a.includes(userAnswer));
+		return accepted.some(
+			(a) => a === userAnswer || userAnswer.includes(a) || a.includes(userAnswer),
+		);
 	}
 
 	if (item.content_type === "sentence") {
 		const expected = normalizeLanguageAnswer(item.sentence_en ?? item.meaning ?? "");
-		return expected === userAnswer || userAnswer.includes(expected) || expected.includes(userAnswer);
+		return (
+			expected === userAnswer || userAnswer.includes(expected) || expected.includes(userAnswer)
+		);
 	}
 
 	// vocabulary, conjugation

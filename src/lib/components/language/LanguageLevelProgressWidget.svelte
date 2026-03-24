@@ -1,147 +1,187 @@
 <script lang="ts">
-	import { ChevronLeft, ChevronRight } from "@lucide/svelte";
-	import {
-		getAllLanguageLevelProgress,
-		getLanguageLevelItems,
-		getLanguageLevelProgressByType,
-		getLanguageUserLevel,
-		type LanguageLevelItem,
-		type LanguageLevelProgressByType,
-		type LanguageLevelProgress,
-	} from "$lib/db/queries/language";
-	import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
-	import { getStageDots } from "$lib/utils/kanji";
-	import { navigate } from "$lib/stores/navigation.svelte";
+import { ChevronLeft, ChevronRight } from "@lucide/svelte";
+import {
+	getAllLanguageLevelProgress,
+	getLanguageLevelItems,
+	getLanguageLevelProgressByType,
+	getLanguageUserLevel,
+	type LanguageLevelItem,
+	type LanguageLevelProgress,
+	type LanguageLevelProgressByType,
+} from "$lib/db/queries/language";
+import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
+import { navigate } from "$lib/stores/navigation.svelte";
+import { getStageDots } from "$lib/utils/kanji";
 
-	interface Props {
-		userLevel: number;
-	}
+interface Props {
+	userLevel: number;
+}
 
-	let { userLevel }: Props = $props();
+let { userLevel }: Props = $props();
 
-	type ViewMode = "summary" | "type-detail" | "level-picker";
+type ViewMode = "summary" | "type-detail" | "level-picker";
 
-	// eslint-disable-next-line svelte/valid-compile -- intentional: capture initial value for local browsing
-	let selectedLevel = $state(userLevel);
-	let progressByType = $state<LanguageLevelProgressByType[]>([]);
-	let allItems = $state<LanguageLevelItem[]>([]);
-	let loading = $state(false);
-	let fetchId = 0;
+// eslint-disable-next-line svelte/valid-compile -- intentional: capture initial value for local browsing
+let selectedLevel = $state(userLevel);
+let progressByType = $state<LanguageLevelProgressByType[]>([]);
+let allItems = $state<LanguageLevelItem[]>([]);
+let loading = $state(false);
+let fetchId = 0;
 
-	let viewMode = $state<ViewMode>("summary");
-	let expandedType = $state("vocabulary");
+let viewMode = $state<ViewMode>("summary");
+let expandedType = $state("vocabulary");
 
-	let levelPickerData = $state<LanguageLevelProgress[]>([]);
-	let levelPickerUserLevel = $state(1);
-	let levelPickerLoading = $state(false);
+let levelPickerData = $state<LanguageLevelProgress[]>([]);
+let levelPickerUserLevel = $state(1);
+let levelPickerLoading = $state(false);
 
-	const TYPE_CONFIG = [
-		{ key: "kana", label: "Kana", icon: "bg-teal-500 dark:bg-teal-600", border: "border-teal-200 dark:border-teal-800" },
-		{ key: "grammar", label: "Grammar", icon: "bg-amber-500 dark:bg-amber-600", border: "border-amber-200 dark:border-amber-800" },
-		{ key: "vocabulary", label: "Vocabulary", icon: "bg-purple-500 dark:bg-purple-600", border: "border-purple-200 dark:border-purple-800" },
-		{ key: "conjugation", label: "Conjugation", icon: "bg-rose-500 dark:bg-rose-600", border: "border-rose-200 dark:border-rose-800" },
-		{ key: "sentence", label: "Sentences", icon: "bg-blue-500 dark:bg-blue-600", border: "border-blue-200 dark:border-blue-800" },
-	] as const;
+const TYPE_CONFIG = [
+	{
+		key: "kana",
+		label: "Kana",
+		icon: "bg-teal-500 dark:bg-teal-600",
+		border: "border-teal-200 dark:border-teal-800",
+	},
+	{
+		key: "grammar",
+		label: "Grammar",
+		icon: "bg-amber-500 dark:bg-amber-600",
+		border: "border-amber-200 dark:border-amber-800",
+	},
+	{
+		key: "vocabulary",
+		label: "Vocabulary",
+		icon: "bg-purple-500 dark:bg-purple-600",
+		border: "border-purple-200 dark:border-purple-800",
+	},
+	{
+		key: "conjugation",
+		label: "Conjugation",
+		icon: "bg-rose-500 dark:bg-rose-600",
+		border: "border-rose-200 dark:border-rose-800",
+	},
+	{
+		key: "sentence",
+		label: "Sentences",
+		icon: "bg-blue-500 dark:bg-blue-600",
+		border: "border-blue-200 dark:border-blue-800",
+	},
+] as const;
 
-	function getTypeProgress(type: string) {
-		return progressByType.find((p) => p.content_type === type) ?? { total: 0, guru_plus: 0, unlocked: 0 };
-	}
-
-	let typeCards = $derived(
-		TYPE_CONFIG.map((cfg) => {
-			const data = getTypeProgress(cfg.key);
-			return { ...cfg, guru: data.guru_plus, total: data.total };
-		}).filter((c) => c.total > 0),
+function getTypeProgress(type: string) {
+	return (
+		progressByType.find((p) => p.content_type === type) ?? { total: 0, guru_plus: 0, unlocked: 0 }
 	);
+}
 
-	let isLevelLocked = $derived(progressByType.every((p) => p.unlocked === 0));
+let typeCards = $derived(
+	TYPE_CONFIG.map((cfg) => {
+		const data = getTypeProgress(cfg.key);
+		return { ...cfg, guru: data.guru_plus, total: data.total };
+	}).filter((c) => c.total > 0),
+);
 
-	let vocabNeeded = $derived(() => {
-		const vocab = getTypeProgress("vocabulary");
-		return Math.max(0, Math.ceil(vocab.total * 0.9) - vocab.guru_plus);
-	});
+let isLevelLocked = $derived(progressByType.every((p) => p.unlocked === 0));
 
-	let expandedItems = $derived(allItems.filter((i) => i.content_type === expandedType));
-	let expandedGuruCount = $derived(expandedItems.filter((i) => i.srs_stage >= 5).length);
+let vocabNeeded = $derived(() => {
+	const vocab = getTypeProgress("vocabulary");
+	return Math.max(0, Math.ceil(vocab.total * 0.9) - vocab.guru_plus);
+});
 
-	function getBlockColor(stage: number): string {
-		if (stage === 0) return "bg-muted";
-		if (stage <= 4) return "bg-pink-400 dark:bg-pink-500";
-		if (stage <= 6) return "bg-green-500 dark:bg-green-400";
-		if (stage === 7) return "bg-blue-400 dark:bg-blue-300";
-		if (stage === 8) return "bg-yellow-400 dark:bg-yellow-300";
-		return "bg-zinc-600 dark:bg-zinc-500";
-	}
+let expandedItems = $derived(allItems.filter((i) => i.content_type === expandedType));
+let expandedGuruCount = $derived(expandedItems.filter((i) => i.srs_stage >= 5).length);
 
-	function getTypeColor(type: string): string {
-		const colors: Record<string, string> = {
-			kana: "bg-teal-500",
-			vocabulary: "bg-purple-500",
-			grammar: "bg-amber-500",
-			sentence: "bg-blue-500",
-			conjugation: "bg-rose-500",
-		};
-		return colors[type] ?? "bg-gray-500";
-	}
+function getBlockColor(stage: number): string {
+	if (stage === 0) return "bg-muted";
+	if (stage <= 4) return "bg-pink-400 dark:bg-pink-500";
+	if (stage <= 6) return "bg-green-500 dark:bg-green-400";
+	if (stage === 7) return "bg-blue-400 dark:bg-blue-300";
+	if (stage === 8) return "bg-yellow-400 dark:bg-yellow-300";
+	return "bg-zinc-600 dark:bg-zinc-500";
+}
 
-	function getTileClasses(item: LanguageLevelItem): string {
-		if (item.srs_stage === 0) return "border-2 border-dashed border-muted-foreground/30 bg-transparent text-muted-foreground/50";
-		if (item.srs_stage === 9) return "bg-zinc-700 dark:bg-zinc-600 text-zinc-300 border border-transparent";
-		if (!item.lesson_completed_at) return "bg-pink-500/30 dark:bg-pink-400/30 text-pink-600 dark:text-pink-400 border border-pink-500/50";
-		if (item.srs_stage <= 4) return "bg-pink-500 dark:bg-pink-600 text-white border border-transparent";
-		if (item.srs_stage <= 6) return "bg-purple-500 dark:bg-purple-600 text-white border border-transparent";
-		if (item.srs_stage === 7) return "bg-blue-500 dark:bg-blue-600 text-white border border-transparent";
-		if (item.srs_stage === 8) return "bg-sky-500 dark:bg-sky-600 text-white border border-transparent";
-		return "bg-muted text-muted-foreground border border-transparent";
-	}
+function getTypeColor(type: string): string {
+	const colors: Record<string, string> = {
+		kana: "bg-teal-500",
+		vocabulary: "bg-purple-500",
+		grammar: "bg-amber-500",
+		sentence: "bg-blue-500",
+		conjugation: "bg-rose-500",
+	};
+	return colors[type] ?? "bg-gray-500";
+}
 
-	function handleTypeClick(key: string) {
-		expandedType = key;
-		viewMode = "type-detail";
-	}
+function getTileClasses(item: LanguageLevelItem): string {
+	if (item.srs_stage === 0)
+		return "border-2 border-dashed border-muted-foreground/30 bg-transparent text-muted-foreground/50";
+	if (item.srs_stage === 9)
+		return "bg-zinc-700 dark:bg-zinc-600 text-zinc-300 border border-transparent";
+	if (!item.lesson_completed_at)
+		return "bg-pink-500/30 dark:bg-pink-400/30 text-pink-600 dark:text-pink-400 border border-pink-500/50";
+	if (item.srs_stage <= 4)
+		return "bg-pink-500 dark:bg-pink-600 text-white border border-transparent";
+	if (item.srs_stage <= 6)
+		return "bg-purple-500 dark:bg-purple-600 text-white border border-transparent";
+	if (item.srs_stage === 7)
+		return "bg-blue-500 dark:bg-blue-600 text-white border border-transparent";
+	if (item.srs_stage === 8)
+		return "bg-sky-500 dark:bg-sky-600 text-white border border-transparent";
+	return "bg-muted text-muted-foreground border border-transparent";
+}
 
-	async function openLevelPicker() {
-		viewMode = "level-picker";
-		if (levelPickerData.length > 0) return;
-		levelPickerLoading = true;
-		const [progressR, levelR] = await Promise.all([getAllLanguageLevelProgress(), getLanguageUserLevel()]);
-		if (progressR.ok) levelPickerData = progressR.data;
-		if (levelR.ok) levelPickerUserLevel = levelR.data;
-		levelPickerLoading = false;
-	}
+function handleTypeClick(key: string) {
+	expandedType = key;
+	viewMode = "type-detail";
+}
 
-	function pickLevel(level: number) {
-		selectedLevel = level;
-		viewMode = "summary";
-	}
+async function openLevelPicker() {
+	viewMode = "level-picker";
+	if (levelPickerData.length > 0) return;
+	levelPickerLoading = true;
+	const [progressR, levelR] = await Promise.all([
+		getAllLanguageLevelProgress(),
+		getLanguageUserLevel(),
+	]);
+	if (progressR.ok) levelPickerData = progressR.data;
+	if (levelR.ok) levelPickerUserLevel = levelR.data;
+	levelPickerLoading = false;
+}
 
-	function getPickerLevelClasses(level: number): string {
-		const progress = levelPickerData.find((p) => p.level === level);
-		if (level === levelPickerUserLevel) return "bg-primary text-primary-foreground font-bold";
-		if (progress && progress.percentage >= 90) return "bg-green-500 dark:bg-green-600 text-white font-semibold";
-		if (progress && progress.unlocked > 0) return "bg-accent text-accent-foreground font-medium";
-		return "bg-muted text-muted-foreground";
-	}
+function pickLevel(level: number) {
+	selectedLevel = level;
+	viewMode = "summary";
+}
 
-	function getPickerProgress(level: number): number {
-		const p = levelPickerData.find((lp) => lp.level === level);
-		return p?.percentage ?? 0;
-	}
+function getPickerLevelClasses(level: number): string {
+	const progress = levelPickerData.find((p) => p.level === level);
+	if (level === levelPickerUserLevel) return "bg-primary text-primary-foreground font-bold";
+	if (progress && progress.percentage >= 90)
+		return "bg-green-500 dark:bg-green-600 text-white font-semibold";
+	if (progress && progress.unlocked > 0) return "bg-accent text-accent-foreground font-medium";
+	return "bg-muted text-muted-foreground";
+}
 
-	async function loadLevel(level: number) {
-		const id = ++fetchId;
-		loading = true;
-		const [progressR, itemsR] = await Promise.all([
-			getLanguageLevelProgressByType(level),
-			getLanguageLevelItems(level),
-		]);
-		if (id !== fetchId) return;
-		if (progressR.ok) progressByType = progressR.data;
-		if (itemsR.ok) allItems = itemsR.data;
-		loading = false;
-	}
+function getPickerProgress(level: number): number {
+	const p = levelPickerData.find((lp) => lp.level === level);
+	return p?.percentage ?? 0;
+}
 
-	$effect(() => { loadLevel(selectedLevel); });
+async function loadLevel(level: number) {
+	const id = ++fetchId;
+	loading = true;
+	const [progressR, itemsR] = await Promise.all([
+		getLanguageLevelProgressByType(level),
+		getLanguageLevelItems(level),
+	]);
+	if (id !== fetchId) return;
+	if (progressR.ok) progressByType = progressR.data;
+	if (itemsR.ok) allItems = itemsR.data;
+	loading = false;
+}
+
+$effect(() => {
+	loadLevel(selectedLevel);
+});
 </script>
 
 <div class="rounded-lg border bg-card p-5">

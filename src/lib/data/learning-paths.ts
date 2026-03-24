@@ -107,12 +107,7 @@ export const LEARNING_PATHS: Record<PathId, LearningPath> = {
 	},
 };
 
-export const PATH_IDS: PathId[] = [
-	"n5",
-	"conversational",
-	"n1",
-	"completionist",
-];
+export const PATH_IDS: PathId[] = ["n5", "conversational", "n1", "completionist"];
 
 export const DEFAULT_PATH: PathId = "n5";
 

@@ -1,11 +1,11 @@
 <script lang="ts">
 import { ChevronLeft, ChevronRight } from "@lucide/svelte";
+import KanjiItemDetail from "$lib/components/kanji/detail/KanjiItemDetail.svelte";
+import RadicalDetail from "$lib/components/kanji/detail/RadicalDetail.svelte";
+import VocabDetail from "$lib/components/kanji/detail/VocabDetail.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import RadicalDetail from "$lib/components/kanji/detail/RadicalDetail.svelte";
-import KanjiItemDetail from "$lib/components/kanji/detail/KanjiItemDetail.svelte";
-import VocabDetail from "$lib/components/kanji/detail/VocabDetail.svelte";
 import { getAdjacentKanji, getKanjiItemById, type KanjiLevelItem } from "$lib/db/queries/kanji";
 import { navigate } from "$lib/stores/navigation.svelte";
 

@@ -1,15 +1,8 @@
 <script lang="ts">
 import { BookOpen, Globe, GraduationCap, Trophy } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
-import {
-	LEARNING_PATHS,
-	PATH_IDS,
-	type PathId,
-} from "$lib/data/learning-paths";
-import {
-	setLanguagePath,
-	clearLanguageLevelsSeed,
-} from "$lib/db/queries/language";
+import { LEARNING_PATHS, PATH_IDS, type PathId } from "$lib/data/learning-paths";
+import { clearLanguageLevelsSeed, setLanguagePath } from "$lib/db/queries/language";
 import { assignLanguageLevels } from "$lib/db/seed/language-levels";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -101,16 +94,10 @@ async function confirmSelection() {
 			return;
 		}
 		await assignLanguageLevels();
-		addToast(
-			`Learning path set to ${LEARNING_PATHS[selected].label}`,
-			"success",
-		);
+		addToast(`Learning path set to ${LEARNING_PATHS[selected].label}`, "success");
 		onselected();
 	} catch (e) {
-		addToast(
-			`Path setup failed: ${e instanceof Error ? e.message : String(e)}`,
-			"error",
-		);
+		addToast(`Path setup failed: ${e instanceof Error ? e.message : String(e)}`, "error");
 	} finally {
 		applying = false;
 	}

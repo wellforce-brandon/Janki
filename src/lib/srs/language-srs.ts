@@ -1,16 +1,15 @@
+import { withTransaction } from "../db/database";
 import {
+	deleteLatestLanguageReview,
 	getLanguageItemById,
+	logLanguageReviewExec,
 	updateLanguageItemSrs,
 	updateLanguageItemSrsExec,
-	logLanguageReview,
-	logLanguageReviewExec,
-	deleteLatestLanguageReview,
 } from "../db/queries/language";
-import { invalidateCache } from "../db/query-cache";
 import { updateDailyStats } from "../db/queries/stats";
-import { safeQuery, withTransaction } from "../db/database";
-import { calculateNextReview, calculateDrop } from "./srs-common";
+import { invalidateCache } from "../db/query-cache";
 import { checkAndUnlockWithinLevel } from "./language-unlock";
+import { calculateDrop, calculateNextReview } from "./srs-common";
 
 export { calculateNextReview };
 
@@ -38,7 +37,8 @@ export async function reviewLanguageItem(
 	const currentStage = item.srs_stage;
 
 	// Compute isNew BEFORE any DB updates -- relies on pre-update counts from the fetched item
-	const isNew = item.correct_count === 0 && item.incorrect_count === 0 && item.lesson_completed_at !== null;
+	const isNew =
+		item.correct_count === 0 && item.incorrect_count === 0 && item.lesson_completed_at !== null;
 
 	let newStage: number;
 	if (correct) {
@@ -51,7 +51,10 @@ export async function reviewLanguageItem(
 
 	await withTransaction(async (db) => {
 		await updateLanguageItemSrsExec(
-			db, itemId, newStage, nextReview,
+			db,
+			itemId,
+			newStage,
+			nextReview,
 			item.correct_count + (correct ? 1 : 0),
 			item.incorrect_count + (correct ? 0 : 1),
 		);
@@ -70,7 +73,16 @@ export async function reviewLanguageItem(
 				correct_count = correct_count + ?,
 				incorrect_count = incorrect_count + ?,
 				time_spent_ms = time_spent_ms + ?`,
-			[isNew_, correctVal, incorrectVal, durationMs ?? 0, isNew_, correctVal, incorrectVal, durationMs ?? 0],
+			[
+				isNew_,
+				correctVal,
+				incorrectVal,
+				durationMs ?? 0,
+				isNew_,
+				correctVal,
+				incorrectVal,
+				durationMs ?? 0,
+			],
 		);
 	});
 

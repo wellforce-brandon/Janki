@@ -1,15 +1,15 @@
+import type { QueryResult } from "../db/database";
 import {
-	getAvailableLessons,
-	getAvailableLessonCount,
-	getTodayLanguageLessonCount,
-	markLessonsBatchCompleted,
 	type ContentType,
+	getAvailableLessonCount,
+	getAvailableLessons,
+	getTodayLanguageLessonCount,
 	type LanguageItem,
+	markLessonsBatchCompleted,
 } from "../db/queries/language";
+import { getSettings } from "../stores/app-settings.svelte";
 import { calculateNextReview } from "./language-srs";
 import { checkAndUnlockWithinLevel } from "./language-unlock";
-import type { QueryResult } from "../db/database";
-import { getSettings } from "../stores/app-settings.svelte";
 
 const DEFAULT_BATCH_SIZE = 5;
 
@@ -60,9 +60,7 @@ export async function getNextLessonBatch(
  * First review is at Apprentice 1 interval (4 hours, rounded to top of hour).
  * Pass the full items array to avoid re-fetching by ID for level info.
  */
-export async function completeLessonBatch(
-	items: LanguageItem[],
-): Promise<QueryResult<void>> {
+export async function completeLessonBatch(items: LanguageItem[]): Promise<QueryResult<void>> {
 	const nextReview = calculateNextReview(1); // Apprentice 1 = 4 hours
 	if (!nextReview) {
 		return { ok: false, error: "Failed to calculate next review time" };

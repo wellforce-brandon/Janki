@@ -18,8 +18,14 @@
 			"!**/src-tauri",
 			"!**/dist",
 			"!**/public/data",
+			"!**/data",
 			"!**/.claude"
 		]
+	},
+	"css": {
+		"parser": { "cssModules": true, "tailwindDirectives": true },
+		"formatter": { "enabled": false },
+		"linter": { "enabled": false }
 	},
 	"overrides": [
 		{
@@ -29,6 +35,17 @@
 					"correctness": {
 						"noUnusedImports": "off",
 						"noUnusedVariables": "off"
+					}
+				}
+			},
+			"formatter": { "enabled": false }
+		},
+		{
+			"includes": ["scripts/**"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noAssignInExpressions": "off"
 					}
 				}
 			}

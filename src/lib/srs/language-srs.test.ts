@@ -1,10 +1,14 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { calculateNextReview } from "./language-srs";
 
 // Mock DB modules -- withTransaction executes the callback with a mock db
 const mockExecute = vi.fn().mockResolvedValue({ rowsAffected: 1 });
 vi.mock("../db/database", () => ({
-	safeQuery: vi.fn((fn: () => Promise<unknown>) => fn().then((data) => ({ ok: true, data })).catch((e) => ({ ok: false, error: String(e) }))),
+	safeQuery: vi.fn((fn: () => Promise<unknown>) =>
+		fn()
+			.then((data) => ({ ok: true, data }))
+			.catch((e) => ({ ok: false, error: String(e) })),
+	),
 	withTransaction: vi.fn(async (fn: (db: { execute: typeof mockExecute }) => Promise<unknown>) => {
 		return fn({ execute: mockExecute });
 	}),
@@ -69,7 +73,7 @@ describe("Language SRS", () => {
 			const results: Date[] = [];
 			for (let stage = 1; stage <= 8; stage++) {
 				const result = calculateNextReview(stage);
-				results.push(new Date(result!.replace(" ", "T") + "Z"));
+				results.push(new Date(`${result?.replace(" ", "T")}Z`));
 			}
 			for (let i = 1; i < results.length; i++) {
 				expect(results[i].getTime()).toBeGreaterThanOrEqual(results[i - 1].getTime());

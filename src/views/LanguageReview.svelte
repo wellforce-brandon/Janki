@@ -1,18 +1,18 @@
 <script lang="ts">
 import ContentTypeFilter from "$lib/components/language/ContentTypeFilter.svelte";
-import LevelUpCelebration from "$lib/components/language/LevelUpCelebration.svelte";
-import LanguageReviewSession from "$lib/components/language/LanguageReviewSession.svelte";
 import type { ReviewSummary } from "$lib/components/language/LanguageReviewSession.svelte";
+import LanguageReviewSession from "$lib/components/language/LanguageReviewSession.svelte";
+import LevelUpCelebration from "$lib/components/language/LevelUpCelebration.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import {
-	getDueLanguageItems,
-	getDueLanguageCount,
+	type ContentType,
 	getAvailableLessonCount,
+	getDueLanguageCount,
+	getDueLanguageItems,
 	getLanguageUserLevel,
 	getTodayLanguageReviewCount,
-	type ContentType,
 	type LanguageItem,
 } from "$lib/db/queries/language";
 import { checkLevelProgression } from "$lib/srs/language-unlock";
@@ -76,7 +76,10 @@ async function handleComplete(result: ReviewSummary) {
 		showLevelUp = true;
 	}
 	if (progressionResult.unlockedCount > 0) {
-		addToast(`${progressionResult.unlockedCount} new item${progressionResult.unlockedCount > 1 ? "s" : ""} unlocked!`, "success");
+		addToast(
+			`${progressionResult.unlockedCount} new item${progressionResult.unlockedCount > 1 ? "s" : ""} unlocked!`,
+			"success",
+		);
 	}
 
 	await loadDueItems();

@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { getCached, setCache, invalidateCache } from "./query-cache";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getCached, invalidateCache, setCache } from "./query-cache";
 
 describe("Query Cache", () => {
 	beforeEach(() => {

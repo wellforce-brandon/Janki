@@ -1,5 +1,5 @@
-import type { LanguageItem } from "$lib/db/queries/language";
 import { getKanaScriptLabel } from "$lib/data/kana-groups";
+import type { LanguageItem } from "$lib/db/queries/language";
 
 /** Get display label for a content type. For kana items, shows Hiragana/Katakana. */
 export function getTypeLabel(type: string, item?: LanguageItem): string {

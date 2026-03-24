@@ -1,5 +1,5 @@
 import { getDb } from "../database";
-import { isKanjiSeeded, markKanjiSeeded, computeFirstReviewTime } from "../queries/kanji";
+import { computeFirstReviewTime, isKanjiSeeded, markKanjiSeeded } from "../queries/kanji";
 
 interface WkMeaning {
 	meaning: string;
@@ -114,26 +114,25 @@ export async function seedKanjiData(): Promise<void> {
 	// Insert radicals
 	await db.execute("BEGIN");
 	try {
-	for (const r of radicals) {
-		const meanings = r.meanings.map((m) => m.meaning);
-		const character = r.character || r.slug;
-		const charImages =
-			r.character_images?.length > 0 ? JSON.stringify(r.character_images) : null;
-		await db.execute(
-			`INSERT INTO kanji_levels (level, item_type, character, meanings, mnemonic_meaning, image_url, wk_id, character_images)
+		for (const r of radicals) {
+			const meanings = r.meanings.map((m) => m.meaning);
+			const character = r.character || r.slug;
+			const charImages = r.character_images?.length > 0 ? JSON.stringify(r.character_images) : null;
+			await db.execute(
+				`INSERT INTO kanji_levels (level, item_type, character, meanings, mnemonic_meaning, image_url, wk_id, character_images)
 			VALUES (?, 'radical', ?, ?, ?, ?, ?, ?)`,
-			[
-				r.level,
-				character,
-				JSON.stringify(meanings),
-				r.meaning_mnemonic || null,
-				r.image_url || null,
-				r.id,
-				charImages,
-			],
-		);
-	}
-	await db.execute("COMMIT");
+				[
+					r.level,
+					character,
+					JSON.stringify(meanings),
+					r.meaning_mnemonic || null,
+					r.image_url || null,
+					r.id,
+					charImages,
+				],
+			);
+		}
+		await db.execute("COMMIT");
 	} catch (e) {
 		await db.execute("ROLLBACK").catch(() => {});
 		throw e;
@@ -142,43 +141,41 @@ export async function seedKanjiData(): Promise<void> {
 	// Insert kanji
 	await db.execute("BEGIN");
 	try {
-	for (const k of kanji) {
-		const meanings = k.meanings.map((m) => m.meaning);
-		const onReadings = k.readings
-			.filter((r) => r.type === "onyomi")
-			.map((r) => (r.accepted ? r.reading : `!${r.reading}`));
-		const kunReadings = k.readings
-			.filter((r) => r.type === "kunyomi")
-			.map((r) => (r.accepted ? r.reading : `!${r.reading}`));
+		for (const k of kanji) {
+			const meanings = k.meanings.map((m) => m.meaning);
+			const onReadings = k.readings
+				.filter((r) => r.type === "onyomi")
+				.map((r) => (r.accepted ? r.reading : `!${r.reading}`));
+			const kunReadings = k.readings
+				.filter((r) => r.type === "kunyomi")
+				.map((r) => (r.accepted ? r.reading : `!${r.reading}`));
 
-		const visuallySimilar =
-			k.visually_similar_subject_ids?.length > 0
-				? JSON.stringify(k.visually_similar_subject_ids)
-				: null;
-		const componentIds =
-			k.component_subject_ids?.length > 0
-				? JSON.stringify(k.component_subject_ids)
-				: null;
-		await db.execute(
-			`INSERT INTO kanji_levels (level, item_type, character, meanings, readings_on, readings_kun, mnemonic_meaning, mnemonic_reading, wk_id, visually_similar_ids, meaning_hint, reading_hint, component_ids)
+			const visuallySimilar =
+				k.visually_similar_subject_ids?.length > 0
+					? JSON.stringify(k.visually_similar_subject_ids)
+					: null;
+			const componentIds =
+				k.component_subject_ids?.length > 0 ? JSON.stringify(k.component_subject_ids) : null;
+			await db.execute(
+				`INSERT INTO kanji_levels (level, item_type, character, meanings, readings_on, readings_kun, mnemonic_meaning, mnemonic_reading, wk_id, visually_similar_ids, meaning_hint, reading_hint, component_ids)
 			VALUES (?, 'kanji', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			[
-				k.level,
-				k.character,
-				JSON.stringify(meanings),
-				JSON.stringify(onReadings),
-				JSON.stringify(kunReadings),
-				k.meaning_mnemonic || null,
-				k.reading_mnemonic || null,
-				k.id,
-				visuallySimilar,
-				k.meaning_hint || null,
-				k.reading_hint || null,
-				componentIds,
-			],
-		);
-	}
-	await db.execute("COMMIT");
+				[
+					k.level,
+					k.character,
+					JSON.stringify(meanings),
+					JSON.stringify(onReadings),
+					JSON.stringify(kunReadings),
+					k.meaning_mnemonic || null,
+					k.reading_mnemonic || null,
+					k.id,
+					visuallySimilar,
+					k.meaning_hint || null,
+					k.reading_hint || null,
+					componentIds,
+				],
+			);
+		}
+		await db.execute("COMMIT");
 	} catch (e) {
 		await db.execute("ROLLBACK").catch(() => {});
 		throw e;
@@ -187,40 +184,41 @@ export async function seedKanjiData(): Promise<void> {
 	// Insert vocabulary with component dependencies
 	await db.execute("BEGIN");
 	try {
-	for (const v of vocab) {
-		const meanings = v.meanings.map((m) => m.meaning);
-		const acceptedReadings = v.readings.filter((r) => r.accepted).map((r) => r.reading);
-		const primaryReading = v.readings.find((r) => r.primary)?.reading ?? acceptedReadings[0] ?? "";
-		const componentIds =
-			v.component_subject_ids.length > 0 ? JSON.stringify(v.component_subject_ids) : null;
+		for (const v of vocab) {
+			const meanings = v.meanings.map((m) => m.meaning);
+			const acceptedReadings = v.readings.filter((r) => r.accepted).map((r) => r.reading);
+			const primaryReading =
+				v.readings.find((r) => r.primary)?.reading ?? acceptedReadings[0] ?? "";
+			const componentIds =
+				v.component_subject_ids.length > 0 ? JSON.stringify(v.component_subject_ids) : null;
 
-		const partsOfSpeech =
-			v.parts_of_speech?.length > 0 ? JSON.stringify(v.parts_of_speech) : null;
-		const contextSentences =
-			v.context_sentences?.length > 0 ? JSON.stringify(v.context_sentences) : null;
-		const pronunciationAudios =
-			v.pronunciation_audios?.length > 0 ? JSON.stringify(v.pronunciation_audios) : null;
+			const partsOfSpeech =
+				v.parts_of_speech?.length > 0 ? JSON.stringify(v.parts_of_speech) : null;
+			const contextSentences =
+				v.context_sentences?.length > 0 ? JSON.stringify(v.context_sentences) : null;
+			const pronunciationAudios =
+				v.pronunciation_audios?.length > 0 ? JSON.stringify(v.pronunciation_audios) : null;
 
-		await db.execute(
-			`INSERT INTO kanji_levels (level, item_type, character, meanings, reading, readings_on, mnemonic_meaning, mnemonic_reading, wk_id, component_ids, parts_of_speech, context_sentences, pronunciation_audios)
+			await db.execute(
+				`INSERT INTO kanji_levels (level, item_type, character, meanings, reading, readings_on, mnemonic_meaning, mnemonic_reading, wk_id, component_ids, parts_of_speech, context_sentences, pronunciation_audios)
 			VALUES (?, 'vocab', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			[
-				v.level,
-				v.character,
-				JSON.stringify(meanings),
-				primaryReading,
-				JSON.stringify(acceptedReadings),
-				v.meaning_mnemonic || null,
-				v.reading_mnemonic || null,
-				v.id,
-				componentIds,
-				partsOfSpeech,
-				contextSentences,
-				pronunciationAudios,
-			],
-		);
-	}
-	await db.execute("COMMIT");
+				[
+					v.level,
+					v.character,
+					JSON.stringify(meanings),
+					primaryReading,
+					JSON.stringify(acceptedReadings),
+					v.meaning_mnemonic || null,
+					v.reading_mnemonic || null,
+					v.id,
+					componentIds,
+					partsOfSpeech,
+					contextSentences,
+					pronunciationAudios,
+				],
+			);
+		}
+		await db.execute("COMMIT");
 	} catch (e) {
 		await db.execute("ROLLBACK").catch(() => {});
 		throw e;
@@ -297,54 +295,50 @@ export async function backfillEnrichedData(): Promise<void> {
 	// Backfill all item types in a single transaction
 	await db.execute("BEGIN");
 	try {
-	// Backfill radicals: character_images
-	for (const r of radicals) {
-		if (r.character_images?.length > 0) {
+		// Backfill radicals: character_images
+		for (const r of radicals) {
+			if (r.character_images?.length > 0) {
+				await db.execute("UPDATE kanji_levels SET character_images = ? WHERE wk_id = ?", [
+					JSON.stringify(r.character_images),
+					r.id,
+				]);
+			}
+		}
+
+		// Backfill kanji: visually_similar_subject_ids, meaning_hint, reading_hint, component_ids
+		for (const k of kanji) {
 			await db.execute(
-				"UPDATE kanji_levels SET character_images = ? WHERE wk_id = ?",
-				[JSON.stringify(r.character_images), r.id],
+				"UPDATE kanji_levels SET visually_similar_ids = ?, meaning_hint = ?, reading_hint = ?, component_ids = ? WHERE wk_id = ?",
+				[
+					k.visually_similar_subject_ids?.length > 0
+						? JSON.stringify(k.visually_similar_subject_ids)
+						: null,
+					k.meaning_hint || null,
+					k.reading_hint || null,
+					k.component_subject_ids?.length > 0 ? JSON.stringify(k.component_subject_ids) : null,
+					k.id,
+				],
 			);
 		}
-	}
 
-	// Backfill kanji: visually_similar_subject_ids, meaning_hint, reading_hint, component_ids
-	for (const k of kanji) {
-		await db.execute(
-			"UPDATE kanji_levels SET visually_similar_ids = ?, meaning_hint = ?, reading_hint = ?, component_ids = ? WHERE wk_id = ?",
-			[
-				k.visually_similar_subject_ids?.length > 0
-					? JSON.stringify(k.visually_similar_subject_ids)
-					: null,
-				k.meaning_hint || null,
-				k.reading_hint || null,
-				k.component_subject_ids?.length > 0
-					? JSON.stringify(k.component_subject_ids)
-					: null,
-				k.id,
-			],
-		);
-	}
-
-	// Backfill vocabulary: parts_of_speech, context_sentences, pronunciation_audios
-	for (const v of vocab) {
-		await db.execute(
-			"UPDATE kanji_levels SET parts_of_speech = ?, context_sentences = ?, pronunciation_audios = ? WHERE wk_id = ?",
-			[
-				v.parts_of_speech?.length > 0 ? JSON.stringify(v.parts_of_speech) : null,
-				v.context_sentences?.length > 0 ? JSON.stringify(v.context_sentences) : null,
-				v.pronunciation_audios?.length > 0 ? JSON.stringify(v.pronunciation_audios) : null,
-				v.id,
-			],
-		);
-	}
-	await db.execute("COMMIT");
+		// Backfill vocabulary: parts_of_speech, context_sentences, pronunciation_audios
+		for (const v of vocab) {
+			await db.execute(
+				"UPDATE kanji_levels SET parts_of_speech = ?, context_sentences = ?, pronunciation_audios = ? WHERE wk_id = ?",
+				[
+					v.parts_of_speech?.length > 0 ? JSON.stringify(v.parts_of_speech) : null,
+					v.context_sentences?.length > 0 ? JSON.stringify(v.context_sentences) : null,
+					v.pronunciation_audios?.length > 0 ? JSON.stringify(v.pronunciation_audios) : null,
+					v.id,
+				],
+			);
+		}
+		await db.execute("COMMIT");
 	} catch (e) {
 		await db.execute("ROLLBACK").catch(() => {});
 		throw e;
 	}
 
-	await db.execute(
-		"INSERT OR REPLACE INTO settings (key, value) VALUES ('enriched_data_v2', '1')",
-	);
+	await db.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('enriched_data_v2', '1')");
 	console.log("Backfill complete: enriched data applied to existing items");
 }

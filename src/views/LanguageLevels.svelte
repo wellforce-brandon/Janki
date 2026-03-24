@@ -1,6 +1,10 @@
 <script lang="ts">
 import LoadingState from "$lib/components/ui/loading-state.svelte";
-import { getAllLanguageLevelProgress, getLanguageUserLevel, type LanguageLevelProgress } from "$lib/db/queries/language";
+import {
+	getAllLanguageLevelProgress,
+	getLanguageUserLevel,
+	type LanguageLevelProgress,
+} from "$lib/db/queries/language";
 import { navigate, viewParams } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
+import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 import {
-	parseJsonArray,
-	normalizeKanjiAnswer,
 	getAcceptedMeanings,
 	getAcceptedReadings,
 	getAllReadings,
-	isKunReadingForKanji,
 	getCorrectDisplay,
+	isKunReadingForKanji,
+	normalizeKanjiAnswer,
+	parseJsonArray,
 } from "./kanji-validation";
-import type { KanjiLevelItem } from "$lib/db/queries/kanji";
 
 function makeItem(overrides: Partial<KanjiLevelItem> = {}): KanjiLevelItem {
 	return {
@@ -107,7 +107,11 @@ describe("getAcceptedMeanings", () => {
 
 describe("getAcceptedReadings", () => {
 	it("should return on readings for kanji", () => {
-		const item = makeItem({ item_type: "kanji", readings_on: '["タイ","ダイ"]', readings_kun: '["おお"]' });
+		const item = makeItem({
+			item_type: "kanji",
+			readings_on: '["タイ","ダイ"]',
+			readings_kun: '["おお"]',
+		});
 		const readings = getAcceptedReadings(item);
 		expect(readings).toContain("タイ");
 		expect(readings).toContain("ダイ");
@@ -115,14 +119,22 @@ describe("getAcceptedReadings", () => {
 	});
 
 	it("should return both on and kun readings for vocab", () => {
-		const item = makeItem({ item_type: "vocab", readings_on: '["タイ"]', readings_kun: '["おお"]' });
+		const item = makeItem({
+			item_type: "vocab",
+			readings_on: '["タイ"]',
+			readings_kun: '["おお"]',
+		});
 		const readings = getAcceptedReadings(item);
 		expect(readings).toContain("タイ");
 		expect(readings).toContain("おお");
 	});
 
 	it("should filter out ! prefixed readings", () => {
-		const item = makeItem({ item_type: "vocab", readings_on: '["タイ","!ダイ"]', readings_kun: null });
+		const item = makeItem({
+			item_type: "vocab",
+			readings_on: '["タイ","!ダイ"]',
+			readings_kun: null,
+		});
 		const readings = getAcceptedReadings(item);
 		expect(readings).toContain("タイ");
 		expect(readings).not.toContain("ダイ");
@@ -130,7 +142,12 @@ describe("getAcceptedReadings", () => {
 	});
 
 	it("should include the reading field for vocab", () => {
-		const item = makeItem({ item_type: "vocab", readings_on: null, readings_kun: null, reading: "おおきい" });
+		const item = makeItem({
+			item_type: "vocab",
+			readings_on: null,
+			readings_kun: null,
+			reading: "おおきい",
+		});
 		expect(getAcceptedReadings(item)).toContain("おおきい");
 	});
 });

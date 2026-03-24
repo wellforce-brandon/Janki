@@ -144,7 +144,6 @@ let srsSpread = $derived.by((): SrsSpreadRow[] => {
 	});
 });
 
-
 $effect(() => {
 	loadDashboard();
 });

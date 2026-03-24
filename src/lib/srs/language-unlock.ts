@@ -1,11 +1,11 @@
 import {
 	type ContentType,
-	unlockLanguageItems,
-	getPendingLessonCount,
-	getLevelContentTypeProgress,
 	getLevelAllContentTypeProgress,
-	getLockedItemsByLevelAndType,
+	getLevelContentTypeProgress,
 	getLevelOverallProgress,
+	getLockedItemsByLevelAndType,
+	getPendingLessonCount,
+	unlockLanguageItems,
 	unlockSentencesWithMetPrerequisites,
 } from "../db/queries/language";
 import { invalidateCache } from "../db/query-cache";
@@ -41,7 +41,7 @@ export async function checkAndUnlockWithinLevel(level: number): Promise<number> 
 	const progress = allProgress.data;
 	const isGatePassed = (type: string) => {
 		const p = progress[type];
-		return !p || p.total === 0 || (p.guru_plus / p.total) >= GURU_GATE_THRESHOLD;
+		return !p || p.total === 0 || p.guru_plus / p.total >= GURU_GATE_THRESHOLD;
 	};
 
 	// Step 1: If 90% of level's kana are guru+, unlock vocabulary
@@ -87,7 +87,7 @@ export async function checkLevelProgression(level: number): Promise<UnlockResult
 	if (!progress.ok) return result;
 
 	const { total, guru_plus } = progress.data;
-	if (total === 0 || (guru_plus / total) < GURU_GATE_THRESHOLD) return result;
+	if (total === 0 || guru_plus / total < GURU_GATE_THRESHOLD) return result;
 
 	const nextLevel = level + 1;
 	if (nextLevel > MAX_LEVEL) return result;
@@ -108,7 +108,9 @@ export async function checkLevelProgression(level: number): Promise<UnlockResult
 			await unlockLanguageItems(ids);
 			result.unlockedCount = ids.length;
 			result.newLevelUnlocked = nextLevel;
-			console.log(`[language-unlock] Level ${level} complete! Unlocked ${ids.length} kana in level ${nextLevel}`);
+			console.log(
+				`[language-unlock] Level ${level} complete! Unlocked ${ids.length} kana in level ${nextLevel}`,
+			);
 		}
 	} else {
 		// No kana in next level -- unlock vocabulary directly (respecting cap)
@@ -116,7 +118,9 @@ export async function checkLevelProgression(level: number): Promise<UnlockResult
 		if (unlocked > 0) {
 			result.unlockedCount = unlocked;
 			result.newLevelUnlocked = nextLevel;
-			console.log(`[language-unlock] Level ${level} complete! Unlocked ${unlocked} vocab in level ${nextLevel} (no kana)`);
+			console.log(
+				`[language-unlock] Level ${level} complete! Unlocked ${unlocked} vocab in level ${nextLevel} (no kana)`,
+			);
 		}
 	}
 

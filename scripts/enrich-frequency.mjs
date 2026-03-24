@@ -18,8 +18,8 @@
  * - jpdb community export
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
-import { join } from "path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 // ── Config ──────────────────────────────────────────────────────────────────
 
@@ -34,9 +34,7 @@ if (!existsSync(FREQ_PATH)) {
 	console.error("Place a TSV file with columns: word, reading, rank");
 	console.error("Compatible sources:");
 	console.error("  - https://github.com/wareya/jpfreq (Innocent Corpus)");
-	console.error(
-		"  - https://github.com/scriptin/wikipedia-word-frequency-jp",
-	);
+	console.error("  - https://github.com/scriptin/wikipedia-word-frequency-jp");
 	process.exit(1);
 }
 
@@ -80,7 +78,7 @@ for (let i = startIndex; i < freqLines.length; i++) {
 
 	if (!reading) reading = "*";
 	const rankNum = parseInt(rank, 10);
-	if (!word || isNaN(rankNum)) continue;
+	if (!word || Number.isNaN(rankNum)) continue;
 
 	if (!freqByWord.has(word)) {
 		freqByWord.set(word, new Map());

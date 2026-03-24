@@ -8,7 +8,7 @@
  */
 
 import { writeFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -178,9 +178,15 @@ async function main() {
 	writeFileSync(vocabFile, JSON.stringify(vocabulary, null, 1));
 
 	console.log("\n--- Summary ---");
-	console.log(`Radicals:   ${radicals.length} items (${(Buffer.byteLength(JSON.stringify(radicals)) / 1024).toFixed(0)} KB)`);
-	console.log(`Kanji:      ${kanji.length} items (${(Buffer.byteLength(JSON.stringify(kanji)) / 1024).toFixed(0)} KB)`);
-	console.log(`Vocabulary: ${vocabulary.length} items (${(Buffer.byteLength(JSON.stringify(vocabulary)) / 1024).toFixed(0)} KB)`);
+	console.log(
+		`Radicals:   ${radicals.length} items (${(Buffer.byteLength(JSON.stringify(radicals)) / 1024).toFixed(0)} KB)`,
+	);
+	console.log(
+		`Kanji:      ${kanji.length} items (${(Buffer.byteLength(JSON.stringify(kanji)) / 1024).toFixed(0)} KB)`,
+	);
+	console.log(
+		`Vocabulary: ${vocabulary.length} items (${(Buffer.byteLength(JSON.stringify(vocabulary)) / 1024).toFixed(0)} KB)`,
+	);
 	if (skipped > 0) console.log(`Skipped:    ${skipped} hidden subjects`);
 
 	const kanaVocab = vocabulary.filter((v) => v.object === "kana_vocabulary");

@@ -46,10 +46,7 @@ function getLevelClasses(level: number): string {
 
 async function load() {
 	loading = true;
-	const [progressResult, levelResult] = await Promise.all([
-		getAllLevelProgress(),
-		getUserLevel(),
-	]);
+	const [progressResult, levelResult] = await Promise.all([getAllLevelProgress(), getUserLevel()]);
 	if (progressResult.ok) levelProgress = progressResult.data;
 	else addToast("Failed to load level progress", "error");
 	if (levelResult.ok) userLevel = levelResult.data;

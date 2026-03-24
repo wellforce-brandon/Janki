@@ -1,19 +1,25 @@
 <script lang="ts">
 import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 import Button from "$lib/components/ui/button/button.svelte";
-import { type KanjiLevelItem, markLessonCompleted, getItemsContainingComponent, updateUserNotes, updateUserSynonyms } from "$lib/db/queries/kanji";
-import { sanitizeMnemonicHtml } from "$lib/utils/sanitize";
+import {
+	getItemsContainingComponent,
+	type KanjiLevelItem,
+	markLessonCompleted,
+	updateUserNotes,
+	updateUserSynonyms,
+} from "$lib/db/queries/kanji";
 import { addToast } from "$lib/stores/toast.svelte";
 import { fisherYatesShuffle, getTypeColor } from "$lib/utils/kanji";
 import {
-	parseJsonArray,
 	getAcceptedMeanings,
 	getAcceptedReadings,
 	getCorrectDisplay,
 	isKunReadingForKanji,
 	normalizeKanjiAnswer,
+	parseJsonArray,
 } from "$lib/utils/kanji-validation";
 import { romajiToHiragana } from "$lib/utils/romaji-to-hiragana";
+import { sanitizeMnemonicHtml } from "$lib/utils/sanitize";
 
 interface Props {
 	items: KanjiLevelItem[];
@@ -47,7 +53,9 @@ $effect(() => {
 	} else {
 		foundInKanji = [];
 	}
-	return () => { cancelled = true; };
+	return () => {
+		cancelled = true;
+	};
 });
 
 let editingNotes = $state(false);

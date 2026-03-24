@@ -12,15 +12,16 @@
  * Reports are written to scripts/reports/
  */
 
-import { execSync } from "child_process";
-import { existsSync } from "fs";
+import { execSync } from "node:child_process";
+import { existsSync } from "node:fs";
 
 const scripts = [
 	{
 		name: "JMDict Enrichment",
 		cmd: "node scripts/enrich-jmdict.mjs",
 		requiredFile: "scripts/data/jmdict-eng-3.6.2.json",
-		skipMessage: "Skipping: download jmdict-eng JSON from https://github.com/scriptin/jmdict-simplified/releases",
+		skipMessage:
+			"Skipping: download jmdict-eng JSON from https://github.com/scriptin/jmdict-simplified/releases",
 	},
 	{
 		name: "Frequency Enrichment",

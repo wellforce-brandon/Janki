@@ -130,7 +130,9 @@ let systemThemeHandler: ((e: MediaQueryListEvent) => void) | null = null;
 function applyTheme(theme: string): void {
 	// Clean up previous system theme listener
 	if (systemThemeHandler) {
-		window.matchMedia("(prefers-color-scheme: dark)").removeEventListener("change", systemThemeHandler);
+		window
+			.matchMedia("(prefers-color-scheme: dark)")
+			.removeEventListener("change", systemThemeHandler);
 		systemThemeHandler = null;
 	}
 
@@ -153,6 +155,8 @@ function applyTheme(theme: string): void {
 				document.documentElement.classList.remove("dark");
 			}
 		};
-		window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", systemThemeHandler);
+		window
+			.matchMedia("(prefers-color-scheme: dark)")
+			.addEventListener("change", systemThemeHandler);
 	}
 }

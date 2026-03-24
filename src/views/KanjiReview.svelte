@@ -3,7 +3,6 @@ import type { ReviewSummary } from "$lib/components/kanji/KanjiReviewSession.sve
 import KanjiReviewSession from "$lib/components/kanji/KanjiReviewSession.svelte";
 import LevelUpCelebration from "$lib/components/kanji/LevelUpCelebration.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
-import { formatTime } from "$lib/utils/common";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import LoadingState from "$lib/components/ui/loading-state.svelte";
 import { getDueKanjiReviews, getUserLevel, type KanjiLevelItem } from "$lib/db/queries/kanji";
@@ -11,6 +10,7 @@ import { getTodayKanjiReviewCount } from "$lib/db/queries/kanji-reviews";
 import { getSettings } from "$lib/stores/app-settings.svelte";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
+import { formatTime } from "$lib/utils/common";
 
 let loading = $state(true);
 let dueItems = $state<KanjiLevelItem[]>([]);

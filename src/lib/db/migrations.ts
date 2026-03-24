@@ -205,7 +205,8 @@ export const migrations: Migration[] = [
 	},
 	{
 		version: 6,
-		description: "Add enriched WK fields: parts of speech, context sentences, audio, similar kanji, radical images",
+		description:
+			"Add enriched WK fields: parts of speech, context sentences, audio, similar kanji, radical images",
 		up: [
 			"ALTER TABLE kanji_levels ADD COLUMN parts_of_speech TEXT",
 			"ALTER TABLE kanji_levels ADD COLUMN context_sentences TEXT",

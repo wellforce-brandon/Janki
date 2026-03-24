@@ -1,16 +1,16 @@
 <script lang="ts">
-import LoadingState from "$lib/components/ui/loading-state.svelte";
 import LazySection from "$lib/components/ui/lazy-section.svelte";
+import LoadingState from "$lib/components/ui/loading-state.svelte";
 import {
-	getLanguageItemsByTypeAndTier,
 	type ContentType,
-	type LanguageItemsByLevel,
+	getLanguageItemsByTypeAndTier,
 	type LanguageItem,
+	type LanguageItemsByLevel,
 } from "$lib/db/queries/language";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
-import { getStageDots } from "$lib/utils/kanji";
 import { navigate, viewParams } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
+import { getStageDots } from "$lib/utils/kanji";
 
 interface Props {
 	contentType: ContentType;
@@ -86,7 +86,7 @@ function estimateSectionHeight(itemCount: number): number {
 
 function getMeaningDisplay(item: LanguageItem): string {
 	if (!item.meaning) return "";
-	return item.meaning.length > 30 ? item.meaning.slice(0, 28) + "..." : item.meaning;
+	return item.meaning.length > 30 ? `${item.meaning.slice(0, 28)}...` : item.meaning;
 }
 
 function openDetail(item: LanguageItem) {

@@ -4,7 +4,7 @@ export function normalizeLanguageAnswer(answer: string): string {
 		.toLowerCase()
 		.trim()
 		.replace(/\s+/g, " ")
-		.replace(/[.,!?;:'"()\[\]{}]/g, "");
+		.replace(/[.,!?;:'"()[\]{}]/g, "");
 }
 
 /**

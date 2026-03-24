@@ -32,19 +32,28 @@ export function addToast(message: string, type: ToastType = "info", duration?: n
 	if (newToasts.length > MAX_TOASTS) {
 		for (const evicted of newToasts.slice(0, newToasts.length - MAX_TOASTS)) {
 			const t = timerMap.get(evicted.id);
-			if (t) { clearTimeout(t); timerMap.delete(evicted.id); }
+			if (t) {
+				clearTimeout(t);
+				timerMap.delete(evicted.id);
+			}
 		}
 	}
 	toasts = newToasts.slice(-MAX_TOASTS);
 
 	if (toast.duration > 0) {
-		timerMap.set(id, setTimeout(() => dismissToast(id), toast.duration));
+		timerMap.set(
+			id,
+			setTimeout(() => dismissToast(id), toast.duration),
+		);
 	}
 }
 
 export function dismissToast(id: number): void {
 	const t = timerMap.get(id);
-	if (t) { clearTimeout(t); timerMap.delete(id); }
+	if (t) {
+		clearTimeout(t);
+		timerMap.delete(id);
+	}
 	toasts = toasts.filter((t) => t.id !== id);
 }
 

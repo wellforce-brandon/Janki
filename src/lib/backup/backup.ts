@@ -1,6 +1,15 @@
 import { appDataDir, join } from "@tauri-apps/api/path";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { copyFile, exists, mkdir, readDir, readFile, remove, rename, stat } from "@tauri-apps/plugin-fs";
+import {
+	copyFile,
+	exists,
+	mkdir,
+	readDir,
+	readFile,
+	remove,
+	rename,
+	stat,
+} from "@tauri-apps/plugin-fs";
 import { closeDb, getDb } from "$lib/db/database";
 
 const BACKUP_DIR = "backups";

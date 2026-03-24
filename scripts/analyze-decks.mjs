@@ -10,14 +10,13 @@
  *           output-file  = data/deck-analysis.json
  */
 
-import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from "fs";
-import { join, basename, dirname } from "path";
+import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import JSZip from "jszip";
 import initSqlJs from "sql.js";
 
 const DECKS_FOLDER =
-	process.argv[2] ||
-	"C:\\Users\\B_StL\\OneDrive\\Desktop\\Personal\\Dev\\Janki\\Decks";
+	process.argv[2] || "C:\\Users\\B_StL\\OneDrive\\Desktop\\Personal\\Dev\\Janki\\Decks";
 const OUTPUT_FILE = process.argv[3] || "data/deck-analysis.json";
 
 // ── Anki parsing (ported from src/lib/import/apkg-parser.ts) ──
@@ -71,7 +70,7 @@ function extractDeckName(db) {
 	}
 }
 
-function extractMediaStats(zip) {
+function _extractMediaStats(zip) {
 	const mediaFile = zip.file("media");
 	if (!mediaFile) return { totalFiles: 0, byExtension: {} };
 
@@ -111,7 +110,7 @@ async function analyzeApkg(filePath) {
 		const deckName = extractDeckName(db);
 
 		// Media stats
-		let mediaStats = { totalFiles: 0, byExtension: {}, totalSizeBytes: 0 };
+		const mediaStats = { totalFiles: 0, byExtension: {}, totalSizeBytes: 0 };
 		const mediaFile = zip.file("media");
 		if (mediaFile) {
 			try {
@@ -151,7 +150,7 @@ async function analyzeApkg(filePath) {
 					const raw = note.fields[i] || "";
 					const clean = stripHtml(raw);
 					// Truncate long fields
-					fieldMap[f.name] = clean.length > 200 ? clean.slice(0, 200) + "..." : clean;
+					fieldMap[f.name] = clean.length > 200 ? `${clean.slice(0, 200)}...` : clean;
 				});
 				return { tags: note.tags, fields: fieldMap };
 			});
@@ -162,9 +161,8 @@ async function analyzeApkg(filePath) {
 				const filled = modelNotes.filter(
 					(n) => n.fields[i] && stripHtml(n.fields[i]).length > 0,
 				).length;
-				fieldFillRates[f.name] = modelNotes.length > 0
-					? Math.round((filled / modelNotes.length) * 100)
-					: 0;
+				fieldFillRates[f.name] =
+					modelNotes.length > 0 ? Math.round((filled / modelNotes.length) * 100) : 0;
 			});
 
 			return {

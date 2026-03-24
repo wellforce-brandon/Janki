@@ -1,7 +1,7 @@
 <script lang="ts">
+import { type ContentTypeCount, getContentTypeCounts } from "$lib/db/queries/language";
 import type { View } from "$lib/stores/navigation.svelte";
 import { currentView, navigate } from "$lib/stores/navigation.svelte";
-import { getContentTypeCounts, type ContentTypeCount } from "$lib/db/queries/language";
 import { getPendingUpdate, isInstalling } from "$lib/stores/update.svelte";
 import { installUpdate } from "$lib/updater/check-update";
 
@@ -39,7 +39,9 @@ let hasConjugation = $state(false);
 async function checkConjugation() {
 	const result = await getContentTypeCounts();
 	if (result.ok) {
-		hasConjugation = result.data.some((c: ContentTypeCount) => c.type === "conjugation" && c.total > 0);
+		hasConjugation = result.data.some(
+			(c: ContentTypeCount) => c.type === "conjugation" && c.total > 0,
+		);
 	}
 }
 
@@ -82,7 +84,12 @@ let sections = $derived<NavSection[]>([
 				shortcut: "Ctrl+6",
 				flyout: { kind: "items" as const, color: "bg-blue-500 dark:bg-blue-600" },
 			},
-			{ id: "lang-conjugation", label: "Conjugation", hidden: !hasConjugation, flyout: { kind: "items" as const, color: "bg-rose-500 dark:bg-rose-600" } },
+			{
+				id: "lang-conjugation",
+				label: "Conjugation",
+				hidden: !hasConjugation,
+				flyout: { kind: "items" as const, color: "bg-rose-500 dark:bg-rose-600" },
+			},
 		],
 	},
 	{

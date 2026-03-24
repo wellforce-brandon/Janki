@@ -37,15 +37,35 @@ let levelPickerUserLevel = $state(1);
 let levelPickerLoading = $state(false);
 
 const TYPE_CONFIG = [
-	{ key: "radical" as const, label: "Radicals", icon: "bg-blue-500 dark:bg-blue-600", border: "border-blue-200 dark:border-blue-800" },
-	{ key: "kanji" as const, label: "Kanji", icon: "bg-pink-500 dark:bg-pink-600", border: "border-pink-200 dark:border-pink-800" },
-	{ key: "vocab" as const, label: "Vocabulary", icon: "bg-purple-500 dark:bg-purple-600", border: "border-purple-200 dark:border-purple-800" },
+	{
+		key: "radical" as const,
+		label: "Radicals",
+		icon: "bg-blue-500 dark:bg-blue-600",
+		border: "border-blue-200 dark:border-blue-800",
+	},
+	{
+		key: "kanji" as const,
+		label: "Kanji",
+		icon: "bg-pink-500 dark:bg-pink-600",
+		border: "border-pink-200 dark:border-pink-800",
+	},
+	{
+		key: "vocab" as const,
+		label: "Vocabulary",
+		icon: "bg-purple-500 dark:bg-purple-600",
+		border: "border-purple-200 dark:border-purple-800",
+	},
 ] as const;
 
 const typeCards = $derived(
 	progress
 		? TYPE_CONFIG.map((cfg) => {
-				const data = cfg.key === "radical" ? progress!.radicals : cfg.key === "kanji" ? progress!.kanji : progress!.vocab;
+				const data =
+					cfg.key === "radical"
+						? progress?.radicals
+						: cfg.key === "kanji"
+							? progress?.kanji
+							: progress?.vocab;
 				return { ...cfg, guru: data.guru_plus, total: data.total };
 			})
 		: [],
@@ -53,7 +73,9 @@ const typeCards = $derived(
 
 const isLevelLocked = $derived(
 	progress
-		? progress.radicals.unlocked === 0 && progress.kanji.unlocked === 0 && progress.vocab.unlocked === 0
+		? progress.radicals.unlocked === 0 &&
+				progress.kanji.unlocked === 0 &&
+				progress.vocab.unlocked === 0
 		: false,
 );
 
@@ -62,7 +84,11 @@ const kanjiNeeded = $derived(
 );
 
 const expandedItems = $derived<KanjiLevelItem[]>(
-	expandedType === "radical" ? allItems.radicals : expandedType === "kanji" ? allItems.kanji : allItems.vocab,
+	expandedType === "radical"
+		? allItems.radicals
+		: expandedType === "kanji"
+			? allItems.kanji
+			: allItems.vocab,
 );
 
 const expandedGuruCount = $derived(expandedItems.filter((i) => i.srs_stage >= 5).length);
@@ -77,7 +103,11 @@ function getBlockColor(stage: number): string {
 }
 
 function getMeaning(item: KanjiLevelItem): string {
-	try { return (JSON.parse(item.meanings) as string[])[0] ?? ""; } catch { return item.meanings; }
+	try {
+		return (JSON.parse(item.meanings) as string[])[0] ?? "";
+	} catch {
+		return item.meanings;
+	}
 }
 
 function getReading(item: KanjiLevelItem): string {
@@ -87,7 +117,9 @@ function getReading(item: KanjiLevelItem): string {
 		try {
 			const parsed = JSON.parse(item.readings_on) as string[];
 			return parsed.filter((r) => !r.startsWith("!"))[0] ?? "";
-		} catch { return item.readings_on; }
+		} catch {
+			return item.readings_on;
+		}
 	}
 	return "";
 }
@@ -115,7 +147,8 @@ function pickLevel(level: number) {
 function getPickerLevelClasses(level: number): string {
 	const progress = levelPickerData.find((p) => p.level === level);
 	if (level === levelPickerUserLevel) return "bg-primary text-primary-foreground font-bold";
-	if (progress && progress.percentage >= 90) return "bg-green-500 dark:bg-green-600 text-white font-semibold";
+	if (progress && progress.percentage >= 90)
+		return "bg-green-500 dark:bg-green-600 text-white font-semibold";
 	if (progress && progress.unlocked > 0) return "bg-accent text-accent-foreground font-medium";
 	return "bg-muted text-muted-foreground";
 }
@@ -128,14 +161,19 @@ function getPickerProgress(level: number): number {
 async function loadLevel(level: number) {
 	const id = ++fetchId;
 	loading = true;
-	const [progressR, itemsR] = await Promise.all([getLevelProgressByType(level), getItemsByLevel(level)]);
+	const [progressR, itemsR] = await Promise.all([
+		getLevelProgressByType(level),
+		getItemsByLevel(level),
+	]);
 	if (id !== fetchId) return;
 	if (progressR.ok) progress = progressR.data;
 	if (itemsR.ok) allItems = itemsR.data;
 	loading = false;
 }
 
-$effect(() => { loadLevel(selectedLevel); });
+$effect(() => {
+	loadLevel(selectedLevel);
+});
 </script>
 
 <div class="rounded-lg border bg-card p-5">

@@ -9,12 +9,12 @@ import { getLanguageSrsDistribution } from "$lib/db/queries/language";
 import {
 	type ContentTypeStats,
 	type DailyStats,
-	type LanguageDayStats,
 	getKanjiStageDistribution,
 	getLanguageReviewStats,
 	getStatsByContentType,
 	getStatsRange,
 	getStreak,
+	type LanguageDayStats,
 } from "$lib/db/queries/stats";
 
 let stats = $state<DailyStats[]>([]);
@@ -151,7 +151,9 @@ let langAccuracyData = $derived(
 );
 let langTotalReviews = $derived(langStats.reduce((s, d) => s + d.total, 0));
 let langTotalCorrect = $derived(langStats.reduce((s, d) => s + d.correct, 0));
-let langAccuracy = $derived(langTotalReviews > 0 ? Math.round((langTotalCorrect / langTotalReviews) * 100) : 0);
+let langAccuracy = $derived(
+	langTotalReviews > 0 ? Math.round((langTotalCorrect / langTotalReviews) * 100) : 0,
+);
 
 // Kanji review charts
 let kanjiReviewsData = $derived(kanjiStats.map((d) => ({ label: d.date, value: d.total })));
@@ -177,7 +179,12 @@ let heatmapData = $derived.by(() => {
 	}
 	return Array.from(map.entries())
 		.sort(([a], [b]) => a.localeCompare(b))
-		.map(([date, counts]) => ({ date, total: counts.kanji + counts.language, kanji: counts.kanji, language: counts.language }));
+		.map(([date, counts]) => ({
+			date,
+			total: counts.kanji + counts.language,
+			kanji: counts.kanji,
+			language: counts.language,
+		}));
 });
 
 let heatmapMax = $derived(Math.max(1, ...heatmapData.map((d) => d.total)));

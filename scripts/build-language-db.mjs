@@ -11,17 +11,16 @@
  *   output-dir   = public/data/language
  */
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync, copyFileSync } from "fs";
-import { join, basename, extname } from "path";
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { extname, join } from "node:path";
 import JSZip from "jszip";
 import initSqlJs from "sql.js";
 
 // ── Config ──────────────────────────────────────────────────────────────────
 
 const DECKS_FOLDER =
-	process.argv[2] ||
-	"C:\\Users\\B_StL\\OneDrive\\Desktop\\Personal\\Dev\\Janki\\Decks";
+	process.argv[2] || "C:\\Users\\B_StL\\OneDrive\\Desktop\\Personal\\Dev\\Janki\\Decks";
 const OUTPUT_DIR = process.argv[3] || "public/data/language";
 const MEDIA_DIR = join(OUTPUT_DIR, "media");
 const MAPPINGS_FILE = "data/field-mappings.json";
@@ -56,7 +55,10 @@ function stripHtml(html) {
 	text = text.replace(/<img[^>]*>/gi, "");
 	// Remove all HTML tags
 	text = text.replace(/<br\s*\/?>/gi, "\n");
-	text = text.replace(/<\/?(div|p|li|ul|ol|tr|td|th|table|span|a|b|i|u|em|strong|ruby|rt|rp|sup|sub|font|center|blockquote|pre|code|h[1-6])[^>]*>/gi, "\n");
+	text = text.replace(
+		/<\/?(div|p|li|ul|ol|tr|td|th|table|span|a|b|i|u|em|strong|ruby|rt|rp|sup|sub|font|center|blockquote|pre|code|h[1-6])[^>]*>/gi,
+		"\n",
+	);
 	text = text.replace(/<[^>]*>/g, "");
 	// Decode HTML entities
 	for (const [entity, char] of Object.entries(HTML_ENTITIES)) {
@@ -118,9 +120,7 @@ function normalizeJapanese(text) {
 	// Remove all whitespace
 	t = t.replace(/\s+/g, "");
 	// Normalize full-width to half-width for alphanumeric
-	t = t.replace(/[\uff01-\uff5e]/g, (ch) =>
-		String.fromCharCode(ch.charCodeAt(0) - 0xfee0)
-	);
+	t = t.replace(/[\uff01-\uff5e]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0));
 	// Lowercase
 	t = t.toLowerCase();
 	return t;
@@ -181,9 +181,7 @@ function extractModels(db) {
 		models.push({
 			id: Number(id),
 			name: model.name,
-			fields: (model.flds || [])
-				.sort((a, b) => a.ord - b.ord)
-				.map((f) => f.name),
+			fields: (model.flds || []).sort((a, b) => a.ord - b.ord).map((f) => f.name),
 		});
 	}
 	return models;
@@ -204,7 +202,7 @@ function extractNotes(db) {
 	}));
 }
 
-function extractMediaMap(zip) {
+function _extractMediaMap(zip) {
 	const mediaFile = zip.file("media");
 	if (!mediaFile) return null;
 	// We'll resolve this async in the caller
@@ -232,7 +230,9 @@ async function parseApkg(filePath) {
 		if (mediaFile) {
 			try {
 				mediaMap = JSON.parse(await mediaFile.async("string"));
-			} catch { /* no valid media */ }
+			} catch {
+				/* no valid media */
+			}
 		}
 
 		return { models, notes, mediaMap, zip };
@@ -265,8 +265,39 @@ function extractJlptLevel(note, modelConfig) {
 	if (source === "genki_chapter_to_jlpt") {
 		// Genki 1 chapters = N5, Genki 2 = N4
 		for (const t of tags) {
-			if (t.includes("Genki_1") || t.includes("Genki1") || t.includes("L1_") || t.includes("L2_") || t.includes("L3_") || t.includes("L4_") || t.includes("L5_") || t.includes("L6_") || t.includes("L7_") || t.includes("L8_") || t.includes("L9_") || t.includes("L10_") || t.includes("L11_") || t.includes("L12_")) return "N5";
-			if (t.includes("Genki_2") || t.includes("Genki2") || t.includes("L13_") || t.includes("L14_") || t.includes("L15_") || t.includes("L16_") || t.includes("L17_") || t.includes("L18_") || t.includes("L19_") || t.includes("L20_") || t.includes("L21_") || t.includes("L22_") || t.includes("L23_")) return "N4";
+			if (
+				t.includes("Genki_1") ||
+				t.includes("Genki1") ||
+				t.includes("L1_") ||
+				t.includes("L2_") ||
+				t.includes("L3_") ||
+				t.includes("L4_") ||
+				t.includes("L5_") ||
+				t.includes("L6_") ||
+				t.includes("L7_") ||
+				t.includes("L8_") ||
+				t.includes("L9_") ||
+				t.includes("L10_") ||
+				t.includes("L11_") ||
+				t.includes("L12_")
+			)
+				return "N5";
+			if (
+				t.includes("Genki_2") ||
+				t.includes("Genki2") ||
+				t.includes("L13_") ||
+				t.includes("L14_") ||
+				t.includes("L15_") ||
+				t.includes("L16_") ||
+				t.includes("L17_") ||
+				t.includes("L18_") ||
+				t.includes("L19_") ||
+				t.includes("L20_") ||
+				t.includes("L21_") ||
+				t.includes("L22_") ||
+				t.includes("L23_")
+			)
+				return "N4";
 		}
 		return null;
 	}
@@ -300,7 +331,11 @@ function extractJlptLevel(note, modelConfig) {
 			const lower = t.toLowerCase();
 			// Check JLPT tags
 			for (const pattern of tagPatterns) {
-				if (lower.includes("n5") || pattern.includes("n5") && lower.includes(pattern.split("::")[0])) return "N5";
+				if (
+					lower.includes("n5") ||
+					(pattern.includes("n5") && lower.includes(pattern.split("::")[0]))
+				)
+					return "N5";
 			}
 			if (lower.includes("n5")) return "N5";
 			if (lower.includes("n4")) return "N4";
@@ -401,7 +436,7 @@ function mapNoteToItem(note, ankiModel, modelConfig, deckConfig) {
 
 			case "frequency_rank": {
 				const num = parseInt(stripHtml(rawValue), 10);
-				if (!isNaN(num)) item[role] = num;
+				if (!Number.isNaN(num)) item[role] = num;
 				break;
 			}
 
@@ -507,8 +542,14 @@ function mergeItems(existing, incoming) {
 
 	// Primary fields: higher priority wins (only if existing is empty or incoming is higher priority)
 	const primaryFields = [
-		"primary_text", "reading", "meaning", "part_of_speech",
-		"formation", "explanation", "romaji", "verb_group",
+		"primary_text",
+		"reading",
+		"meaning",
+		"part_of_speech",
+		"formation",
+		"explanation",
+		"romaji",
+		"verb_group",
 	];
 
 	for (const field of primaryFields) {
@@ -587,7 +628,7 @@ let mediaCount = 0;
  * Extract a media file from the zip, deduplicate by content hash.
  * Returns the deduplicated filename.
  */
-async function extractMediaFile(zip, mediaMap, ankiIndex, originalName) {
+async function extractMediaFile(zip, _mediaMap, ankiIndex, originalName) {
 	const zipEntry = zip.file(String(ankiIndex));
 	if (!zipEntry) return null;
 
@@ -686,7 +727,12 @@ function isWelcomeCard(note, modelConfig) {
 	// Kaishi 1.5k+: first note is a welcome card
 	if (modelConfig.modelName === "Kaishi 1.5k++") {
 		const firstField = stripHtml(note.fields[0] || "");
-		if (!firstField || firstField.length > 100 || firstField.toLowerCase().includes("welcome") || firstField.toLowerCase().includes("about")) {
+		if (
+			!firstField ||
+			firstField.length > 100 ||
+			firstField.toLowerCase().includes("welcome") ||
+			firstField.toLowerCase().includes("about")
+		) {
 			return true;
 		}
 	}
@@ -744,7 +790,9 @@ async function main() {
 
 	const skippedDecks = fieldMappings.decks.filter((d) => d.priority <= 0);
 	stats.decksSkipped = skippedDecks.length;
-	console.log(`Skipping ${skippedDecks.length} decks: ${skippedDecks.map((d) => d.fileName.slice(0, 30)).join(", ")}\n`);
+	console.log(
+		`Skipping ${skippedDecks.length} decks: ${skippedDecks.map((d) => d.fileName.slice(0, 30)).join(", ")}\n`,
+	);
 
 	for (const deckConfig of deckConfigs) {
 		const filePath = join(DECKS_FOLDER, deckConfig.fileName);
@@ -784,10 +832,12 @@ async function main() {
 			if (!ankiModel) {
 				// Try fuzzy match
 				const fuzzy = parsed.models.find((m) =>
-					m.name.toLowerCase().includes(modelConfig.modelName.toLowerCase().slice(0, 10))
+					m.name.toLowerCase().includes(modelConfig.modelName.toLowerCase().slice(0, 10)),
 				);
 				if (!fuzzy) {
-					stats.errors.push(`Model not found: "${modelConfig.modelName}" in ${deckConfig.fileName}. Available: ${parsed.models.map((m) => m.name).join(", ")}`);
+					stats.errors.push(
+						`Model not found: "${modelConfig.modelName}" in ${deckConfig.fileName}. Available: ${parsed.models.map((m) => m.name).join(", ")}`,
+					);
 					continue;
 				}
 				// Use fuzzy match
@@ -807,7 +857,10 @@ async function main() {
 				}
 
 				// FJSD vocab filter
-				if (deckConfig.fileName.includes("Full_Japanese_Study_Deck") && contentType === "vocabulary") {
+				if (
+					deckConfig.fileName.includes("Full_Japanese_Study_Deck") &&
+					contentType === "vocabulary"
+				) {
 					if (!fjsdVocabFilter(note)) {
 						deckSkipped++;
 						stats.notesSkipped++;
@@ -832,7 +885,11 @@ async function main() {
 					collapseConjugationForms(item);
 				}
 
-				if (deckConfig.fileName.includes("Genki") && (modelConfig.modelName.includes("Simple Model") || modelConfig.modelName.includes("Basic"))) {
+				if (
+					deckConfig.fileName.includes("Genki") &&
+					(modelConfig.modelName.includes("Simple Model") ||
+						modelConfig.modelName.includes("Basic"))
+				) {
 					fixGenkiPrimaryText(item);
 				}
 
@@ -841,7 +898,11 @@ async function main() {
 				}
 
 				// FJSD: extract frequency rank from nf tier tag
-				if (deckConfig.fileName.includes("Full_Japanese_Study_Deck") && contentType === "vocabulary" && !item.frequency_rank) {
+				if (
+					deckConfig.fileName.includes("Full_Japanese_Study_Deck") &&
+					contentType === "vocabulary" &&
+					!item.frequency_rank
+				) {
 					for (const t of note.tags) {
 						const nfMatch = t.match(/^word::common::nf(\d+)$/);
 						if (nfMatch) {
@@ -888,7 +949,7 @@ async function main() {
 	// ── Post-merge: assign JLPT by frequency for items missing it ───────────
 
 	console.log("\nPost-merge: assigning JLPT levels by frequency...");
-	for (const [key, item] of buckets.vocabulary) {
+	for (const [_key, item] of buckets.vocabulary) {
 		if (!item.jlpt_level && item.frequency_rank) {
 			if (item.frequency_rank <= 800) item.jlpt_level = "N5";
 			else if (item.frequency_rank <= 1500) item.jlpt_level = "N4";
@@ -913,11 +974,13 @@ async function main() {
 		}
 		// Collapse example_sentences from primary fields
 		if (clean.example_sentence_ja && !clean.example_sentences) {
-			clean.example_sentences = [{
-				ja: clean.example_sentence_ja,
-				en: clean.example_sentence_en || "",
-				reading: clean.example_sentence_reading || "",
-			}];
+			clean.example_sentences = [
+				{
+					ja: clean.example_sentence_ja,
+					en: clean.example_sentence_en || "",
+					reading: clean.example_sentence_reading || "",
+				},
+			];
 		}
 		// Add extra examples from Tae Kim
 		if (item._extra_examples?.length > 0) {
@@ -952,7 +1015,9 @@ async function main() {
 		writeFileSync(outFile, JSON.stringify(items, null, 2));
 
 		const sizeMB = (Buffer.byteLength(JSON.stringify(items)) / 1024 / 1024).toFixed(1);
-		console.log(`${contentType.padEnd(15)} ${String(items.length).padStart(7)} items  ${sizeMB.padStart(6)} MB  -> ${outFile}`);
+		console.log(
+			`${contentType.padEnd(15)} ${String(items.length).padStart(7)} items  ${sizeMB.padStart(6)} MB  -> ${outFile}`,
+		);
 
 		// JLPT breakdown for vocab
 		if (contentType === "vocabulary") {
@@ -961,7 +1026,11 @@ async function main() {
 				const level = item.jlpt_level || "untagged";
 				jlptCounts[level] = (jlptCounts[level] || 0) + 1;
 			}
-			console.log(`  JLPT: ${Object.entries(jlptCounts).map(([k, v]) => `${k}=${v}`).join(", ")}`);
+			console.log(
+				`  JLPT: ${Object.entries(jlptCounts)
+					.map(([k, v]) => `${k}=${v}`)
+					.join(", ")}`,
+			);
 		}
 	}
 

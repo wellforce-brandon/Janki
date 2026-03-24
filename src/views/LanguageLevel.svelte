@@ -1,6 +1,6 @@
 <script lang="ts">
-import LoadingState from "$lib/components/ui/loading-state.svelte";
 import LazySection from "$lib/components/ui/lazy-section.svelte";
+import LoadingState from "$lib/components/ui/loading-state.svelte";
 import {
 	getLanguageLevelItems,
 	getLanguageLevelProgress,
@@ -8,9 +8,9 @@ import {
 	type LanguageLevelProgress,
 } from "$lib/db/queries/language";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
-import { getStageDots } from "$lib/utils/kanji";
 import { navigate, viewParams } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
+import { getStageDots } from "$lib/utils/kanji";
 
 const MAX_LEVEL = 60;
 
@@ -32,7 +32,13 @@ const TYPE_COLORS: Record<string, string> = {
 
 let loading = $state(true);
 let items = $state<LanguageLevelItem[]>([]);
-let progress = $state<LanguageLevelProgress>({ level: 1, total: 0, guru_plus: 0, unlocked: 0, percentage: 0 });
+let progress = $state<LanguageLevelProgress>({
+	level: 1,
+	total: 0,
+	guru_plus: 0,
+	unlocked: 0,
+	percentage: 0,
+});
 
 let level = $derived(Number(viewParams().level) || 1);
 
@@ -56,7 +62,7 @@ function getSrsClasses(item: LanguageLevelItem): string {
 
 function getMeaningDisplay(item: LanguageLevelItem): string {
 	if (!item.meaning) return "";
-	return item.meaning.length > 30 ? item.meaning.slice(0, 28) + "..." : item.meaning;
+	return item.meaning.length > 30 ? `${item.meaning.slice(0, 28)}...` : item.meaning;
 }
 
 function openDetail(item: LanguageLevelItem) {
@@ -84,23 +90,25 @@ $effect(() => {
 });
 
 // Group items by content_type for display
-let sections = $derived((() => {
-	const typeOrder = ["kana", "grammar", "vocabulary", "conjugation", "sentence"];
-	const grouped = new Map<string, LanguageLevelItem[]>();
-	for (const item of items) {
-		const list = grouped.get(item.content_type) ?? [];
-		list.push(item);
-		grouped.set(item.content_type, list);
-	}
-	return typeOrder
-		.filter((t) => grouped.has(t))
-		.map((t) => ({
-			type: t,
-			title: TYPE_LABELS[t] ?? t,
-			color: TYPE_COLORS[t] ?? "",
-			items: grouped.get(t)!,
-		}));
-})());
+let sections = $derived(
+	(() => {
+		const typeOrder = ["kana", "grammar", "vocabulary", "conjugation", "sentence"];
+		const grouped = new Map<string, LanguageLevelItem[]>();
+		for (const item of items) {
+			const list = grouped.get(item.content_type) ?? [];
+			list.push(item);
+			grouped.set(item.content_type, list);
+		}
+		return typeOrder
+			.filter((t) => grouped.has(t))
+			.map((t) => ({
+				type: t,
+				title: TYPE_LABELS[t] ?? t,
+				color: TYPE_COLORS[t] ?? "",
+				items: grouped.get(t)!,
+			}));
+	})(),
+);
 </script>
 
 <div class="space-y-6">

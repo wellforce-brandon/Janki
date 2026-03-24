@@ -2,24 +2,24 @@ import "@fontsource/dm-sans/400.css";
 import "@fontsource/dm-sans/500.css";
 import "@fontsource/dm-sans/700.css";
 import "@fontsource/fira-code/400.css";
-import { mount } from "svelte";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { mount } from "svelte";
 import { autoBackup } from "$lib/backup/backup";
 import { getDb } from "$lib/db/database";
-import { seedKanjiData, backfillEnrichedData } from "$lib/db/seed/kanji-data";
+import { rebuildKanjiFtsIndex } from "$lib/db/queries/kanji";
+import { rebuildFtsIndex } from "$lib/db/queries/language";
+import { backfillEnrichedData, seedKanjiData } from "$lib/db/seed/kanji-data";
 import {
-	seedLanguageData,
+	applyGrammarGroupOrdering,
+	applyGrammarJlptTagging,
+	applySentenceJlptTagging,
 	applyVocabPartOfSpeech,
 	applyVocabTopicOrdering,
 	applyVocabTopicOrderingV2,
-	applyGrammarGroupOrdering,
-	applySentenceJlptTagging,
-	applyGrammarJlptTagging,
+	seedLanguageData,
 } from "$lib/db/seed/language-data";
 import { assignLanguageLevels } from "$lib/db/seed/language-levels";
-import { rebuildFtsIndex } from "$lib/db/queries/language";
-import { rebuildKanjiFtsIndex } from "$lib/db/queries/kanji";
-import { loadSettings, getSettings } from "$lib/stores/app-settings.svelte";
+import { getSettings, loadSettings } from "$lib/stores/app-settings.svelte";
 import { checkForUpdatesSilent } from "$lib/updater/check-update";
 import App from "./App.svelte";
 

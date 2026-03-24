@@ -6,6 +6,8 @@ import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
 import {
+	type ContentTypeCount,
+	type CriticalLanguageItem,
 	getAvailableLessonCount,
 	getContentTypeCounts,
 	getCriticalLanguageItems,
@@ -17,8 +19,6 @@ import {
 	getRecentlyUnlockedItems,
 	getTodayLanguageReviewCount,
 	getUpcomingLanguageReviews,
-	type ContentTypeCount,
-	type CriticalLanguageItem,
 	type LanguageItem,
 	type LanguageSrsSummary,
 	type RecentLanguageMistake,
@@ -63,22 +63,33 @@ function getTypeColor(type: string): string {
 async function loadDashboard() {
 	const myId = ++fetchId;
 	try {
-		const [countR, lessonR, dueR, todayR, levelR, forecastR, srsR, unlockedR, criticalR, mistakesR] =
-			await Promise.all([
-				getContentTypeCounts(),
-				getAvailableLessonCount(),
-				getDueLanguageCount(),
-				getTodayLanguageReviewCount(),
-				getLanguageUserLevel(),
-				getUpcomingLanguageReviews(24),
-				getLanguageSrsSummary(),
-				getRecentlyUnlockedItems(10),
-				getCriticalLanguageItems(0.7, 10),
-				getRecentLanguageMistakes(10),
-			]);
+		const [
+			countR,
+			lessonR,
+			dueR,
+			todayR,
+			levelR,
+			forecastR,
+			srsR,
+			unlockedR,
+			criticalR,
+			mistakesR,
+		] = await Promise.all([
+			getContentTypeCounts(),
+			getAvailableLessonCount(),
+			getDueLanguageCount(),
+			getTodayLanguageReviewCount(),
+			getLanguageUserLevel(),
+			getUpcomingLanguageReviews(24),
+			getLanguageSrsSummary(),
+			getRecentlyUnlockedItems(10),
+			getCriticalLanguageItems(0.7, 10),
+			getRecentLanguageMistakes(10),
+		]);
 
 		if (myId !== fetchId) return;
-		if (countR.ok) totalItems = countR.data.reduce((sum: number, c: ContentTypeCount) => sum + c.total, 0);
+		if (countR.ok)
+			totalItems = countR.data.reduce((sum: number, c: ContentTypeCount) => sum + c.total, 0);
 		if (lessonR.ok) lessonCount = lessonR.data;
 		if (dueR.ok) reviewCount = dueR.data;
 		if (todayR.ok) todayReviewCount = todayR.data;
@@ -122,7 +133,11 @@ let srsSpread = $derived.by((): SrsSpreadRow[] => {
 		{ category: "Burned", stages: [9] },
 	];
 	return categories.map(({ category, stages }) => {
-		let kana = 0, grammar = 0, vocabulary = 0, conjugation = 0, sentence = 0;
+		let kana = 0,
+			grammar = 0,
+			vocabulary = 0,
+			conjugation = 0,
+			sentence = 0;
 		for (const d of srsDistribution) {
 			if (stages.includes(d.srs_stage)) {
 				if (d.content_type === "kana") kana += d.count;
@@ -132,7 +147,16 @@ let srsSpread = $derived.by((): SrsSpreadRow[] => {
 				else if (d.content_type === "sentence") sentence += d.count;
 			}
 		}
-		return { category, stages, kana, grammar, vocabulary, conjugation, sentence, total: kana + grammar + vocabulary + conjugation + sentence };
+		return {
+			category,
+			stages,
+			kana,
+			grammar,
+			vocabulary,
+			conjugation,
+			sentence,
+			total: kana + grammar + vocabulary + conjugation + sentence,
+		};
 	});
 });
 

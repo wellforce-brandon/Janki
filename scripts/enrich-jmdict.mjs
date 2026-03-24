@@ -14,8 +14,8 @@
  * https://github.com/scriptin/jmdict-simplified/releases
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
-import { join, dirname } from "path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 // ── Config ──────────────────────────────────────────────────────────────────
 
@@ -101,7 +101,7 @@ function getMeaningWords(meaning) {
 	return new Set(
 		meaning
 			.toLowerCase()
-			.split(/[,;()\/\n]+/)
+			.split(/[,;()/\n]+/)
 			.map((s) => s.trim())
 			.filter(Boolean),
 	);
@@ -115,7 +115,7 @@ function computeMeaningOverlap(ourMeaning, jmdictGlosses) {
 	for (const g of jmdictGlosses) {
 		for (const word of g.text
 			.toLowerCase()
-			.split(/[,;()\/]+/)
+			.split(/[,;()/]+/)
 			.map((s) => s.trim())
 			.filter(Boolean)) {
 			jmdictWords.add(word);
@@ -134,9 +134,7 @@ function computeMeaningOverlap(ourMeaning, jmdictGlosses) {
 console.log("Loading JMDict data...");
 if (!existsSync(JMDICT_PATH)) {
 	console.error(`JMDict file not found: ${JMDICT_PATH}`);
-	console.error(
-		"Download from: https://github.com/scriptin/jmdict-simplified/releases",
-	);
+	console.error("Download from: https://github.com/scriptin/jmdict-simplified/releases");
 	process.exit(1);
 }
 
@@ -161,9 +159,7 @@ for (const word of jmdict.words) {
 		byKana.set(k.text, list);
 	}
 }
-console.log(
-	`Index: ${byKanji.size} kanji forms, ${byKana.size} kana forms`,
-);
+console.log(`Index: ${byKanji.size} kanji forms, ${byKana.size} kana forms`);
 
 // Load vocabulary
 console.log("Loading vocabulary...");
@@ -189,9 +185,9 @@ let modified = 0;
 function normalizeText(text) {
 	if (!text) return text;
 	return text
-		.replace(/（[^）]*）/g, "")  // Remove fullwidth parens and contents
-		.replace(/\([^)]*\)/g, "")   // Remove ASCII parens and contents
-		.replace(/[〜～*]/g, "")      // Remove tilde prefixes and asterisks
+		.replace(/（[^）]*）/g, "") // Remove fullwidth parens and contents
+		.replace(/\([^)]*\)/g, "") // Remove ASCII parens and contents
+		.replace(/[〜～*]/g, "") // Remove tilde prefixes and asterisks
 		.trim();
 }
 
@@ -238,9 +234,7 @@ for (const item of vocab) {
 
 		// Also try reading match as tiebreaker
 		if (bestOverlap < 0.3 && reading) {
-			const readingMatch = candidates.find((c) =>
-				c.kana.some((k) => k.text === reading),
-			);
+			const readingMatch = candidates.find((c) => c.kana.some((k) => k.text === reading));
 			if (readingMatch) {
 				const glosses = readingMatch.sense.flatMap((s) => s.gloss);
 				const overlap = computeMeaningOverlap(item.meaning, glosses);

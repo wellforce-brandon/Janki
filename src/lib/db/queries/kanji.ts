@@ -1,6 +1,9 @@
+import {
+	ACCELERATED_INTERVALS,
+	calculateNextReview,
+	STANDARD_INTERVALS,
+} from "$lib/srs/srs-common";
 import { getDb, type QueryResult, safeQuery, sqlPlaceholders, withTransaction } from "../database";
-
-import { calculateNextReview, STANDARD_INTERVALS, ACCELERATED_INTERVALS } from "$lib/srs/srs-common";
 
 export function computeFirstReviewTime(level: number): string {
 	const intervals = level <= 2 ? ACCELERATED_INTERVALS : STANDARD_INTERVALS;
@@ -153,10 +156,14 @@ export interface LevelProgressByType {
 	vocab: { total: number; guru_plus: number; unlocked: number };
 }
 
-export async function getLevelProgressByType(level: number): Promise<QueryResult<LevelProgressByType>> {
+export async function getLevelProgressByType(
+	level: number,
+): Promise<QueryResult<LevelProgressByType>> {
 	return safeQuery(async () => {
 		const db = await getDb();
-		const rows = await db.select<{ item_type: string; total: number; guru_plus: number; unlocked: number }[]>(
+		const rows = await db.select<
+			{ item_type: string; total: number; guru_plus: number; unlocked: number }[]
+		>(
 			`SELECT item_type,
 				COUNT(*) as total,
 				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus,
@@ -166,7 +173,12 @@ export async function getLevelProgressByType(level: number): Promise<QueryResult
 			[level],
 		);
 		const empty = { total: 0, guru_plus: 0, unlocked: 0 };
-		const result: LevelProgressByType = { level, radicals: { ...empty }, kanji: { ...empty }, vocab: { ...empty } };
+		const result: LevelProgressByType = {
+			level,
+			radicals: { ...empty },
+			kanji: { ...empty },
+			vocab: { ...empty },
+		};
 		for (const row of rows) {
 			const counts = { total: row.total, guru_plus: row.guru_plus, unlocked: row.unlocked };
 			if (row.item_type === "radical") result.radicals = counts;
@@ -220,10 +232,17 @@ export async function updateKanjiSrsState(
 				reading_current_streak = CASE WHEN ? = 0 THEN reading_current_streak + 1 ELSE 0 END,
 				reading_max_streak = CASE WHEN ? = 0 THEN MAX(reading_max_streak, reading_current_streak + 1) ELSE reading_max_streak END
 			WHERE id = ?`,
-			[srsStage, nextReview, correctDelta, incorrectDelta,
-				meaningIncorrect, meaningIncorrect,
-				readingIncorrect, readingIncorrect,
-				id],
+			[
+				srsStage,
+				nextReview,
+				correctDelta,
+				incorrectDelta,
+				meaningIncorrect,
+				meaningIncorrect,
+				readingIncorrect,
+				readingIncorrect,
+				id,
+			],
 		);
 	});
 }
@@ -702,9 +721,7 @@ export async function resetAllKanjiProgress(): Promise<QueryResult<void>> {
 	});
 }
 
-export async function getItemsByWkIds(
-	wkIds: number[],
-): Promise<QueryResult<KanjiLevelItem[]>> {
+export async function getItemsByWkIds(wkIds: number[]): Promise<QueryResult<KanjiLevelItem[]>> {
 	return safeQuery(async () => {
 		if (wkIds.length === 0) return [];
 		const db = await getDb();
@@ -744,10 +761,7 @@ export async function updateUserSynonyms(
 	});
 }
 
-export async function updateUserNotes(
-	id: number,
-	notes: string,
-): Promise<QueryResult<void>> {
+export async function updateUserNotes(id: number, notes: string): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		await db.execute("UPDATE kanji_levels SET user_notes = ? WHERE id = ?", [

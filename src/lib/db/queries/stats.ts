@@ -123,7 +123,9 @@ export interface ContentTypeStats {
 	time_spent_ms: number;
 }
 
-export async function getStatsByContentType(days: number): Promise<QueryResult<ContentTypeStats[]>> {
+export async function getStatsByContentType(
+	days: number,
+): Promise<QueryResult<ContentTypeStats[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<ContentTypeStats[]>(
@@ -150,7 +152,9 @@ export interface LanguageDayStats {
 }
 
 /** Get language review stats per day from language_review_log */
-export async function getLanguageReviewStats(days: number): Promise<QueryResult<LanguageDayStats[]>> {
+export async function getLanguageReviewStats(
+	days: number,
+): Promise<QueryResult<LanguageDayStats[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<LanguageDayStats[]>(
@@ -175,7 +179,9 @@ export interface LanguageSrsProgression {
 }
 
 /** Get SRS stage distribution snapshots over time (based on review log transitions) */
-export async function getLanguageSrsProgression(days: number): Promise<QueryResult<LanguageSrsProgression[]>> {
+export async function getLanguageSrsProgression(
+	days: number,
+): Promise<QueryResult<LanguageSrsProgression[]>> {
 	return safeQuery(async () => {
 		const db = await getDb();
 		return db.select<LanguageSrsProgression[]>(

@@ -1,7 +1,6 @@
-import { getDb } from "../database";
-import type { QueryResult } from "../database";
-import { safeQuery } from "../database";
 import { getKanaGroupInfo } from "$lib/data/kana-groups";
+import type { QueryResult } from "../database";
+import { getDb, safeQuery } from "../database";
 
 interface LanguageItem {
 	content_type: string;
@@ -71,10 +70,7 @@ function jsonOrNull(value: unknown): string | null {
 	return JSON.stringify(value);
 }
 
-function insertItem(
-	item: LanguageItem,
-	contentType: string,
-): { sql: string; params: unknown[] } {
+function insertItem(item: LanguageItem, contentType: string): { sql: string; params: unknown[] } {
 	// Determine lesson group/order for kana items
 	let lessonGroup: string | null = null;
 	let lessonOrder: number | null = null;
@@ -300,11 +296,7 @@ export async function applyVocabTopicOrdering(): Promise<void> {
 }
 
 /** Helper: run a batch of UPDATEs in a transaction, gated by a settings flag */
-async function runFixup(
-	flagKey: string,
-	label: string,
-	updates: string[],
-): Promise<void> {
+async function runFixup(flagKey: string, label: string, updates: string[]): Promise<void> {
 	const db = await getDb();
 	const rows = await db.select<{ value: string }[]>(
 		`SELECT value FROM settings WHERE key = '${flagKey}'`,
@@ -317,9 +309,7 @@ async function runFixup(
 		for (const stmt of updates) {
 			await db.execute(stmt);
 		}
-		await db.execute(
-			`INSERT OR REPLACE INTO settings (key, value) VALUES ('${flagKey}', 'true')`,
-		);
+		await db.execute(`INSERT OR REPLACE INTO settings (key, value) VALUES ('${flagKey}', 'true')`);
 		await db.execute("COMMIT");
 		console.log(`${label} complete`);
 	} catch (e) {

@@ -1,21 +1,14 @@
 <script lang="ts">
-import {
-	getItemsByWkIds,
-	type KanjiLevelItem,
-} from "$lib/db/queries/kanji";
-import {
-	parseContextSentences,
-	parsePronunciationAudios,
-	parseWkIdArray,
-} from "$lib/utils/kanji";
-import ItemHeader from "./ItemHeader.svelte";
-import MnemonicSection from "./MnemonicSection.svelte";
-import UserSynonyms from "./UserSynonyms.svelte";
-import UserNotes from "./UserNotes.svelte";
-import RelatedItemsGrid from "./RelatedItemsGrid.svelte";
-import ContextSentences from "./ContextSentences.svelte";
+import { getItemsByWkIds, type KanjiLevelItem } from "$lib/db/queries/kanji";
+import { parseContextSentences, parsePronunciationAudios, parseWkIdArray } from "$lib/utils/kanji";
 import AudioPlayer from "./AudioPlayer.svelte";
+import ContextSentences from "./ContextSentences.svelte";
+import ItemHeader from "./ItemHeader.svelte";
 import ItemProgression from "./ItemProgression.svelte";
+import MnemonicSection from "./MnemonicSection.svelte";
+import RelatedItemsGrid from "./RelatedItemsGrid.svelte";
+import UserNotes from "./UserNotes.svelte";
+import UserSynonyms from "./UserSynonyms.svelte";
 
 interface Props {
 	item: KanjiLevelItem;

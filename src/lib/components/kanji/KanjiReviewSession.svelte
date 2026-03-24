@@ -59,7 +59,9 @@ let inputValue = $state("");
 let feedbackState = $state<"none" | "correct" | "incorrect" | "shake">("none");
 let correctAnswer = $state("");
 let isProcessing = $state(false);
-let inputDisabled = $derived(feedbackState === "correct" || feedbackState === "incorrect" || isProcessing);
+let inputDisabled = $derived(
+	feedbackState === "correct" || feedbackState === "incorrect" || isProcessing,
+);
 let sessionStartTime = $state(Date.now());
 let itemStartTime = $state(Date.now());
 

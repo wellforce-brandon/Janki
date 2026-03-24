@@ -1,7 +1,7 @@
 import { ask } from "@tauri-apps/plugin-dialog";
 import { check } from "@tauri-apps/plugin-updater";
-import { setPendingUpdate, setInstalling } from "$lib/stores/update.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
+import { setInstalling, setPendingUpdate } from "$lib/stores/update.svelte";
 
 /**
  * Silent background check on app startup.

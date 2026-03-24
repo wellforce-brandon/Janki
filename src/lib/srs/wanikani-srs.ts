@@ -1,11 +1,11 @@
+import { withTransaction } from "../db/database";
 import { checkAndUnlockLevel } from "../db/queries/kanji";
 import { invalidateCache } from "../db/query-cache";
-import { withTransaction } from "../db/database";
 import {
-	calculateNextReview as calculateNextReviewBase,
-	calculateDrop,
-	STANDARD_INTERVALS,
 	ACCELERATED_INTERVALS,
+	calculateDrop,
+	calculateNextReview as calculateNextReviewBase,
+	STANDARD_INTERVALS,
 } from "./srs-common";
 
 export const STAGE_NAMES: Record<number, string> = {
@@ -71,10 +71,17 @@ export async function reviewKanjiItem(
 				reading_current_streak = CASE WHEN ? = 0 THEN reading_current_streak + 1 ELSE 0 END,
 				reading_max_streak = CASE WHEN ? = 0 THEN MAX(reading_max_streak, reading_current_streak + 1) ELSE reading_max_streak END
 			WHERE id = ?`,
-			[newStage, nextReview, correct ? 1 : 0, correct ? 0 : 1,
-				meaningIncorrect, meaningIncorrect,
-				readingIncorrect, readingIncorrect,
-				id],
+			[
+				newStage,
+				nextReview,
+				correct ? 1 : 0,
+				correct ? 0 : 1,
+				meaningIncorrect,
+				meaningIncorrect,
+				readingIncorrect,
+				readingIncorrect,
+				id,
+			],
 		);
 
 		await db.execute(

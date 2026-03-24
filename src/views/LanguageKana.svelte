@@ -1,17 +1,17 @@
 <script lang="ts">
 import Button from "$lib/components/ui/button/button.svelte";
 import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
-import { getLanguageItems, type LanguageItem } from "$lib/db/queries/language";
 import {
+	DAKUTEN_ROWS,
+	GOJUON_ROWS,
+	HANDAKUTEN_ROWS,
 	isHiragana,
 	isKatakana,
 	VOWELS,
-	GOJUON_ROWS,
-	DAKUTEN_ROWS,
-	HANDAKUTEN_ROWS,
 	YOON_COLS,
 	YOON_ROWS,
 } from "$lib/data/kana-groups";
+import { getLanguageItems, type LanguageItem } from "$lib/db/queries/language";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";

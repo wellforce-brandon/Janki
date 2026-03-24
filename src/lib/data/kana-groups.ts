@@ -134,26 +134,64 @@ const SEION_ROWS: Record<string, Set<string>> = {
 };
 
 const DAKUTEN_ROMAJI = new Set([
-	"ga", "gi", "gu", "ge", "go",
-	"za", "ji", "zu", "ze", "zo",
-	"da", "dzi", "dzu", "de", "do",
-	"ba", "bi", "bu", "be", "bo",
+	"ga",
+	"gi",
+	"gu",
+	"ge",
+	"go",
+	"za",
+	"ji",
+	"zu",
+	"ze",
+	"zo",
+	"da",
+	"dzi",
+	"dzu",
+	"de",
+	"do",
+	"ba",
+	"bi",
+	"bu",
+	"be",
+	"bo",
 ]);
 
 const HANDAKUTEN_ROMAJI = new Set(["pa", "pi", "pu", "pe", "po"]);
 
 const YOON_ROMAJI = new Set([
-	"kya", "kyu", "kyo",
-	"sha", "shu", "sho",
-	"cha", "chu", "cho",
-	"nya", "nyu", "nyo",
-	"hya", "hyu", "hyo",
-	"mya", "myu", "myo",
-	"rya", "ryu", "ryo",
-	"gya", "gyu", "gyo",
-	"ja", "ju", "jo",
-	"bya", "byu", "byo",
-	"pya", "pyu", "pyo",
+	"kya",
+	"kyu",
+	"kyo",
+	"sha",
+	"shu",
+	"sho",
+	"cha",
+	"chu",
+	"cho",
+	"nya",
+	"nyu",
+	"nyo",
+	"hya",
+	"hyu",
+	"hyo",
+	"mya",
+	"myu",
+	"myo",
+	"rya",
+	"ryu",
+	"ryo",
+	"gya",
+	"gyu",
+	"gyo",
+	"ja",
+	"ju",
+	"jo",
+	"bya",
+	"byu",
+	"byo",
+	"pya",
+	"pyu",
+	"pyo",
 ]);
 
 /**
@@ -192,9 +230,7 @@ export function getKanaGroupInfo(
  * Get the group label for a kana item, suitable for UI display.
  * Falls back to "Kana" if no group info can be determined.
  */
-export function getKanaGroupLabel(
-	lessonGroup: string | null | undefined,
-): string {
+export function getKanaGroupLabel(lessonGroup: string | null | undefined): string {
 	if (!lessonGroup) return "Kana";
 	const group = KANA_GROUP_MAP.get(lessonGroup);
 	return group?.label ?? "Kana";

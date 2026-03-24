@@ -1,19 +1,11 @@
 <script lang="ts">
 import { getVersion } from "@tauri-apps/api/app";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { exportBackup, importBackup } from "$lib/backup/backup";
+import PathPicker from "$lib/components/language/PathPicker.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
-import {
-	LEARNING_PATHS,
-	type PathId,
-} from "$lib/data/learning-paths";
-import {
-	getSettings,
-	type KanjiReviewOrder,
-	resetAllSettings,
-	saveSetting,
-} from "$lib/stores/app-settings.svelte";
-import { addToast } from "$lib/stores/toast.svelte";
-import { getTts } from "$lib/tts/speech";
+import { LEARNING_PATHS, type PathId } from "$lib/data/learning-paths";
+import { rebuildKanjiFtsIndex, resetAllKanjiProgress } from "$lib/db/queries/kanji";
 import {
 	clearLanguageLevelsSeed,
 	getLanguagePath,
@@ -22,10 +14,15 @@ import {
 	setLanguagePath,
 } from "$lib/db/queries/language";
 import { assignLanguageLevels } from "$lib/db/seed/language-levels";
-import { resetAllKanjiProgress, rebuildKanjiFtsIndex } from "$lib/db/queries/kanji";
+import {
+	getSettings,
+	type KanjiReviewOrder,
+	resetAllSettings,
+	saveSetting,
+} from "$lib/stores/app-settings.svelte";
+import { addToast } from "$lib/stores/toast.svelte";
+import { getTts } from "$lib/tts/speech";
 import { checkForUpdates } from "$lib/updater/check-update";
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import PathPicker from "$lib/components/language/PathPicker.svelte";
 
 let s = $derived(getSettings());
 let appVersion = $state("...");
@@ -103,7 +100,11 @@ async function handleRebuildFts() {
 		if (langResult.ok && kanjiResult.ok) {
 			addToast("Search index rebuilt successfully", "success");
 		} else {
-			const err = !langResult.ok ? langResult.error : !kanjiResult.ok ? kanjiResult.error : "Unknown";
+			const err = !langResult.ok
+				? langResult.error
+				: !kanjiResult.ok
+					? kanjiResult.error
+					: "Unknown";
 			addToast(`Rebuild failed: ${err}`, "error");
 		}
 	} catch (e) {
@@ -120,11 +121,17 @@ async function handleResetLearning() {
 	try {
 		if (target === "language" || target === "all") {
 			const r = await resetAllLanguageProgress();
-			if (!r.ok) { addToast(`Failed to reset language data: ${r.error}`, "error"); return; }
+			if (!r.ok) {
+				addToast(`Failed to reset language data: ${r.error}`, "error");
+				return;
+			}
 		}
 		if (target === "kanji" || target === "all") {
 			const r = await resetAllKanjiProgress();
-			if (!r.ok) { addToast(`Failed to reset kanji data: ${r.error}`, "error"); return; }
+			if (!r.ok) {
+				addToast(`Failed to reset kanji data: ${r.error}`, "error");
+				return;
+			}
 		}
 		const label = target === "all" ? "All learning" : target === "language" ? "Language" : "Kanji";
 		addToast(`${label} progress has been reset`, "success");

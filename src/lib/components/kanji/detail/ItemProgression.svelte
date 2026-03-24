@@ -12,7 +12,7 @@ let totalReviews = $derived(item.correct_count + item.incorrect_count);
 
 function parseUtcDate(dateStr: string | null): Date | null {
 	if (!dateStr) return null;
-	return new Date(dateStr.endsWith("Z") ? dateStr : dateStr + "Z");
+	return new Date(dateStr.endsWith("Z") ? dateStr : `${dateStr}Z`);
 }
 
 function formatDate(dateStr: string | null): string {

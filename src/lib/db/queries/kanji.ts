@@ -3,7 +3,14 @@ import {
 	calculateNextReview,
 	STANDARD_INTERVALS,
 } from "$lib/srs/srs-common";
-import { getDb, type QueryResult, safeQuery, sqlPlaceholders, withTransaction } from "../database";
+import {
+	executeBatch,
+	getDb,
+	type QueryResult,
+	safeQuery,
+	sqlPlaceholders,
+	withTransaction,
+} from "../database";
 
 export function computeFirstReviewTime(level: number): string {
 	const intervals = level <= 2 ? ACCELERATED_INTERVALS : STANDARD_INTERVALS;
@@ -707,17 +714,16 @@ export async function markKanjiSeeded(): Promise<QueryResult<void>> {
 /** Reset all kanji learning progress (SRS state, review logs). Does NOT delete items. */
 export async function resetAllKanjiProgress(): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
-		await withTransaction(async (db) => {
-			await db.execute("DELETE FROM kanji_review_log");
-			await db.execute(`UPDATE kanji_levels SET
+		await executeBatch([
+			"DELETE FROM kanji_review_log",
+			`UPDATE kanji_levels SET
 				srs_stage = 0,
 				unlocked_at = NULL,
 				next_review = NULL,
 				correct_count = 0,
 				incorrect_count = 0,
-				lesson_completed_at = NULL
-			`);
-		});
+				lesson_completed_at = NULL`,
+		]);
 	});
 }
 

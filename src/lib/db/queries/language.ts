@@ -1,10 +1,10 @@
 import {
 	type Database,
+	executeBatch,
 	getDb,
 	type QueryResult,
 	safeQuery,
 	sqlPlaceholders,
-	withTransaction,
 } from "../database";
 import { CACHE_KEYS, getCached, setCache } from "../query-cache";
 
@@ -713,19 +713,18 @@ export async function clearLanguageLevelsSeed(): Promise<QueryResult<void>> {
 /** Reset all language learning progress (SRS state, review logs, path selection). Does NOT delete items. */
 export async function resetAllLanguageProgress(): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
-		await withTransaction(async (db) => {
-			await db.execute("DELETE FROM language_review_log");
-			await db.execute(`UPDATE language_items SET
+		await executeBatch([
+			"DELETE FROM language_review_log",
+			`UPDATE language_items SET
 				srs_stage = 0,
 				unlocked_at = NULL,
 				next_review = NULL,
 				correct_count = 0,
 				incorrect_count = 0,
-				lesson_completed_at = NULL
-			`);
-			await db.execute("DELETE FROM settings WHERE key = 'language_path'");
-			await db.execute("DELETE FROM settings WHERE key = 'language_levels_v5_paths'");
-		});
+				lesson_completed_at = NULL`,
+			"DELETE FROM settings WHERE key = 'language_path'",
+			"DELETE FROM settings WHERE key = 'language_levels_v5_paths'",
+		]);
 	});
 }
 

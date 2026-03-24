@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.29.2.0] - 2026-03-24
+
+### Fixed
+
+- "Cannot commit -- no transaction is active" error when resetting learning data -- tauri-plugin-sql's connection pool dispatches each execute() to a different connection, breaking BEGIN/COMMIT across calls. Reset operations now use batched SQL that runs atomically on a single connection.
+- Migration runner also converted to batched SQL for the same connection-affinity guarantee.
+
 ## [0.29.1.0] - 2026-03-24
 
 ### Fixed

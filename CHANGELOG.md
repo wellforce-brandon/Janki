@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [0.29.3.0] - 2026-03-24
+## [0.29.4.0] - 2026-03-24
+
+### Changed
+
+- Update dialog replaced with custom themed modal -- matches app theme (light/dark), shows version badge, and has proper Install & Restart / Later buttons instead of the plain OS dialog
+- Sidebar update banner now opens the themed dialog instead of installing directly
 
 ### Fixed
 

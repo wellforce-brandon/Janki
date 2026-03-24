@@ -2,8 +2,7 @@
 import { type ContentTypeCount, getContentTypeCounts } from "$lib/db/queries/language";
 import type { View } from "$lib/stores/navigation.svelte";
 import { currentView, navigate } from "$lib/stores/navigation.svelte";
-import { getPendingUpdate, isInstalling } from "$lib/stores/update.svelte";
-import { installUpdate } from "$lib/updater/check-update";
+import { getPendingUpdate, isInstalling, showUpdateDialog } from "$lib/stores/update.svelte";
 
 interface TierFlyout {
 	kind: "levels" | "items";
@@ -291,7 +290,7 @@ function handleTierClick(item: NavItem, tierIndex: number) {
 					{isInstalling()
 						? 'bg-muted text-muted-foreground cursor-wait'
 						: 'bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400 dark:hover:bg-green-500/20'}"
-				onclick={installUpdate}
+				onclick={showUpdateDialog}
 				disabled={isInstalling()}
 			>
 				{#if isInstalling()}

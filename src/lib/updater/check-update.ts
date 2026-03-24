@@ -1,7 +1,6 @@
-import { ask } from "@tauri-apps/plugin-dialog";
 import { check } from "@tauri-apps/plugin-updater";
 import { addToast } from "$lib/stores/toast.svelte";
-import { setInstalling, setPendingUpdate } from "$lib/stores/update.svelte";
+import { setInstalling, setPendingUpdate, showUpdateDialog } from "$lib/stores/update.svelte";
 
 /**
  * Silent background check on app startup.
@@ -20,28 +19,20 @@ export async function checkForUpdatesSilent(): Promise<void> {
 
 /**
  * Manual check from Settings page.
- * Shows a dialog if an update is found, or a toast if already up to date.
+ * Opens the custom update dialog if an update is found.
  */
 export async function checkForUpdates(): Promise<void> {
 	try {
 		const update = await check();
 		if (update) {
 			setPendingUpdate(update);
-			const yes = await ask(
-				`Version ${update.version} is available.\n\n${update.body ?? ""}`.trim() +
-					"\n\nInstall now and restart?",
-				{ title: "Update Available", kind: "info" },
-			);
-			if (yes) {
-				await installUpdate();
-			}
+			showUpdateDialog();
 		} else {
 			addToast("You're on the latest version", "info", 3000);
 		}
 	} catch (e) {
 		console.error("[Updater] Check failed:", e);
 		const msg = e instanceof Error ? e.message : String(e);
-		// Network errors or missing release artifacts are expected during builds
 		if (msg.includes("404") || msg.includes("network") || msg.includes("fetch")) {
 			addToast("No update info available yet -- try again later", "info", 3000);
 		} else {
@@ -52,7 +43,7 @@ export async function checkForUpdates(): Promise<void> {
 
 /**
  * Download and install the pending update.
- * Called from either the Settings dialog or the sidebar banner.
+ * Called from the update dialog or the sidebar banner.
  */
 export async function installUpdate(): Promise<void> {
 	const { getPendingUpdate } = await import("$lib/stores/update.svelte");

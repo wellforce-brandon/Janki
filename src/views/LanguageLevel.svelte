@@ -105,7 +105,7 @@ let sections = $derived(
 				type: t,
 				title: TYPE_LABELS[t] ?? t,
 				color: TYPE_COLORS[t] ?? "",
-				items: grouped.get(t)!,
+				items: grouped.get(t) ?? [],
 			}));
 	})(),
 );

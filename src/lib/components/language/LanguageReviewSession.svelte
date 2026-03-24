@@ -8,8 +8,8 @@ import {
 } from "$lib/srs/language-srs";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
-import { speakJapanese, isTtsSpeaking, stopSpeaking } from "$lib/tts/speech.svelte";
 import { extractSpeechText } from "$lib/tts/sanitize-tts";
+import { isTtsSpeaking, speakJapanese, stopSpeaking } from "$lib/tts/speech.svelte";
 import { fuzzyMatch, normalizeLanguageAnswer } from "$lib/utils/answer-validation";
 import { fisherYatesShuffle } from "$lib/utils/common";
 import { getTypeColor, getTypeLabel } from "$lib/utils/content-type";

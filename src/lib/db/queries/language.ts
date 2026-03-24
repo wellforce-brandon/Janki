@@ -1619,7 +1619,7 @@ export async function getLanguageItemsByTypeAndTier(
 			byLevel.set(lvl, []);
 		}
 		for (const item of items) {
-			const arr = byLevel.get(item.language_level!);
+			const arr = item.language_level != null ? byLevel.get(item.language_level) : undefined;
 			if (arr) arr.push(item);
 		}
 

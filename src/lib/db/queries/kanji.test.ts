@@ -20,9 +20,8 @@ vi.mock("../query-cache", () => ({
 describe("getDueKanjiReviews", () => {
 	it("should reject invalid order values", async () => {
 		const { getDueKanjiReviews } = await import("./kanji");
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		await expect(getDueKanjiReviews("invalid-order" as any)).rejects.toThrow(
-			"Invalid review order",
-		);
+		await expect(
+			getDueKanjiReviews("invalid-order" as unknown as Parameters<typeof getDueKanjiReviews>[0]),
+		).rejects.toThrow("Invalid review order");
 	});
 });

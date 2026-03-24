@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.27.0.0] - 2026-03-24
+
+### Added
+
+- Gated unlock system: within each level, kana guru -> vocab unlocks -> grammar/conjugation unlocks -> sentences unlock (90% guru+ threshold)
+- Level progression: 90% of all items in a level at guru+ unlocks the next level's kana
+- Level-up celebration overlay for language reviews (mirrors kanji section)
+- Path picker component for selecting learning path on first launch
+- Language path display and reset option in Settings
+
+### Changed
+
+- Language unlock logic rewritten from flat JLPT-gated to level-based cascade (checkAndUnlockWithinLevel, checkLevelProgression)
+- Per-type lesson caps (vocabLessonCap, grammarLessonCap, etc.) now enforced during unlock gating
+- Review completion triggers within-level unlock checks; batch completion triggers level progression check
+- Dashboard catch-up unlock now uses level-based check instead of old JLPT-gated logic
+
 ## [0.26.0.0] - 2026-03-24
 
 ### Added

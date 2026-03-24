@@ -20,7 +20,7 @@ import {
 } from "$lib/db/queries/language";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { type DailyStats, getStreak, getTodayStats } from "$lib/db/queries/stats";
-import { checkAndUnlockItems } from "$lib/srs/language-unlock";
+import { checkAndUnlockWithinLevel } from "$lib/srs/language-unlock";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 
@@ -79,8 +79,10 @@ async function loadDashboard() {
 			error = "Some stats failed to load.";
 		}
 
-		// Run language item unlock check on dashboard load (catches up on kanji progress)
-		await checkAndUnlockItems();
+		// Run unlock check for current language level on dashboard load
+		if (langUserLevel > 0) {
+			await checkAndUnlockWithinLevel(langUserLevel);
+		}
 
 		const [lpResult, langLpResult] = await Promise.all([
 			getLevelProgress(userLevel),

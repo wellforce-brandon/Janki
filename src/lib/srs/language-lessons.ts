@@ -3,12 +3,11 @@ import {
 	getAvailableLessonCount,
 	getLanguageItemById,
 	markLessonsBatchCompleted,
-	unlockLevelVocabIfKanaReviewed,
-	unlockSentencesWithMetPrerequisites,
 	type ContentType,
 	type LanguageItem,
 } from "../db/queries/language";
 import { calculateNextReview } from "./language-srs";
+import { checkAndUnlockWithinLevel } from "./language-unlock";
 import type { QueryResult } from "../db/database";
 
 const DEFAULT_BATCH_SIZE = 5;
@@ -57,18 +56,17 @@ export async function completeLessonBatch(
 
 	const result = await markLessonsBatchCompleted(itemIds, nextReview);
 
-	// After completing kana lessons, check if vocab should unlock in that level
+	// After completing lessons, check if more items should unlock in those levels
 	if (result.ok) {
 		const levelsToCheck = new Set<number>();
 		for (const id of itemIds) {
 			const itemResult = await getLanguageItemById(id);
-			if (itemResult.ok && itemResult.data?.content_type === "kana" && itemResult.data.language_level) {
+			if (itemResult.ok && itemResult.data?.language_level) {
 				levelsToCheck.add(itemResult.data.language_level);
 			}
 		}
 		for (const level of levelsToCheck) {
-			unlockLevelVocabIfKanaReviewed(level).catch(console.error);
-			unlockSentencesWithMetPrerequisites(level).catch(console.error);
+			checkAndUnlockWithinLevel(level).catch(console.error);
 		}
 	}
 

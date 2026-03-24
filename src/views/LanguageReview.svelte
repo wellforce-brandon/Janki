@@ -1,5 +1,6 @@
 <script lang="ts">
 import ContentTypeFilter from "$lib/components/language/ContentTypeFilter.svelte";
+import LevelUpCelebration from "$lib/components/language/LevelUpCelebration.svelte";
 import LanguageReviewSession from "$lib/components/language/LanguageReviewSession.svelte";
 import type { ReviewSummary } from "$lib/components/language/LanguageReviewSession.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
@@ -9,10 +10,11 @@ import {
 	getDueLanguageItems,
 	getDueLanguageCount,
 	getAvailableLessonCount,
+	getLanguageUserLevel,
 	type ContentType,
 	type LanguageItem,
 } from "$lib/db/queries/language";
-import { checkAndUnlockItems } from "$lib/srs/language-unlock";
+import { checkLevelProgression } from "$lib/srs/language-unlock";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 import { formatTime } from "$lib/utils/common";
@@ -24,18 +26,23 @@ let lessonCount = $state(0);
 let sessionActive = $state(false);
 let summary = $state<ReviewSummary | null>(null);
 let selectedType = $state<string>("all");
+let levelBefore = $state(1);
+let showLevelUp = $state(false);
+let newLevel = $state(1);
 
 async function loadDueItems() {
 	loading = true;
 	const typeFilter = selectedType === "all" ? undefined : (selectedType as ContentType);
-	const [dueResult, countResult, lessonResult] = await Promise.all([
+	const [dueResult, countResult, lessonResult, levelResult] = await Promise.all([
 		getDueLanguageItems(typeFilter),
 		getDueLanguageCount(typeFilter),
 		getAvailableLessonCount(typeFilter),
+		getLanguageUserLevel(),
 	]);
 	if (dueResult.ok) dueItems = dueResult.data;
 	if (countResult.ok) dueCount = countResult.data;
 	if (lessonResult.ok) lessonCount = lessonResult.data;
+	if (levelResult.ok) levelBefore = levelResult.data;
 	loading = false;
 }
 
@@ -54,10 +61,14 @@ async function handleComplete(result: ReviewSummary) {
 		"success",
 	);
 
-	// Run unlock check after review session
-	const unlockResult = await checkAndUnlockItems();
-	if (unlockResult.ok && unlockResult.data > 0) {
-		addToast(`${unlockResult.data} new item${unlockResult.data > 1 ? "s" : ""} unlocked!`, "success");
+	// Check level progression after batch completion
+	const progressionResult = await checkLevelProgression(levelBefore);
+	if (progressionResult.newLevelUnlocked) {
+		newLevel = progressionResult.newLevelUnlocked;
+		showLevelUp = true;
+	}
+	if (progressionResult.unlockedCount > 0) {
+		addToast(`${progressionResult.unlockedCount} new item${progressionResult.unlockedCount > 1 ? "s" : ""} unlocked!`, "success");
 	}
 
 	await loadDueItems();
@@ -67,6 +78,10 @@ $effect(() => {
 	loadDueItems();
 });
 </script>
+
+{#if showLevelUp}
+	<LevelUpCelebration level={newLevel} onclose={() => { showLevelUp = false; }} />
+{/if}
 
 <div class="space-y-6">
 	{#if sessionActive}

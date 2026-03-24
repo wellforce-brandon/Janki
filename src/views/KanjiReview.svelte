@@ -10,7 +10,6 @@ import { getDueKanjiReviews, getUserLevel, type KanjiLevelItem } from "$lib/db/q
 import { getTodayKanjiReviewCount } from "$lib/db/queries/kanji-reviews";
 import { getSettings } from "$lib/stores/app-settings.svelte";
 import { navigate } from "$lib/stores/navigation.svelte";
-import { checkAndUnlockItems } from "$lib/srs/language-unlock";
 import { addToast } from "$lib/stores/toast.svelte";
 
 let loading = $state(true);
@@ -56,9 +55,6 @@ async function handleComplete(result: ReviewSummary) {
 		newLevel = levelResult.data;
 		showLevelUp = true;
 	}
-
-	// Trigger language item unlocks (vocab depends on kanji progress)
-	await checkAndUnlockItems();
 
 	await loadDueItems();
 }

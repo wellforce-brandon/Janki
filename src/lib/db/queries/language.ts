@@ -641,6 +641,36 @@ export async function getLanguageLevelProgressByType(
 	});
 }
 
+/** Read the user's selected learning path from the settings table. Returns null if not set. */
+export async function getLanguagePath(): Promise<QueryResult<string | null>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ value: string }[]>(
+			"SELECT value FROM settings WHERE key = 'language_path'",
+		);
+		return rows.length > 0 ? rows[0].value : null;
+	});
+}
+
+/** Write the selected learning path to the settings table. */
+export async function setLanguagePath(pathId: string): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute(
+			"INSERT OR REPLACE INTO settings (key, value) VALUES ('language_path', ?)",
+			[pathId],
+		);
+	});
+}
+
+/** Delete the language_levels_v5_paths seed flag so assignLanguageLevels() re-runs. */
+export async function clearLanguageLevelsSeed(): Promise<QueryResult<void>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		await db.execute("DELETE FROM settings WHERE key = 'language_levels_v5_paths'");
+	});
+}
+
 /** Reset all language learning progress (SRS state, review logs). Does NOT delete items. */
 export async function resetAllLanguageProgress(): Promise<QueryResult<void>> {
 	return safeQuery(async () => {
@@ -1264,6 +1294,59 @@ export async function getLanguageUserLevel(): Promise<QueryResult<number>> {
 			LIMIT 1
 		`);
 		return rows.length > 0 ? rows[0].level : 1;
+	});
+}
+
+// ===================== Level-Based Unlock Helpers =====================
+
+/** Get guru+ progress for a content type within a specific level */
+export async function getLevelContentTypeProgress(
+	level: number,
+	contentType: ContentType,
+): Promise<QueryResult<{ total: number; guru_plus: number }>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ total: number; guru_plus: number }[]>(`
+			SELECT COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
+			FROM language_items
+			WHERE language_level = ? AND content_type = ?
+		`, [level, contentType]);
+		return rows[0] ?? { total: 0, guru_plus: 0 };
+	});
+}
+
+/** Get locked items of a content type within a level, up to a limit */
+export async function getLockedItemsByLevelAndType(
+	level: number,
+	contentType: ContentType,
+	limit: number,
+): Promise<QueryResult<{ id: number }[]>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		return db.select<{ id: number }[]>(
+			`SELECT id FROM language_items
+			 WHERE language_level = ? AND content_type = ? AND srs_stage = 0
+			 ORDER BY COALESCE(lesson_order, 9999), COALESCE(frequency_rank, 999999), id
+			 LIMIT ?`,
+			[level, contentType, limit],
+		);
+	});
+}
+
+/** Get overall guru+ progress for ALL items in a level */
+export async function getLevelOverallProgress(
+	level: number,
+): Promise<QueryResult<{ total: number; guru_plus: number }>> {
+	return safeQuery(async () => {
+		const db = await getDb();
+		const rows = await db.select<{ total: number; guru_plus: number }[]>(`
+			SELECT COUNT(*) as total,
+				COUNT(CASE WHEN srs_stage >= 5 THEN 1 END) as guru_plus
+			FROM language_items
+			WHERE language_level = ?
+		`, [level]);
+		return rows[0] ?? { total: 0, guru_plus: 0 };
 	});
 }
 

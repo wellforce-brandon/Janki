@@ -1,6 +1,7 @@
 <script lang="ts">
 import { RefreshCw } from "@lucide/svelte";
 import LanguageLevelProgressWidget from "$lib/components/language/LanguageLevelProgressWidget.svelte";
+import PathPicker from "$lib/components/language/PathPicker.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import EmptyState from "$lib/components/ui/empty-state.svelte";
 import SkeletonCards from "$lib/components/ui/skeleton-cards.svelte";
@@ -9,6 +10,7 @@ import {
 	getContentTypeCounts,
 	getCriticalLanguageItems,
 	getDueLanguageCount,
+	getLanguagePath,
 	getLanguageSrsSummary,
 	getLanguageUserLevel,
 	getRecentLanguageMistakes,
@@ -27,6 +29,8 @@ import { addToast } from "$lib/stores/toast.svelte";
 
 let loading = $state(true);
 let refreshing = $state(false);
+let showPathPicker = $state(false);
+let checkedPath = $state(false);
 
 let lessonCount = $state(0);
 let reviewCount = $state(0);
@@ -133,9 +137,31 @@ let srsSpread = $derived.by((): SrsSpreadRow[] => {
 });
 
 $effect(() => {
-	loadDashboard();
+	checkPathAndLoad();
 });
+
+async function checkPathAndLoad() {
+	const r = await getLanguagePath();
+	if (r.ok && !r.data) {
+		showPathPicker = true;
+		checkedPath = true;
+		loading = false;
+		return;
+	}
+	checkedPath = true;
+	loadDashboard();
+}
 </script>
+
+{#if showPathPicker}
+	<PathPicker
+		onselected={() => {
+			showPathPicker = false;
+			loading = true;
+			loadDashboard();
+		}}
+	/>
+{/if}
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">

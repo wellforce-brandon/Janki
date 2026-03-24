@@ -1,328 +1,162 @@
-import { getDb, safeQuery, type QueryResult } from "../db/database";
 import {
 	type ContentType,
 	unlockLanguageItems,
-	getNextLockedKanaGroup,
-	getLockedKanaByGroup,
-	getKanaGroupProgress,
-	getPreviousKanaGroup,
 	getPendingLessonCount,
-	getLockedVocabularyBatch,
-	getLockedGrammarBatch,
-	getLockedSentenceBatch,
-	getLockedConjugationBatch,
-	getJlptLevelProgressByType,
-	getContentTypeMilestone,
-	getNextLockedGrammarGroup,
-	getLockedGrammarByGroup,
-	getGrammarGroupProgress,
-	getPreviousGrammarGroup,
+	getLevelContentTypeProgress,
+	getLockedItemsByLevelAndType,
+	getLevelOverallProgress,
+	unlockSentencesWithMetPrerequisites,
 } from "../db/queries/language";
+import { invalidateCache } from "../db/query-cache";
 import { getSettings } from "../stores/app-settings.svelte";
-import { KANJI_REGEX_GLOBAL } from "../utils/japanese";
 
-/** JLPT levels in progression order, null = untagged (last) */
-const JLPT_LEVELS: (string | null)[] = ["N5", "N4", "N3", "N2", "N1", null];
+/** 90% guru+ threshold for all unlock gates */
+const GURU_GATE_THRESHOLD = 0.9;
 
-/** Threshold for JLPT level gating: >80% of previous level at Guru+ */
-const JLPT_GATE_THRESHOLD = 0.8;
+/** Maximum language level (may vary by path, but 100 is the upper bound) */
+const MAX_LEVEL = 100;
 
-/** Sentence unlock prerequisites */
-const SENTENCE_VOCAB_THRESHOLD = 50;
-const SENTENCE_GRAMMAR_THRESHOLD = 10;
-
-/** Conjugation unlock prerequisites */
-const CONJUGATION_VOCAB_THRESHOLD = 10;
+export interface UnlockResult {
+	unlockedCount: number;
+	newLevelUnlocked: number | null;
+}
 
 /**
- * Run after each review session (language or kanji) and on app startup.
- * Checks all locked items for met prerequisites and unlocks them,
- * respecting per-content-type pending lesson caps.
- * Returns the count of newly unlocked items.
+ * Check and unlock items within a single level using the cascade:
+ *   kana guru'd -> vocab unlocks
+ *   vocab guru'd -> grammar + conjugation unlock
+ *   grammar guru'd -> sentences unlock
+ *
+ * Respects per-type pending lesson caps from settings.
+ * Call after each review answer is processed.
  */
-let unlockRunning = false;
-
-export async function checkAndUnlockItems(): Promise<QueryResult<number>> {
-	// Level-based unlocking is now handled by:
-	// - checkAndUnlockLanguageLevel() in language.ts (level progression)
-	// - unlockLevelVocabIfKanaReviewed() in language.ts (kana gate within level)
-	// - unlockSentencesWithMetPrerequisites() in language.ts (sentence prereqs)
-	// The old per-type JLPT-gated unlock logic is disabled to prevent
-	// bypassing the level system.
-	return { ok: true, data: 0 };
-}
-
-// --- Kana (unchanged -- already properly gated) ---
-
-const KANA_GATE_THRESHOLD = 0.8;
-
-async function unlockKana(): Promise<number> {
-	const nextGroup = await getNextLockedKanaGroup();
-	if (!nextGroup.ok) { console.warn("[unlock] getNextLockedKanaGroup failed:", nextGroup.error); return 0; }
-	if (!nextGroup.data) return 0;
-
-	const { lesson_group, lesson_order } = nextGroup.data;
-
-	if (lesson_order === 1) {
-		return await unlockKanaGroup(lesson_group);
-	}
-
-	const prevGroupResult = await getPreviousKanaGroup(lesson_order);
-	if (!prevGroupResult.ok || !prevGroupResult.data) {
-		return await unlockKanaGroup(lesson_group);
-	}
-
-	const progress = await getKanaGroupProgress(prevGroupResult.data);
-	if (!progress.ok) { console.warn("[unlock] getKanaGroupProgress failed:", progress.error); return 0; }
-
-	const { total, at_apprentice4_plus } = progress.data;
-	if (total === 0) return await unlockKanaGroup(lesson_group);
-
-	const ratio = at_apprentice4_plus / total;
-	if (ratio >= KANA_GATE_THRESHOLD) {
-		return await unlockKanaGroup(lesson_group);
-	}
-
-	return 0;
-}
-
-async function unlockKanaGroup(lessonGroup: string): Promise<number> {
-	const result = await getLockedKanaByGroup(lessonGroup);
-	if (!result.ok || result.data.length === 0) return 0;
-
-	const ids = result.data.map((r) => r.id);
-	await unlockLanguageItems(ids);
-	return ids.length;
-}
-
-// --- Vocabulary ---
-
-async function unlockVocabulary(): Promise<number> {
-	const pendingResult = await getPendingLessonCount("vocabulary");
-	if (!pendingResult.ok) { console.warn("[unlock] vocab pending count failed:", pendingResult.error); return 0; }
-
-	const cap = getSettings().vocabLessonCap;
-	if (pendingResult.data >= cap) return 0;
-
-	let remaining = cap - pendingResult.data;
-	const guruKanji = await getGuruPlusKanji();
+export async function checkAndUnlockWithinLevel(level: number): Promise<number> {
 	let totalUnlocked = 0;
 
-	for (const level of JLPT_LEVELS) {
-		if (remaining <= 0) break;
+	// Step 1: If 90% of level's kana are guru+, unlock vocabulary
+	const kanaProgress = await getLevelContentTypeProgress(level, "kana");
+	if (kanaProgress.ok) {
+		const { total, guru_plus } = kanaProgress.data;
+		// If no kana in this level, the gate is automatically passed
+		const kanaGatePassed = total === 0 || (guru_plus / total) >= GURU_GATE_THRESHOLD;
 
-		// JLPT gate for N4+ (N5 and untagged always open)
-		if (level !== null && level !== "N5") {
-			const gateOpen = await isJlptGateOpenForType(level, "vocabulary");
-			if (!gateOpen) break;
+		if (kanaGatePassed) {
+			totalUnlocked += await unlockTypeInLevel(level, "vocabulary", "vocabLessonCap");
 		}
+	}
 
-		// Fetch extra to account for kanji-blocked items
-		// Fetch extra to account for kanji-blocked items, capped at 50
-		const batchResult = await getLockedVocabularyBatch(level, Math.min(remaining * 3, 50));
-		if (!batchResult.ok || batchResult.data.length === 0) continue;
+	// Step 2: If 90% of level's vocabulary are guru+, unlock grammar + conjugation
+	const vocabProgress = await getLevelContentTypeProgress(level, "vocabulary");
+	if (vocabProgress.ok) {
+		const { total, guru_plus } = vocabProgress.data;
+		const vocabGatePassed = total === 0 || (guru_plus / total) >= GURU_GATE_THRESHOLD;
 
-		const toUnlock: number[] = [];
-		for (const item of batchResult.data) {
-			if (toUnlock.length >= remaining) break;
-
-			const kanjiInWord = item.primary_text.match(KANJI_REGEX_GLOBAL);
-			if (!kanjiInWord || kanjiInWord.length === 0) {
-				toUnlock.push(item.id);
-			} else {
-				const allGuru = kanjiInWord.every((k) => guruKanji.has(k));
-				if (allGuru) toUnlock.push(item.id);
-			}
+		if (vocabGatePassed) {
+			totalUnlocked += await unlockTypeInLevel(level, "grammar", "grammarLessonCap");
+			totalUnlocked += await unlockTypeInLevel(level, "conjugation", "conjugationLessonCap");
 		}
+	}
 
-		if (toUnlock.length > 0) {
-			await unlockLanguageItems(toUnlock);
-			totalUnlocked += toUnlock.length;
-			remaining -= toUnlock.length;
+	// Step 3: If 90% of level's grammar are guru+, unlock sentences
+	const grammarProgress = await getLevelContentTypeProgress(level, "grammar");
+	if (grammarProgress.ok) {
+		const { total, guru_plus } = grammarProgress.data;
+		// If no grammar in this level, check if vocab gate passed instead
+		const grammarGatePassed = total === 0 || (guru_plus / total) >= GURU_GATE_THRESHOLD;
+
+		if (grammarGatePassed) {
+			// First try prerequisite-based sentence unlocking
+			const prereqResult = await unlockSentencesWithMetPrerequisites(level);
+			if (prereqResult.ok) totalUnlocked += prereqResult.data;
+
+			// Also unlock any remaining locked sentences up to the cap
+			totalUnlocked += await unlockTypeInLevel(level, "sentence", "sentenceLessonCap");
 		}
+	}
+
+	if (totalUnlocked > 0) {
+		invalidateCache("contentTypeCounts");
 	}
 
 	return totalUnlocked;
 }
 
-// --- Grammar ---
+/**
+ * Check if a level is complete (90% of ALL items at guru+) and unlock
+ * the next level's kana (or vocab if the next level has no kana).
+ *
+ * Call after a review batch completes.
+ * Returns the new level number if unlocked, or null.
+ */
+export async function checkLevelProgression(level: number): Promise<UnlockResult> {
+	const result: UnlockResult = { unlockedCount: 0, newLevelUnlocked: null };
 
-/** Threshold for grammar group gating: 80% of previous group at Apprentice 4+ */
-const GRAMMAR_GATE_THRESHOLD = 0.8;
+	const progress = await getLevelOverallProgress(level);
+	if (!progress.ok) return result;
 
-async function unlockGrammar(): Promise<number> {
-	const pendingResult = await getPendingLessonCount("grammar");
-	if (!pendingResult.ok) { console.warn("[unlock] grammar pending count failed:", pendingResult.error); return 0; }
+	const { total, guru_plus } = progress.data;
+	if (total === 0 || (guru_plus / total) < GURU_GATE_THRESHOLD) return result;
 
-	const cap = getSettings().grammarLessonCap;
-	if (pendingResult.data >= cap) return 0;
+	const nextLevel = level + 1;
+	if (nextLevel > MAX_LEVEL) return result;
 
-	let remaining = cap - pendingResult.data;
-	let totalUnlocked = 0;
+	// Check if next level has any items at all
+	const nextProgress = await getLevelOverallProgress(nextLevel);
+	if (!nextProgress.ok || nextProgress.data.total === 0) return result;
 
-	// Phase 1: Structured group progression (Tae Kim sections)
-	// While grouped items exist, only unlock through group progression
-	const nextGroup = await getNextLockedGrammarGroup();
-	if (nextGroup.ok && nextGroup.data) {
-		const groupUnlocked = await unlockGrammarByGroup(nextGroup.data, remaining);
-		totalUnlocked += groupUnlocked;
-		// Don't fall through to ungrouped -- keep focus on current group
-		return totalUnlocked;
+	// Check if next level has kana
+	const nextKana = await getLevelContentTypeProgress(nextLevel, "kana");
+	if (!nextKana.ok) return result;
+
+	if (nextKana.data.total > 0) {
+		// Unlock next level's kana
+		const locked = await getLockedItemsByLevelAndType(nextLevel, "kana", nextKana.data.total);
+		if (locked.ok && locked.data.length > 0) {
+			const ids = locked.data.map((r) => r.id);
+			await unlockLanguageItems(ids);
+			result.unlockedCount = ids.length;
+			result.newLevelUnlocked = nextLevel;
+			console.log(`[language-unlock] Level ${level} complete! Unlocked ${ids.length} kana in level ${nextLevel}`);
+		}
+	} else {
+		// No kana in next level -- unlock vocabulary directly (respecting cap)
+		const unlocked = await unlockTypeInLevel(nextLevel, "vocabulary", "vocabLessonCap");
+		if (unlocked > 0) {
+			result.unlockedCount = unlocked;
+			result.newLevelUnlocked = nextLevel;
+			console.log(`[language-unlock] Level ${level} complete! Unlocked ${unlocked} vocab in level ${nextLevel} (no kana)`);
+		}
 	}
 
-	// Phase 2: All groups exhausted -- ungrouped items, JLPT-ordered
-	for (const level of JLPT_LEVELS) {
-		if (remaining <= 0) break;
-
-		if (level !== null && level !== "N5") {
-			const gateOpen = await isJlptGateOpenForType(level, "grammar");
-			if (!gateOpen) break;
-		}
-
-		const batchResult = await getLockedGrammarBatch(level, remaining);
-		if (!batchResult.ok || batchResult.data.length === 0) continue;
-
-		const toUnlock = batchResult.data.slice(0, remaining).map((i) => i.id);
-		if (toUnlock.length > 0) {
-			await unlockLanguageItems(toUnlock);
-			totalUnlocked += toUnlock.length;
-			remaining -= toUnlock.length;
-		}
+	if (result.unlockedCount > 0) {
+		invalidateCache("contentTypeCounts");
 	}
 
-	return totalUnlocked;
+	return result;
 }
 
-async function unlockGrammarByGroup(
-	groupInfo: { lesson_group: string; lesson_order: number },
-	cap: number,
+/**
+ * Unlock locked items of a content type within a level, respecting
+ * the global pending lesson cap for that type.
+ */
+async function unlockTypeInLevel(
+	level: number,
+	contentType: ContentType,
+	capKey: "vocabLessonCap" | "grammarLessonCap" | "sentenceLessonCap" | "conjugationLessonCap",
 ): Promise<number> {
-	const { lesson_group, lesson_order } = groupInfo;
+	const pendingResult = await getPendingLessonCount(contentType);
+	if (!pendingResult.ok) return 0;
 
-	// First group (copula) unlocks immediately
-	if (lesson_order <= 1) {
-		return await doUnlockGrammarGroup(lesson_group, cap);
-	}
+	const cap = getSettings()[capKey];
+	if (pendingResult.data >= cap) return 0;
 
-	// Check previous group has 80% at Apprentice 4+
-	const prevGroup = await getPreviousGrammarGroup(lesson_order);
-	if (!prevGroup.ok || !prevGroup.data) {
-		// No previous group found -- unlock anyway
-		return await doUnlockGrammarGroup(lesson_group, cap);
-	}
+	const remaining = cap - pendingResult.data;
 
-	const progress = await getGrammarGroupProgress(prevGroup.data);
-	if (!progress.ok) return 0;
+	const locked = await getLockedItemsByLevelAndType(level, contentType, remaining);
+	if (!locked.ok || locked.data.length === 0) return 0;
 
-	const { total, at_apprentice4_plus } = progress.data;
-	if (total === 0 || at_apprentice4_plus / total >= GRAMMAR_GATE_THRESHOLD) {
-		return await doUnlockGrammarGroup(lesson_group, cap);
-	}
-
-	return 0; // Gate not met -- learner needs to progress current group first
-}
-
-async function doUnlockGrammarGroup(lessonGroup: string, cap: number): Promise<number> {
-	const result = await getLockedGrammarByGroup(lessonGroup, cap);
-	if (!result.ok || result.data.length === 0) return 0;
-
-	const ids = result.data.map((r) => r.id);
+	const ids = locked.data.map((r) => r.id);
 	await unlockLanguageItems(ids);
+	console.log(`[language-unlock] Unlocked ${ids.length} ${contentType} items in level ${level}`);
 	return ids.length;
-}
-
-// --- Sentences ---
-
-async function unlockSentences(): Promise<number> {
-	// Check global prerequisites: enough vocab + grammar foundation
-	const vocabMilestone = await getContentTypeMilestone("vocabulary", 4);
-	const grammarMilestone = await getContentTypeMilestone("grammar", 4);
-	if (!vocabMilestone.ok) { console.warn("[unlock] sentence vocab milestone failed:", vocabMilestone.error); return 0; }
-	if (!grammarMilestone.ok) { console.warn("[unlock] sentence grammar milestone failed:", grammarMilestone.error); return 0; }
-	if (vocabMilestone.data < SENTENCE_VOCAB_THRESHOLD) return 0;
-	if (grammarMilestone.data < SENTENCE_GRAMMAR_THRESHOLD) return 0;
-
-	const pendingResult = await getPendingLessonCount("sentence");
-	if (!pendingResult.ok) return 0;
-
-	const cap = getSettings().sentenceLessonCap;
-	if (pendingResult.data >= cap) return 0;
-
-	let remaining = cap - pendingResult.data;
-	let totalUnlocked = 0;
-
-	// Unlock sentences in JLPT order (N5 first, then N4, etc.)
-	for (const level of JLPT_LEVELS) {
-		if (remaining <= 0) break;
-
-		if (level !== null && level !== "N5") {
-			const gateOpen = await isJlptGateOpenForType(level, "sentence");
-			if (!gateOpen) break;
-		}
-
-		const batchResult = await getLockedSentenceBatch(level, remaining);
-		if (!batchResult.ok || batchResult.data.length === 0) continue;
-
-		const toUnlock = batchResult.data.slice(0, remaining).map((i) => i.id);
-		if (toUnlock.length > 0) {
-			await unlockLanguageItems(toUnlock);
-			totalUnlocked += toUnlock.length;
-			remaining -= toUnlock.length;
-		}
-	}
-
-	return totalUnlocked;
-}
-
-// --- Conjugation ---
-
-async function unlockConjugations(): Promise<number> {
-	// Check prerequisite: enough vocab learned
-	const vocabMilestone = await getContentTypeMilestone("vocabulary", 4);
-	if (!vocabMilestone.ok) { console.warn("[unlock] conjugation vocab milestone failed:", vocabMilestone.error); return 0; }
-	if (vocabMilestone.data < CONJUGATION_VOCAB_THRESHOLD) return 0;
-
-	const pendingResult = await getPendingLessonCount("conjugation");
-	if (!pendingResult.ok) return 0;
-
-	const cap = getSettings().conjugationLessonCap;
-	if (pendingResult.data >= cap) return 0;
-
-	const needed = cap - pendingResult.data;
-	const batchResult = await getLockedConjugationBatch(needed);
-	if (!batchResult.ok || batchResult.data.length === 0) return 0;
-
-	const toUnlock = batchResult.data.map((i) => i.id);
-	await unlockLanguageItems(toUnlock);
-	return toUnlock.length;
-}
-
-// --- Shared helpers ---
-
-/** Get set of kanji characters at Guru+ (srs_stage >= 5) in kanji_levels */
-async function getGuruPlusKanji(): Promise<Set<string>> {
-	const result = await safeQuery(async () => {
-		const db = await getDb();
-		const rows = await db.select<{ character: string }[]>(
-			"SELECT character FROM kanji_levels WHERE item_type = 'kanji' AND srs_stage >= 5",
-		);
-		return new Set(rows.map((r) => r.character));
-	});
-	return result.ok ? result.data : new Set();
-}
-
-/** Check if the JLPT gate is open for a given level and content type */
-async function isJlptGateOpenForType(level: string, contentType: ContentType): Promise<boolean> {
-	const idx = JLPT_LEVELS.indexOf(level);
-	if (idx <= 0) return true; // N5, untagged, or unknown -- always open
-
-	const prevLevel = JLPT_LEVELS[idx - 1];
-	if (prevLevel === null) return true;
-
-	const result = await getJlptLevelProgressByType(prevLevel, contentType);
-	if (!result.ok) return false;
-
-	const { total, guru_plus } = result.data;
-	if (total === 0) return true;
-	return guru_plus / total >= JLPT_GATE_THRESHOLD;
 }

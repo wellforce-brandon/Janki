@@ -7,10 +7,11 @@ vi.mock("../db/queries/language", () => ({
 	getLanguageItemById: vi.fn(),
 	updateLanguageItemSrs: vi.fn().mockResolvedValue({ ok: true }),
 	logLanguageReview: vi.fn().mockResolvedValue({ ok: true }),
-	checkAndUnlockLanguageLevel: vi.fn().mockResolvedValue({ ok: true, data: 0 }),
-	unlockLevelVocabIfKanaReviewed: vi.fn().mockResolvedValue({ ok: true, data: 0 }),
-	unlockSentencesWithMetPrerequisites: vi.fn().mockResolvedValue({ ok: true, data: 0 }),
 	deleteLatestLanguageReview: vi.fn().mockResolvedValue({ ok: true }),
+}));
+
+vi.mock("./language-unlock", () => ({
+	checkAndUnlockWithinLevel: vi.fn().mockResolvedValue(0),
 }));
 
 vi.mock("../db/queries/stats", () => ({

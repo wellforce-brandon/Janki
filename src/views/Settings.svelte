@@ -3,6 +3,10 @@ import { getVersion } from "@tauri-apps/api/app";
 import { exportBackup, importBackup } from "$lib/backup/backup";
 import Button from "$lib/components/ui/button/button.svelte";
 import {
+	LEARNING_PATHS,
+	type PathId,
+} from "$lib/data/learning-paths";
+import {
 	getSettings,
 	type KanjiReviewOrder,
 	resetAllSettings,
@@ -10,10 +14,18 @@ import {
 } from "$lib/stores/app-settings.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
 import { getTts } from "$lib/tts/speech";
-import { rebuildFtsIndex, resetAllLanguageProgress } from "$lib/db/queries/language";
+import {
+	clearLanguageLevelsSeed,
+	getLanguagePath,
+	rebuildFtsIndex,
+	resetAllLanguageProgress,
+	setLanguagePath,
+} from "$lib/db/queries/language";
+import { assignLanguageLevels } from "$lib/db/seed/language-levels";
 import { resetAllKanjiProgress } from "$lib/db/queries/kanji";
 import { checkForUpdates } from "$lib/updater/check-update";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import PathPicker from "$lib/components/language/PathPicker.svelte";
 
 let s = $derived(getSettings());
 let appVersion = $state("...");
@@ -21,12 +33,32 @@ let showResetConfirm = $state(false);
 let pendingZoom = $state<number | null>(null);
 let showResetLearningConfirm = $state<"language" | "kanji" | "all" | null>(null);
 let resettingLearning = $state(false);
+let currentPathId = $state<string | null>(null);
+let showPathChangeConfirm = $state(false);
+let showPathPicker = $state(false);
+let changingPath = $state(false);
 
 $effect(() => {
 	getVersion().then((v) => {
 		appVersion = v;
 	});
+	getLanguagePath().then((r) => {
+		if (r.ok) currentPathId = r.data;
+	});
 });
+
+let currentPathLabel = $derived(
+	currentPathId && currentPathId in LEARNING_PATHS
+		? LEARNING_PATHS[currentPathId as PathId].label
+		: "Not selected",
+);
+
+async function handleChangePath() {
+	changingPath = true;
+	showPathChangeConfirm = false;
+	showPathPicker = true;
+	changingPath = false;
+}
 
 function setTheme(theme: "dark" | "light" | "system") {
 	saveSetting("theme", theme);
@@ -106,6 +138,17 @@ async function handleResetDefaults() {
 	addToast("All settings restored to defaults", "success");
 }
 </script>
+
+{#if showPathPicker}
+	<PathPicker
+		onselected={() => {
+			showPathPicker = false;
+			getLanguagePath().then((r) => {
+				if (r.ok) currentPathId = r.data;
+			});
+		}}
+	/>
+{/if}
 
 <div class="mx-auto max-w-2xl space-y-8">
 	<h2 class="text-2xl font-bold">Settings</h2>
@@ -276,6 +319,32 @@ async function handleResetDefaults() {
 			/>
 			<span class="text-sm">Show timer during review</span>
 		</label>
+	</section>
+
+	<!-- Learning Path -->
+	<section class="space-y-3 rounded-lg border bg-card p-4">
+		<h3 class="font-medium">Learning Path</h3>
+		<p class="text-sm text-muted-foreground">
+			Your learning path determines which items you study and how they're paced across levels.
+		</p>
+		<div class="flex items-center justify-between">
+			<span class="text-sm font-medium">{currentPathLabel}</span>
+			{#if showPathChangeConfirm}
+				<div class="flex items-center gap-2">
+					<span class="text-xs text-destructive">All language progress will be reset.</span>
+					<Button variant="destructive" size="sm" onclick={handleChangePath}>
+						Change
+					</Button>
+					<Button variant="outline" size="sm" onclick={() => (showPathChangeConfirm = false)}>
+						Cancel
+					</Button>
+				</div>
+			{:else}
+				<Button variant="outline" size="sm" onclick={() => (showPathChangeConfirm = true)}>
+					Change Path
+				</Button>
+			{/if}
+		</div>
 	</section>
 
 	<!-- Language Lesson Caps -->

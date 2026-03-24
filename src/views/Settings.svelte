@@ -5,7 +5,11 @@ import { exportBackup, importBackup } from "$lib/backup/backup";
 import PathPicker from "$lib/components/language/PathPicker.svelte";
 import Button from "$lib/components/ui/button/button.svelte";
 import { LEARNING_PATHS, type PathId } from "$lib/data/learning-paths";
-import { rebuildKanjiFtsIndex, resetAllKanjiProgress } from "$lib/db/queries/kanji";
+import {
+	initializeKanjiProgression,
+	rebuildKanjiFtsIndex,
+	resetAllKanjiProgress,
+} from "$lib/db/queries/kanji";
 import {
 	clearLanguageLevelsSeed,
 	getLanguagePath,
@@ -132,6 +136,8 @@ async function handleResetLearning() {
 				addToast(`Failed to reset kanji data: ${r.error}`, "error");
 				return;
 			}
+			// Re-unlock level 1 radicals so kanji is ready to go immediately
+			await initializeKanjiProgression();
 		}
 		const label = target === "all" ? "All learning" : target === "language" ? "Language" : "Kanji";
 		addToast(`${label} progress has been reset`, "success");

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.29.3.0] - 2026-03-24
+
+### Fixed
+
+- Learning path (N5, etc.) not starting with any unlocked lessons -- level 1 kana and kanji radicals now auto-unlock on every startup via idempotent bootstrap checks, covering edge cases where SRS state was reset but seed flags remained set
+- Resetting kanji progress leaving no lessons available until app restart -- kanji level 1 radicals now re-unlock immediately after reset in the same session
+- App-level startup gate ensures PathPicker shows before any other UI when no learning path is selected (e.g., after a full reset)
+
 ## [0.29.2.0] - 2026-03-24
 
 ### Fixed

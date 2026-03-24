@@ -6,7 +6,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { mount } from "svelte";
 import { autoBackup } from "$lib/backup/backup";
 import { getDb } from "$lib/db/database";
-import { rebuildKanjiFtsIndex } from "$lib/db/queries/kanji";
+import { initializeKanjiProgression, rebuildKanjiFtsIndex } from "$lib/db/queries/kanji";
 import { rebuildFtsIndex } from "$lib/db/queries/language";
 import { backfillEnrichedData, seedKanjiData } from "$lib/db/seed/kanji-data";
 import {
@@ -18,7 +18,10 @@ import {
 	applyVocabTopicOrderingV2,
 	seedLanguageData,
 } from "$lib/db/seed/language-data";
-import { assignLanguageLevels } from "$lib/db/seed/language-levels";
+import {
+	assignLanguageLevels,
+	ensureLanguageLevel1Bootstrapped,
+} from "$lib/db/seed/language-levels";
 import { getSettings, loadSettings } from "$lib/stores/app-settings.svelte";
 import { checkForUpdatesSilent } from "$lib/updater/check-update";
 import App from "./App.svelte";
@@ -36,6 +39,12 @@ async function init() {
 		await applySentenceJlptTagging();
 		await applyGrammarJlptTagging();
 		await assignLanguageLevels();
+
+		// Ensure level 1 items are unlocked on every startup (idempotent).
+		// Covers edge cases where SRS state was reset but seed flags remain set.
+		await initializeKanjiProgression();
+		await ensureLanguageLevel1Bootstrapped();
+
 		await rebuildFtsIndex();
 		await rebuildKanjiFtsIndex();
 	} catch (e) {

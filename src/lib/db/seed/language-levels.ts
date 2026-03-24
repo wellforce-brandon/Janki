@@ -205,3 +205,26 @@ async function bootstrapLevel1(db: DbHandle): Promise<void> {
 	);
 	console.log("[language-levels] Auto-unlocked level 1 kana.");
 }
+
+/**
+ * Standalone bootstrap check that runs on every startup.
+ * If language levels are assigned but no items are unlocked, unlock level 1 kana.
+ * Idempotent -- safe to call repeatedly.
+ */
+export async function ensureLanguageLevel1Bootstrapped(): Promise<void> {
+	const result = await safeQuery(async () => {
+		const db = await getDb();
+
+		// Only bootstrap if levels have been assigned
+		const hasLevels = await db.select<{ cnt: number }[]>(
+			"SELECT COUNT(*) as cnt FROM language_items WHERE language_level IS NOT NULL",
+		);
+		if (hasLevels[0].cnt === 0) return; // No levels assigned yet
+
+		await bootstrapLevel1(db);
+	});
+
+	if (!result.ok) {
+		console.error("[language-levels] Bootstrap check failed:", result.error);
+	}
+}

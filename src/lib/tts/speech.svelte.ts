@@ -4,12 +4,53 @@ export interface TtsEngine {
 	isAvailable(): boolean;
 }
 
+/** Reactive speaking state -- use isTtsSpeaking() in Svelte components */
+let speaking = $state(false);
+
+export function isTtsSpeaking(): boolean {
+	return speaking;
+}
+
 class WebSpeechTts implements TtsEngine {
 	private get synth() {
 		return window.speechSynthesis;
 	}
 	private rate = 1.0;
 	private pitch = 1.0;
+	private cachedVoices: SpeechSynthesisVoice[] = [];
+	private voicesReady: Promise<void>;
+
+	constructor() {
+		this.voicesReady = new Promise<void>((resolve) => {
+			if (!this.isAvailable()) {
+				resolve();
+				return;
+			}
+
+			const voices = this.synth.getVoices();
+			if (voices.length > 0) {
+				this.cachedVoices = voices;
+				resolve();
+				return;
+			}
+
+			const onVoicesChanged = () => {
+				this.cachedVoices = this.synth.getVoices();
+				this.synth.removeEventListener("voiceschanged", onVoicesChanged);
+				resolve();
+			};
+			this.synth.addEventListener("voiceschanged", onVoicesChanged);
+
+			// Timeout fallback -- resolve after 3s even if event never fires
+			setTimeout(() => {
+				if (this.cachedVoices.length === 0) {
+					this.cachedVoices = this.synth.getVoices();
+				}
+				this.synth.removeEventListener("voiceschanged", onVoicesChanged);
+				resolve();
+			}, 3000);
+		});
+	}
 
 	setRate(rate: number) {
 		this.rate = Math.max(0.1, Math.min(2.0, rate));
@@ -24,7 +65,7 @@ class WebSpeechTts implements TtsEngine {
 	}
 
 	private getJapaneseVoice(): SpeechSynthesisVoice | null {
-		const voices = this.synth.getVoices();
+		const voices = this.cachedVoices;
 		// Prefer Microsoft voices (Edge/Windows), then Google, then any ja voice
 		const preferred = voices.find((v) => v.lang.startsWith("ja") && v.name.includes("Microsoft"));
 		if (preferred) return preferred;
@@ -35,15 +76,15 @@ class WebSpeechTts implements TtsEngine {
 		return voices.find((v) => v.lang.startsWith("ja")) ?? null;
 	}
 
-	speak(text: string, lang = "ja-JP"): Promise<void> {
+	async speak(text: string, lang = "ja-JP"): Promise<void> {
+		if (!this.isAvailable()) {
+			throw new Error("Speech synthesis not available");
+		}
+
+		this.stop();
+		await this.voicesReady;
+
 		return new Promise((resolve, reject) => {
-			if (!this.isAvailable()) {
-				reject(new Error("Speech synthesis not available"));
-				return;
-			}
-
-			this.stop();
-
 			const utterance = new SpeechSynthesisUtterance(text);
 			utterance.lang = lang;
 			utterance.rate = this.rate;
@@ -52,9 +93,16 @@ class WebSpeechTts implements TtsEngine {
 			const voice = this.getJapaneseVoice();
 			if (voice) utterance.voice = voice;
 
-			utterance.onend = () => resolve();
-			utterance.onerror = (e) => reject(e);
+			utterance.onend = () => {
+				speaking = false;
+				resolve();
+			};
+			utterance.onerror = (e) => {
+				speaking = false;
+				reject(e);
+			};
 
+			speaking = true;
 			this.synth.speak(utterance);
 		});
 	}
@@ -63,6 +111,7 @@ class WebSpeechTts implements TtsEngine {
 		if (this.isAvailable()) {
 			this.synth.cancel();
 		}
+		speaking = false;
 	}
 }
 
@@ -83,4 +132,9 @@ export function speakJapanese(text: string): void {
 			// Silently fail -- TTS is optional
 		});
 	}
+}
+
+export function stopSpeaking(): void {
+	const tts = getTts();
+	tts.stop();
 }

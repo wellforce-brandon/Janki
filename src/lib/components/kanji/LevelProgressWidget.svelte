@@ -66,7 +66,7 @@ const typeCards = $derived(
 						: cfg.key === "kanji"
 							? progress?.kanji
 							: progress?.vocab;
-				return { ...cfg, guru: data.guru_plus, total: data.total };
+				return { ...cfg, guru: data?.guru_plus ?? 0, total: data?.total ?? 0 };
 			})
 		: [],
 );

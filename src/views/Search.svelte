@@ -5,7 +5,7 @@ import { getKanaScriptLabel } from "$lib/data/kana-groups";
 import { type KanjiLevelItem, searchKanjiItems } from "$lib/db/queries/kanji";
 import { type LanguageItem, searchLanguageItems } from "$lib/db/queries/language";
 import { navigate } from "$lib/stores/navigation.svelte";
-import { speakJapanese } from "$lib/tts/speech";
+import { speakJapanese } from "$lib/tts/speech.svelte";
 import { parseMeanings } from "$lib/utils/kanji";
 import { highlightMatch } from "$lib/utils/search";
 import n5Data from "../../data/grammar/n5.json";

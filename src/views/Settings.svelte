@@ -21,7 +21,7 @@ import {
 	saveSetting,
 } from "$lib/stores/app-settings.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
-import { getTts } from "$lib/tts/speech";
+import { getTts } from "$lib/tts/speech.svelte";
 import { checkForUpdates } from "$lib/updater/check-update";
 
 let s = $derived(getSettings());

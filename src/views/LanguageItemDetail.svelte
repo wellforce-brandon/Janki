@@ -16,7 +16,8 @@ import {
 } from "$lib/db/queries/language";
 import { navigate } from "$lib/stores/navigation.svelte";
 import { addToast } from "$lib/stores/toast.svelte";
-import { getTts } from "$lib/tts/speech";
+import { getTts, isTtsSpeaking, stopSpeaking } from "$lib/tts/speech.svelte";
+import { sanitizeForSpeech } from "$lib/tts/sanitize-tts";
 import { safeParseJson } from "$lib/utils/common";
 import { sanitizeCardHtml } from "$lib/utils/sanitize";
 
@@ -126,13 +127,17 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 async function speak(text: string) {
+	if (isTtsSpeaking()) {
+		stopSpeaking();
+		return;
+	}
 	const tts = getTts();
 	if (!tts.isAvailable()) {
 		addToast("Text-to-speech is not available on this device", "warning");
 		return;
 	}
 	try {
-		await tts.speak(text);
+		await tts.speak(sanitizeForSpeech(text));
 	} catch {
 		addToast("TTS playback failed", "error");
 	}

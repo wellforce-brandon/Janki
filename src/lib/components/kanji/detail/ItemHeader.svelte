@@ -2,7 +2,7 @@
 import SrsStageIndicator from "$lib/components/kanji/SrsStageIndicator.svelte";
 import Badge from "$lib/components/ui/badge/badge.svelte";
 import type { KanjiLevelItem } from "$lib/db/queries/kanji";
-import { speakJapanese } from "$lib/tts/speech";
+import { speakJapanese } from "$lib/tts/speech.svelte";
 import {
 	getTileClasses,
 	parseCharacterImages,

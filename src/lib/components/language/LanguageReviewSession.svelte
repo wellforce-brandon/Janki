@@ -8,7 +8,8 @@ import {
 } from "$lib/srs/language-srs";
 import { STAGE_NAMES } from "$lib/srs/wanikani-srs";
 import { addToast } from "$lib/stores/toast.svelte";
-import { speakJapanese } from "$lib/tts/speech";
+import { speakJapanese, isTtsSpeaking, stopSpeaking } from "$lib/tts/speech.svelte";
+import { extractSpeechText } from "$lib/tts/sanitize-tts";
 import { fuzzyMatch, normalizeLanguageAnswer } from "$lib/utils/answer-validation";
 import { fisherYatesShuffle } from "$lib/utils/common";
 import { getTypeColor, getTypeLabel } from "$lib/utils/content-type";
@@ -147,7 +148,7 @@ function getPlaceholder(item: LanguageItem): string {
 /** Play audio for current item */
 function playAudio() {
 	if (!current) return;
-	speakJapanese(current.primary_text);
+	speakJapanese(extractSpeechText(current));
 }
 
 async function submitAnswer() {
@@ -297,6 +298,10 @@ function handleKeydown(e: KeyboardEvent) {
 		return;
 	}
 	if (e.key === "Escape") {
+		if (isTtsSpeaking()) {
+			stopSpeaking();
+			return;
+		}
 		if (showShortcuts) {
 			showShortcuts = false;
 			return;
@@ -381,6 +386,16 @@ function handleKeydown(e: KeyboardEvent) {
 						Undo
 					</button>
 				{/if}
+				{#if isTtsSpeaking()}
+				<button
+					type="button"
+					class="text-xs text-destructive hover:text-destructive/80"
+					onclick={stopSpeaking}
+					title="Stop audio (Escape)"
+				>
+					&#9632; Stop
+				</button>
+			{:else}
 				<button
 					type="button"
 					class="text-xs hover:text-foreground"
@@ -389,6 +404,7 @@ function handleKeydown(e: KeyboardEvent) {
 				>
 					&#9654; Audio
 				</button>
+			{/if}
 				<button
 					type="button"
 					class="text-xs hover:text-foreground"

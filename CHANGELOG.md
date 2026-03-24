@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.29.1.0] - 2026-03-24
+
+### Fixed
+
+- TTS voice loading race condition -- voices now preload via `voiceschanged` event with 3-second fallback, fixing silent failures on cold start
+- TTS reading bracket annotations and HTML tags literally -- new text sanitizer strips `[n]`, `(casual)`, HTML, and other non-speech content before speaking
+- TTS reading too much text for sentence items -- `extractSpeechText()` now picks `sentence_ja` for sentence content type instead of raw `primary_text`
+- No way to stop TTS mid-playback -- added stop button toggle and Escape keybind in review session, plus click-to-stop on detail view speak buttons
+- Pre-existing type error in LevelProgressWidget where `data` could be undefined
+
 ## [0.29.0.0] - 2026-03-24
 
 ### Added
